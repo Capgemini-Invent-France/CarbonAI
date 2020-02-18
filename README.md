@@ -12,4 +12,15 @@ First of all you need to install the intel utility allowing you to monitor power
 To install this package, clone this repo and run `pip install .`
 
 
-## Run
+## Usage
+
+To monitor the power consumption of a function, follow this example:
+```python
+from PyPowerGadget import PowerMeter
+power_meter = PowerMeter()
+power_meter.mesure_power(<your_function>)(<your_function_arguments>)
+```
+You just have to import the `PowerMeter` object, initialise it and call the function you want to monitor
+
+
+### Documentation

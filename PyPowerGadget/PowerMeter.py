@@ -1,3 +1,6 @@
+__all__ = ["PowerMeter"]
+
+
 from PyPowerGadget.PowerGadget import *
 from PyPowerGadget.settings import *
 
@@ -13,8 +16,8 @@ class PowerMeter():
 
 
     def aggregate_power(self, recorded_power):
-        print(summary)
-        used_energy = self.pue * (summary[TOTAL_ENERGY_CPU] + summary[TOTAL_ENERGY_MEMORY])
+        print(recorded_power)
+        used_energy = self.pue * (recorded_power[TOTAL_ENERGY_CPU] + recorded_power[TOTAL_ENERGY_MEMORY])
 
     def mesure_power(self, func, time_interval=1):
 

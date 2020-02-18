@@ -4,6 +4,6 @@
 
 __version__ = "0.0.1"
 
-from PyPowerGadget.mesure_power import mesure_power
+from PyPowerGadget.PowerMeter import PowerMeter
 
-__all__ = ["mesure_power"]
+__all__ = ["PowerMeter"]

@@ -1,5 +1,3 @@
-__all__ = ["mesure_power"]
-
 import os
 import sys
 
