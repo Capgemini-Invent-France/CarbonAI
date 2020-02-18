@@ -82,4 +82,5 @@ def say_whee():
 
 
 if __name__ == "__main__":
-    print(mesure_power(say_whee)())
+    power_gadget = PowerGadget()
+    print(power_gadget.mesure_power(say_whee)())

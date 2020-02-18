@@ -38,48 +38,124 @@ import subprocess
 import re
 
 
-def parse_power_log():
-    results = {
-        TOTAL_TIME: 0,
-        TOTAL_ENERGY_ALL: 0,
-        TOTAL_ENERGY_CPU: 0,
-        TOTAL_ENERGY_MEMORY: 0,
-    }
-    with open("test.csv") as f:
-        content = f.read()
-    results[TOTAL_TIME] = float(
-        re.search('(?<=Total Elapsed Time \(sec\) = )(.*)(?=")', content).group(0)
-    )
-    results[TOTAL_ENERGY_ALL] = float(
-        re.search(
-            '(?<=Cumulative Package Energy_0 \(mWh\) = )(.*)(?=")', content
-        ).group(0)
-    )
-    results[TOTAL_ENERGY_CPU] = float(
-        re.search('(?<=Cumulative IA Energy_0 \(mWh\) = )(.*)(?=")', content).group(0)
-    )
-    results[TOTAL_ENERGY_MEMORY] = float(
-        re.search('(?<=Cumulative DRAM Energy_0 \(mWh\) = )(.*)(?=")', content).group(0)
-    )
-    return results
+class PowerGadget:
+    def __init__(self, log_path=POWERLOG_DATA_PATH, power_log_path=""):
 
+        self.platform = sys.platform
+        if len(power_log_path) > 0:
+            self.power_log_path = power_log_path
+        elif self.platform == MAC_PLATFORM:
+            self.power_log_path = POWERLOG_PATH_MAC
+        elif self.platform == WIN_PLATFORM:
+            self.power_log_path = POWERLOG_PATH_WIN
 
-def get_power_consumption(duration=1, resolution=500):
-	out = subprocess.run(
-	    [
-	        POWERLOG_PATH_WIN,
-	        "-resolution",
-	        str(resolution),
-	        "-duration",
-	        str(duration),
-	        "-file",
-	        "test.csv",
-	    ],
-	    #stdout=open(os.devnull, "wb"),
-	)
-	print(out)
-	logs = parse_power_log()
-	return logs
+        self.log_path = log_path
+
+        self.power_consumption_functions = {
+            MAC_PLATFORM: self.get_power_consumption_mac
+        }
+
+    def parse_power_log(self):
+        results = {
+            TOTAL_TIME: 0,
+            TOTAL_ENERGY_ALL: 0,
+            TOTAL_ENERGY_CPU: 0,
+            TOTAL_ENERGY_MEMORY: 0,
+        }
+        with open(self.log_path) as f:
+            content = f.read()
+        results[TOTAL_TIME] = float(
+            re.search('(?<=Total Elapsed Time \(sec\) = )(.*)(?=")', content).group(0)
+        )
+        results[TOTAL_ENERGY_ALL] = float(
+            re.search(
+                '(?<=Cumulative Package Energy_0 \(mWh\) = )(.*)(?=")', content
+            ).group(0)
+        )
+        results[TOTAL_ENERGY_CPU] = float(
+            re.search('(?<=Cumulative IA Energy_0 \(mWh\) = )(.*)(?=")', content).group(
+                0
+            )
+        )
+        results[TOTAL_ENERGY_MEMORY] = float(
+            re.search(
+                '(?<=Cumulative DRAM Energy_0 \(mWh\) = )(.*)(?=")', content
+            ).group(0)
+        )
+        return results
+
+    def get_power_consumption_mac(self, duration=1, resolution=500):
+        out = subprocess.run(
+            [
+                self.power_log_path,
+                "-resolution",
+                str(resolution),
+                "-duration",
+                str(duration),
+                "-file",
+                self.log_path,
+            ],
+            stdout=open(os.devnull, "wb"),
+        )
+        return
+
+    def get_power_consumption(self, duration=1, resolution=100):
+        self.power_consumption_functions[self.platform](
+            duration=duration, resolution=resolution
+        )
+        consumption = self.parse_power_log()
+        return consumption
+
+    def extract_power(self, list_of_power, interval=1):
+        list_of_power.append(self.get_power_consumption(duration=interval))
+        while True:
+            list_of_power.append(self.get_power_consumption(duration=interval))
+
+    def execute_function(self, fun, fun_args, results):
+        results["results"] = fun(*fun_args[0], **fun_args[1])
+
+    def aggregate_power(self, recorded_power):
+        summary = recorded_power.sum(axis=0)
+        pue = 1.28  # pue for my laptop
+        # pue = 1.58 # pue for a server
+        print(summary)
+        used_energy = pue * (summary[TOTAL_ENERGY_CPU] + summary[TOTAL_ENERGY_MEMORY])
+
+    def mesure_power(self, func, time_interval=1):
+        import pandas as pd
+        import time
+        import multiprocessing
+        from multiprocessing import Process, Manager
+
+        def wrapper(*args, **kwargs):
+            multiprocessing.set_start_method("spawn", force=True)
+            with Manager() as manager:
+                power_draws = manager.list()
+                return_dict = manager.dict()
+
+                func_process = Process(
+                    target=self.execute_function,
+                    args=(func, (args, kwargs), return_dict),
+                )
+                power_process = Process(
+                    target=self.extract_power, args=(power_draws, time_interval)
+                )
+
+                power_process.start()
+                func_process.start()
+
+                func_process.join()
+                power_process.terminate()
+                power_process.join()
+
+                power_draws_list = list(power_draws)
+                time.sleep(2)
+                # power_draws_list.append(parse_power_log())
+                results = return_dict["results"]
+            self.aggregate_power(pd.DataFrame.from_records(power_draws_list))
+            return results
+
+        return wrapper
 
 
 if __name__ == "__main__":
