@@ -37,23 +37,16 @@ from PyPowerGadget.settings import *
 import subprocess
 import re
 
+import pandas as pd
+import time
+import multiprocessing
+from multiprocessing import Process, Manager
+
 
 class PowerGadget:
-    def __init__(self, log_path=POWERLOG_DATA_PATH, power_log_path=""):
-
-        self.platform = sys.platform
-        if len(power_log_path) > 0:
-            self.power_log_path = power_log_path
-        elif self.platform == MAC_PLATFORM:
-            self.power_log_path = POWERLOG_PATH_MAC
-        elif self.platform == WIN_PLATFORM:
-            self.power_log_path = POWERLOG_PATH_WIN
-
+    def __init__(self, log_path=POWERLOG_DATA_PATH):
         self.log_path = log_path
-
-        self.power_consumption_functions = {
-            MAC_PLATFORM: self.get_power_consumption_mac
-        }
+        self.recorded_power = []
 
     def parse_power_log(self):
         results = {
@@ -84,7 +77,18 @@ class PowerGadget:
         )
         return results
 
-    def get_power_consumption_mac(self, duration=1, resolution=500):
+
+class PowerGadgetMac(PowerGadget):
+    def __init__(self, power_log_path=""):
+        super().__init__()
+        if len(power_log_path) > 0:
+            self.power_log_path = power_log_path
+        else:
+            self.power_log_path = POWERLOG_PATH_MAC
+
+        assert os.path.exists(self.power_log_path)
+
+    def get_power_consumption(self, duration=1, resolution=500):
         out = subprocess.run(
             [
                 self.power_log_path,
@@ -97,12 +101,6 @@ class PowerGadget:
             ],
             stdout=open(os.devnull, "wb"),
         )
-        return
-
-    def get_power_consumption(self, duration=1, resolution=100):
-        self.power_consumption_functions[self.platform](
-            duration=duration, resolution=resolution
-        )
         consumption = self.parse_power_log()
         return consumption
 
@@ -114,48 +112,58 @@ class PowerGadget:
     def execute_function(self, fun, fun_args, results):
         results["results"] = fun(*fun_args[0], **fun_args[1])
 
-    def aggregate_power(self, recorded_power):
-        summary = recorded_power.sum(axis=0)
-        pue = 1.28  # pue for my laptop
-        # pue = 1.58 # pue for a server
-        print(summary)
-        used_energy = pue * (summary[TOTAL_ENERGY_CPU] + summary[TOTAL_ENERGY_MEMORY])
+    def wrapper(self, func, *args, time_interval=1, **kwargs):
+        multiprocessing.set_start_method("spawn", force=True)
+        with Manager() as manager:
+            power_draws = manager.list()
+            return_dict = manager.dict()
 
-    def mesure_power(self, func, time_interval=1):
-        import pandas as pd
-        import time
-        import multiprocessing
-        from multiprocessing import Process, Manager
+            func_process = Process(
+                target=self.execute_function, args=(func, (args, kwargs), return_dict)
+            )
+            power_process = Process(
+                target=self.extract_power, args=(power_draws, time_interval)
+            )
 
-        def wrapper(*args, **kwargs):
-            multiprocessing.set_start_method("spawn", force=True)
-            with Manager() as manager:
-                power_draws = manager.list()
-                return_dict = manager.dict()
+            power_process.start()
+            func_process.start()
 
-                func_process = Process(
-                    target=self.execute_function,
-                    args=(func, (args, kwargs), return_dict),
-                )
-                power_process = Process(
-                    target=self.extract_power, args=(power_draws, time_interval)
-                )
+            func_process.join()
+            power_process.terminate()
+            power_process.join()
 
-                power_process.start()
-                func_process.start()
+            power_draws_list = list(power_draws)
+            time.sleep(2)
+            power_draws_list.append(self.parse_power_log())
+            results = return_dict["results"]
+        self.recorded_power = pd.DataFrame.from_records(power_draws_list)
+        self.recorded_power = self.recorded_power.sum(axis=0)
+        return results
 
-                func_process.join()
-                power_process.terminate()
-                power_process.join()
 
-                power_draws_list = list(power_draws)
-                time.sleep(2)
-                # power_draws_list.append(parse_power_log())
-                results = return_dict["results"]
-            self.aggregate_power(pd.DataFrame.from_records(power_draws_list))
-            return results
+class PowerGadgetWin(PowerGadget):
+    def __init__(self, power_log_path=""):
+        super().__init__()
+        if len(power_log_path) > 0:
+            self.power_log_path = power_log_path
+        else:
+            self.power_log_path = POWERLOG_PATH_WIN
 
-        return wrapper
+        assert os.path.exists(self.power_log_path)
+
+    def wrapper(self, func, *args, time_interval=1, **kwargs):
+        out = subprocess.run(
+            ["start", self.power_log_path, "/min"], stdout=open(os.devnull, "wb")
+        )
+        out = subprocess.run(
+            [self.power_log_path, "-start"], stdout=open(os.devnull, "wb")
+        )
+        results = func(*args, **kwargs)
+        out = subprocess.run(
+            [self.power_log_path, "-stop"], stdout=open(os.devnull, "wb")
+        )
+        self.recorded_power = self.parse_power_log()
+        return resuts
 
 
 if __name__ == "__main__":
