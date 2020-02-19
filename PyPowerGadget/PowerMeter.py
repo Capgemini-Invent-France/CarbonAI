@@ -5,12 +5,12 @@ from PyPowerGadget.PowerGadget import *
 from PyPowerGadget.settings import *
 
 class PowerMeter():
-    def __init__(self):
+    def __init__(self, power_log_path=""):
         self.platform = sys.platform
         if self.platform == MAC_PLATFORM:
-            self.power_gadget = PowerGadgetMac()
+            self.power_gadget = PowerGadgetMac(power_log_path=power_log_path)
         elif self.platform == WIN_PLATFORM:
-            self.power_gadget = PowerGadgetWin()
+            self.power_gadget = PowerGadgetWin(power_log_path=power_log_path)
         self.pue = 1.28  # pue for my laptop
         # self.pue = 1.58 # pue for a server
 

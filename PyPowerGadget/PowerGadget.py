@@ -1,4 +1,5 @@
-"""Introduction
+"""
+Introduction
 Intel(R) Power Gadget is a software-based power estimation tool enabled for 2nd Generation Intel(R) Core(TM) processors or later. It includes a application, driver, and libraries to monitor and estimate real-time processor package power information in watts using the energy counters in the processor
 
 Uninstall
@@ -25,7 +26,8 @@ For more information, see Using the Intel Power Gadget API on Mac OS X.
 
 Processor Energy (Total energy of the processor) = IA Energy + GT Energy (if applicable) + Others (not measured)
 IA Energy (Energy of the CPU/processor cores)
-GT Energy (Energy of the processor graphics) – If applicable , some processors for desktops and servers don’t have it or may have use discrete graphics"""
+GT Energy (Energy of the processor graphics) – If applicable , some processors for desktops and servers don’t have it or may have use discrete graphics
+"""
 
 
 import os
@@ -44,8 +46,10 @@ from multiprocessing import Process, Manager
 
 
 class PowerGadget:
-    def __init__(self, log_path=POWERLOG_DATA_PATH):
-        self.log_path = log_path
+    def __init__(self):
+        self.log_path = os.path.join(
+            os.path.dirname(os.path.abspath(__file__)), POWERLOG_FILENAME
+        )
         self.recorded_power = []
 
     def parse_power_log(self):
@@ -86,7 +90,12 @@ class PowerGadgetMac(PowerGadget):
         else:
             self.power_log_path = POWERLOG_PATH_MAC
 
-        assert os.path.exists(self.power_log_path)
+        if not os.path.exists(self.power_log_path):
+            raise ModuleNotFoundError(
+                "We didn't find the Intel Power Gadget tool. \nMake sure it is installed (download available here : https://software.intel.com/sites/default/files/managed/91/6b/Intel%20Power%20Gadget.dmg).\nIf it is installed, we looked for it here:"
+                + self.power_log_path
+                + ", try passing the path to the powerLog tool to the powerMeter."
+            )
 
     def get_power_consumption(self, duration=1, resolution=500):
         out = subprocess.run(
@@ -149,7 +158,12 @@ class PowerGadgetWin(PowerGadget):
         else:
             self.power_log_path = POWERLOG_PATH_WIN
 
-        assert os.path.exists(self.power_log_path)
+        if not os.path.exists(self.power_log_path):
+            raise ModuleNotFoundError(
+                "We didn't find the Intel Power Gadget tool. \nMake sure it is installed (download available here : https://software.intel.com/file/823776/download).\nIf it is installed, we looked for it here:"
+                + self.power_log_path
+                + ", try passing the path to the powerLog tool to the powerMeter."
+            )
 
     def wrapper(self, func, *args, time_interval=1, **kwargs):
         out = subprocess.run(

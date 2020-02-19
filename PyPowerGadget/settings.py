@@ -6,7 +6,7 @@ POWERLOG_PATH_WIN = "C:\\Program Files\\Intel\\Power Gadget 3.5\\PowerLog3.0.exe
 MAC_PLATFORM = "darwin"
 WIN_PLATFORM = "win32"
 # PROJECT_PATH = "/Users/martinchauvin/Capgemini/Green AI - General/green_ai_code/"
-POWERLOG_DATA_PATH = "powerLog.csv"
+POWERLOG_FILENAME = "powerLog.csv"
 
 TOTAL_TIME = "Total Elapsed Time (sec)"
 TOTAL_ENERGY_ALL = "Cumulative Package Energy (mWh)"
