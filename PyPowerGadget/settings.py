@@ -14,7 +14,8 @@ INTELPOWERLOG_FILENAME = "intelPowerLog.csv"
 NVIDIAPOWERLOG_FILENAME = "nvidiaPowerLog.csv"
 
 
-TOTAL_TIME = "Total Elapsed Time (sec)"
+TOTAL_CPU_TIME = "Total Elapsed CPU Time (sec)"
+TOTAL_GPU_TIME = "Total Elapsed GPU Time (sec)"
 TOTAL_ENERGY_ALL = "Cumulative Package Energy (mWh)"
 TOTAL_ENERGY_CPU = "Cumulative IA Energy (mWh)"
 TOTAL_ENERGY_GPU = "Cumulative GPU Energy (mWh)"

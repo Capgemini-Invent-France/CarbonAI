@@ -54,14 +54,14 @@ class PowerGadget:
 
     def parse_power_log(self):
         results = {
-            TOTAL_TIME: 0,
+            TOTAL_CPU_TIME: 0,
             TOTAL_ENERGY_ALL: 0,
             TOTAL_ENERGY_CPU: 0,
             TOTAL_ENERGY_MEMORY: 0,
         }
         content = self.log_file.read_text()
 
-        results[TOTAL_TIME] = float(
+        results[TOTAL_CPU_TIME] = float(
             re.search('(?<=Total Elapsed Time \(sec\) = )(.*)(?=")', content).group(0)
         )
         results[TOTAL_ENERGY_ALL] = float(
