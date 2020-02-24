@@ -31,6 +31,7 @@ class PowerMeter:
         self.energy_mix = 0.522  # kgCO2e/kWh
 
     def __get_country(self):
+        # from https://stackoverflow.com/questions/40059654/python-convert-a-bytes-array-into-json-format
         r = requests.get("http://ipinfo.io/json")
         response = r.content.decode("utf8").replace("'", '"')
         user_info = json.loads(response)

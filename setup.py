@@ -10,6 +10,6 @@ setup(
     author="Neyri",
     packages=find_packages(),
     python_requires=">=3.*, <4",
-    install_requires=["pandas", "numpy"],
+    install_requires=["pandas", "numpy", "requests"],
     license="MIT",
 )
