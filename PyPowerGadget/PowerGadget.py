@@ -47,9 +47,7 @@ from multiprocessing import Process, Manager
 
 class PowerGadget:
     def __init__(self):
-        self.log_file = (
-            Path(os.path.dirname(os.path.abspath(__file__))) / INTELPOWERLOG_FILENAME
-        )
+        self.log_file = PACKAGE_PATH / INTELPOWERLOG_FILENAME
         self.recorded_power = []
 
     def parse_power_log(self):

@@ -25,10 +25,20 @@ class PowerMeter:
             self.gpu_power = NoGpuPower()
         self.pue = 1.28  # pue for my laptop
         # self.pue = 1.58 # pue for a server
-        self.location = "USA"
+        self.location = "US"
         if get_country:
             self.location = self.__get_country()
-        self.energy_mix = 0.522  # kgCO2e/kWh
+        self.energy_mix_db = self.__load_energy_mix_db()
+        self.energy_mix = self.__get_energy_mix()  # kgCO2e/kWh
+        print(self.energy_mix)
+
+    def __load_energy_mix_db(self):
+        return pd.read_csv(PACKAGE_PATH / ENERGY_MIX_DATABASE)
+
+    def __get_energy_mix(self):
+        return self.energy_mix_db.loc[
+            self.energy_mix_db[COUNTRY_CODE_COLUMN] == self.location, ENERGY_MIX_COLUMN
+        ]
 
     def __get_country(self):
         # from https://stackoverflow.com/questions/40059654/python-convert-a-bytes-array-into-json-format
