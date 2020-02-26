@@ -7,11 +7,12 @@ DMG_PATH = Path("/tmp/IntelPowerGadget.dmg")
 MSI_PATH = Path("C:\\tmp\\IntelPowerGadget.msi")
 
 POWERLOG_PATH_MAC = Path("/Applications/Intel Power Gadget/PowerLog")
-POWERLOG_PATH_WIN = Path("C:\\Program Files\\Intel\\Power Gadget 3.5\\PowerLog3.0.exe")
+POWERLOG_PATH_WIN = Path("C:/Program Files/Intel/Power Gadget 3.5/IntelPowerGadget.exe")
 
 ENERGY_MIX_DATABASE = Path("ademe_energy_mix_by_country.csv")
 ENERGY_MIX_COLUMN = "Energy mix (kgCO2/kWh)"
 COUNTRY_CODE_COLUMN = "ISO"
+COUNTRY_NAME_COLUMN = "Country"
 
 MAC_PLATFORM = "darwin"
 WIN_PLATFORM = "win32"
@@ -20,6 +21,7 @@ LINUX_PLATFORM = "linux"
 INTELPOWERLOG_FILENAME = "intelPowerLog.csv"
 NVIDIAPOWERLOG_FILENAME = "nvidiaPowerLog.csv"
 
+LOGGING_FILE = "power_logs.csv"
 
 TOTAL_CPU_TIME = "Total Elapsed CPU Time (sec)"
 TOTAL_GPU_TIME = "Total Elapsed GPU Time (sec)"

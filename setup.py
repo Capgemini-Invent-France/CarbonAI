@@ -2,10 +2,11 @@ from setuptools import setup, find_packages
 
 from setuptools.command.install import install
 
+import PyPowerGadget
 
 setup(
     name="PyPowerGadget",
-    version="0.0.2",
+    version=PyPowerGadget.__version__,
     description="Monitor the power consumption of a function",
     author="Neyri",
     package_data={"": ["ademe_energy_mix_by_country.csv"]},

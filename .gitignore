@@ -5,4 +5,5 @@ build/
 dist/
 *.egg*
 *powerLog.csv
+*power_logs.csv
 .DS_STORE

@@ -127,7 +127,7 @@ class PowerGadgetMac(PowerGadget):
         with Manager() as manager:
             power_draws = manager.list()
             return_dict = manager.dict()
-
+            return_dict["results"] = None
             func_process = Process(
                 target=self.execute_function, args=(func, (args, kwargs), return_dict)
             )
@@ -160,7 +160,7 @@ class PowerGadgetWin(PowerGadget):
             self.power_log_path = Path(power_log_path)
         else:
             self.power_log_path = POWERLOG_PATH_WIN
-
+        print(self.power_log_path)
         if not self.power_log_path.exists():
             raise ModuleNotFoundError(
                 "We didn't find the Intel Power Gadget tool. \nMake sure it is installed (download available here : https://software.intel.com/file/823776/download).\nIf it is installed, we looked for it here:"
@@ -171,8 +171,10 @@ class PowerGadgetWin(PowerGadget):
     def wrapper(self, func, *args, time_interval=1, **kwargs):
         print("starting CPU power monitoring ...")
         out = subprocess.run(
-            ["start", self.power_log_path, "/min"], stdout=open(os.devnull, "wb")
+            ["start", '"' + str(self.power_log_path) + '"', "/min"],
+            stdout=open(os.devnull, "wb"),
         )
+        print("starting logging")
         out = subprocess.run(
             [self.power_log_path, "-start"], stdout=open(os.devnull, "wb")
         )
@@ -181,6 +183,7 @@ class PowerGadgetWin(PowerGadget):
         out = subprocess.run(
             [self.power_log_path, "-stop"], stdout=open(os.devnull, "wb")
         )
+        print("parsing")
         self.recorded_power = self.parse_power_log()
         return results
 
