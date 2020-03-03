@@ -3,6 +3,9 @@ __all__ = ["PowerMeter"]
 import json
 import requests
 import datetime
+import getpass
+import os
+import sys
 
 from PyPowerGadget.PowerGadget import *
 from PyPowerGadget.NvidiaPower import *
@@ -10,7 +13,21 @@ from PyPowerGadget.settings import *
 
 
 class PowerMeter:
-    def __init__(self, cpu_power_log_path="", get_country=True):
+    """PowerMeter is a general tool to monitor and log the power consumption of any given function.
+
+    Parameters
+    ----------
+    cpu_power_log_path (optional) : str
+        The path to the tool "PowerLog"
+    get_country (optional) : bool
+        Whether use user country location or not
+    user_name (optional) : str
+        The name of the user using the tool (for logging purpose)
+    """
+
+    def __init__(
+        self, cpu_power_log_path="", get_country=True, user_name="", project_name=""
+    ):
         self.platform = sys.platform
         if self.platform == MAC_PLATFORM:
             self.power_gadget = PowerGadgetMac(power_log_path=cpu_power_log_path)
@@ -28,6 +45,15 @@ class PowerMeter:
         else:
             self.gpu_power = NoGpuPower()
 
+        if len(user_name) > 0:
+            self.user = user_name
+        else:
+            self.user = getpass.getuser()
+        if len(project_name) > 0:
+            self.project = project_name
+        else:
+            self.project = self.__extract_env_name()
+
         self.location = "US"
         if get_country:
             self.location = self.__get_country()
@@ -38,8 +64,11 @@ class PowerMeter:
         self.logging_filename = PACKAGE_PATH / LOGGING_FILE
         self.logging_columns = [
             "Datetime",
+            "User ID",
             COUNTRY_CODE_COLUMN,
             COUNTRY_NAME_COLUMN,
+            "Platform",
+            "Project name",
             TOTAL_CPU_TIME,
             TOTAL_GPU_TIME,
             TOTAL_ENERGY_ALL,
@@ -48,7 +77,10 @@ class PowerMeter:
             TOTAL_ENERGY_MEMORY,
             "PUE",
             "CO2 emitted (gCO2e)",
-            "Description",
+            "Algorithm",
+            "Package",
+            "Algorithm's parameters",
+            "Comment",
         ]
         self.__init_logging_file()
 
@@ -73,6 +105,18 @@ class PowerMeter:
             COUNTRY_NAME_COLUMN,
         ].values[0]
 
+    def __extract_env_name(self):
+        env = "unknown"
+        try:
+            env = os.environ["CONDA_DEFAULT_ENV"]
+        except:
+            pass
+        if hasattr(sys, "real_prefix"):
+            env = sys.real_prefix.split("/")[-1]
+        elif hasattr(sys, "base_prefix") and sys.base_prefix != sys.prefix:
+            env = sys.base_prefix.split("/")[-1]
+        return env
+
     def __check_gpu(self):
         import ctypes
 
@@ -87,7 +131,7 @@ class PowerMeter:
                 continue
         return cuda_available
 
-    def aggregate_power(self, cpu_recorded_power, gpu_recorded_power):
+    def __aggregate_power(self, cpu_recorded_power, gpu_recorded_power):
         # print(pd.concat([cpu_recorded_power, gpu_recorded_power]))
 
         used_energy = self.pue * (
@@ -103,20 +147,46 @@ class PowerMeter:
 
         return co2_emitted
 
-    def mesure_power(self, func, description="", time_interval=1):
+    def mesure_power(self, func, package, algorithm, algorithm_params="", comments=""):
+        """
+        Mesure the power consumption of a given function
+
+        Parameters
+        ----------
+        func : python function
+            The python function that will be monitored
+        package : str
+            A string describing the package used by this function (e.g. sklearn, Pytorch, ...)
+        algorithm : str
+            A string describing the algorithm used in the function monitored (e.g. RandomForestClassifier, ResNet121, ...)
+        algorithm_params (optional) : str
+            A string describing the parameters used by the algorithm
+        comments (optional) : str
+            A string to provide any useful information
+
+        Returns
+        -------
+        The result of the execution the provided function
+        """
+        if len(algorithm) == 0 or len(package) == 0:
+            raise SyntaxError(
+                "Please input a description for the function you are trying to monitor. Pass in the algorithm and the package you are trying to monitor"
+            )
+
         def wrapper(*args, **kwargs):
             self.gpu_power.start_mesure()
             try:
-                results = self.power_gadget.wrapper(
-                    func, *args, time_interval=time_interval, **kwargs
-                )
+                results = self.power_gadget.wrapper(func, *args, **kwargs)
             finally:
                 self.gpu_power.stop_mesure()
                 self.gpu_power.parse_power_log()
-            self.log_records(
+            self.__log_records(
                 self.power_gadget.recorded_power,
                 self.gpu_power.recorded_power,
-                description=description,
+                algorithm=algorithm,
+                package=package,
+                algorithm_params=algorithm_params,
+                comments=comments,
             )
             return results
 
@@ -126,14 +196,25 @@ class PowerMeter:
         if not self.logging_filename.exists():
             self.logging_filename.write_text(",".join(self.logging_columns))
 
-    def log_records(self, cpu_recorded_power, gpu_recorded_power, description=""):
-        co2_emitted = self.aggregate_power(
+    def __log_records(
+        self,
+        cpu_recorded_power,
+        gpu_recorded_power,
+        algorithm="",
+        package="",
+        algorithm_params="",
+        comments="",
+    ):
+        co2_emitted = self.__aggregate_power(
             self.power_gadget.recorded_power, self.gpu_power.recorded_power
         )
         info = [
             str(datetime.datetime.now()),
+            self.user,
             self.location,
             self.location_name,
+            self.platform,
+            self.project,
             str(cpu_recorded_power[TOTAL_CPU_TIME]),
             str(gpu_recorded_power[TOTAL_GPU_TIME]),
             str(cpu_recorded_power[TOTAL_ENERGY_ALL]),
@@ -142,6 +223,9 @@ class PowerMeter:
             str(cpu_recorded_power[TOTAL_ENERGY_MEMORY]),
             str(self.pue),
             str(co2_emitted),
-            description.replace(",", ";"),
+            algorithm.replace(",", ";"),
+            package.replace(",", ";"),
+            algorithm_params.replace(",", ";"),
+            comments.replace(",", ";"),
         ]
         self.logging_filename.open("a").write("\n" + (",".join(info)))

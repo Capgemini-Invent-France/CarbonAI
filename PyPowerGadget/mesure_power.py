@@ -18,4 +18,6 @@ def say_whee():
 
 if __name__ == "__main__":
     power_meter = PowerMeter(get_country=True)
-    print(power_meter.mesure_power(say_whee, description="test")())
+    print(
+        power_meter.mesure_power(say_whee, algorithm="classic python", package="None")()
+    )
