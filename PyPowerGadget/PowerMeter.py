@@ -78,8 +78,8 @@ class PowerMeter:
             TOTAL_ENERGY_MEMORY,
             "PUE",
             "CO2 emitted (gCO2e)",
-            "Algorithm",
             "Package",
+            "Algorithm",
             "Algorithm's parameters",
             "Comment",
         ]
@@ -233,8 +233,8 @@ class PowerMeter:
             str(cpu_recorded_power[TOTAL_ENERGY_MEMORY]),
             str(self.pue),
             str(co2_emitted),
-            algorithm.replace(",", ";"),
             package.replace(",", ";"),
+            algorithm.replace(",", ";"),
             algorithm_params.replace(",", ";"),
             comments.replace(",", ";"),
         ]
