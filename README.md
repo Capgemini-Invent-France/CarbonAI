@@ -17,10 +17,13 @@ To install this package, clone this repo and run `pip install .`
 To monitor the power consumption of a function, follow this example:
 ```python
 from PyPowerGadget import PowerMeter
-power_meter = PowerMeter()
+power_meter = PowerMeter(project="MNIST classifier")
 result_of_your_function = power_meter.mesure_power(
     <your_function>,
-    description="describe your function here"
+    package="sklearn",
+    algorithm="RandomForestClassifier",
+    algorithm_params="n_estimators=300, max_depth=15",
+    comments="Classifier trained on the MNIST dataset, 3 test"
 )(<your_function_arguments>)
 ```
 You just have to import the `PowerMeter` object, initialise it and call the function you want to monitor.
@@ -42,3 +45,43 @@ logged_data
 </div>
 
 ### Documentation
+
+*class* **PyPowerGadget.PowerMeter**(*project_name="", user_name="", cpu_power_log_path="", get_country=True*)
+&nbsp;&nbsp;&nbsp;&nbsp;PowerMeter is a general tool to monitor and log the power consumption of any given function.
+>project_name (optional) : str
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The name of the project you are working on (for logging purpose)
+
+>user_name (optional) : str
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The name of the user using the tool (for logging purpose)
+>cpu_power_log_path (optional) : str
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The path to the tool "PowerLog"
+>get_country (optional) : bool
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Whether use user country location or not
+<hr/>
+
+> &nbsp;&nbsp;&nbsp;&nbsp;**mesure_power**(*func, package, algorithm, algorithm_params="", comments=""*)
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Mesure the power consumption of any given function
+
+> &nbsp;&nbsp;&nbsp;&nbsp;func : python function
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The python function that will be monitored
+
+> &nbsp;&nbsp;&nbsp;&nbsp;package : str
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;A string describing the package used by this function (e.g. sklearn, Pytorch, ...)
+> &nbsp;&nbsp;&nbsp;&nbsp;algorithm : str
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;A string describing the algorithm used in the function monitored (e.g. RandomForestClassifier, ResNet121, ...)
+> &nbsp;&nbsp;&nbsp;&nbsp;algorithm_params (optional) : str
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;A string describing the parameters used by the algorithm
+> &nbsp;&nbsp;&nbsp;&nbsp;comments (optional) : str
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;A string to provide any useful information
+
+&nbsp;&nbsp;&nbsp;&nbsp; This method returns the result of the provided function and log collected data
