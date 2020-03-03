@@ -6,6 +6,7 @@ import datetime
 import getpass
 import os
 import sys
+import warnings
 
 from PyPowerGadget.PowerGadget import *
 from PyPowerGadget.NvidiaPower import *
@@ -194,7 +195,16 @@ class PowerMeter:
 
     def __init_logging_file(self):
         if not self.logging_filename.exists():
-            self.logging_filename.write_text(",".join(self.logging_columns))
+            self.logging_filename.write_text(self.__written_columns())
+        elif self.__written_columns() not in self.logging_filename.read_text():
+            warnings.warn(
+                "The column names of the log file are not right, it will be overwritten"
+            )
+            time.sleep(5)
+            self.logging_filename.write_text(self.__written_columns())
+
+    def __written_columns(self):
+        return ",".join(self.logging_columns)
 
     def __log_records(
         self,
