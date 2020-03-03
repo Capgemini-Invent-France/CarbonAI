@@ -38,6 +38,7 @@ sys.path.insert(0, os.path.dirname(os.getcwd()))
 from PyPowerGadget.settings import *
 import subprocess
 import re
+import glob
 
 import pandas as pd
 import time
@@ -47,14 +48,13 @@ from multiprocessing import Process, Manager
 
 class PowerGadget:
     def __init__(self):
-        self.log_file = PACKAGE_PATH / INTELPOWERLOG_FILENAME
         self.recorded_power = []
 
-    def parse_power_log(self):
-        content = self.log_file.read_text()
+    def parse_power_log(self, log_file):
+        content = log_file.read_text()
         if not "Total Elapsed Time" in content:
             time.sleep(2)
-            content = self.log_file.read_text()
+            content = log_file.read_text()
         results = {
             TOTAL_CPU_TIME: 0,
             TOTAL_ENERGY_ALL: 0,
@@ -97,6 +97,10 @@ class PowerGadgetMac(PowerGadget):
                 + str(self.power_log_path)
                 + ", try passing the path to the powerLog tool to the powerMeter."
             )
+        self.log_file = self.__get_log_file()
+
+    def __get_log_file(self):
+        return PACKAGE_PATH / MAC_INTELPOWERLOG_FILENAME
 
     def get_power_consumption(self, duration=1, resolution=500):
         out = subprocess.run(
@@ -111,7 +115,7 @@ class PowerGadgetMac(PowerGadget):
             ],
             stdout=open(os.devnull, "wb"),
         )
-        consumption = self.parse_power_log()
+        consumption = self.parse_power_log(self.log_file)
         return consumption
 
     def extract_power(self, list_of_power, interval=1):
@@ -146,7 +150,7 @@ class PowerGadgetMac(PowerGadget):
 
             power_draws_list = list(power_draws)
             time.sleep(2)
-            power_draws_list.append(self.parse_power_log())
+            power_draws_list.append(self.parse_power_log(self.log_file))
             results = return_dict["results"]
         self.recorded_power = pd.DataFrame.from_records(power_draws_list)
         self.recorded_power = self.recorded_power.sum(axis=0)
@@ -184,8 +188,13 @@ class PowerGadgetWin(PowerGadget):
             [self.power_log_path, "-stop"], stdout=open(os.devnull, "wb")
         )
         print("parsing")
-        self.recorded_power = self.parse_power_log()
+        self.recorded_power = self.parse_power_log(self.__get_log_file())
         return results
+
+    def __get_log_file(self):
+        file_names = glob.glob(str(HOME_DIR / "Documents" / WIN_INTELPOWERLOG_FILENAME))
+        file_names.sort(key=lambda f: list(map(int, re.split("-|_|\.|/", f)[-7:-1])))
+        return Path(file_names[-1])
 
 
 class PowerGadgetLinux(PowerGadget):

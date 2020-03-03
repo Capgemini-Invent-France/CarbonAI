@@ -2,6 +2,7 @@ from pathlib import Path
 import os
 
 PACKAGE_PATH = Path(os.path.dirname(os.path.abspath(__file__)))
+HOME_DIR = Path.home()
 
 DMG_PATH = Path("/tmp/IntelPowerGadget.dmg")
 MSI_PATH = Path("C:\\tmp\\IntelPowerGadget.msi")
@@ -18,7 +19,8 @@ MAC_PLATFORM = "darwin"
 WIN_PLATFORM = "win32"
 LINUX_PLATFORM = "linux"
 # PROJECT_PATH = "/Users/martinchauvin/Capgemini/Green AI - General/green_ai_code/"
-INTELPOWERLOG_FILENAME = "intelPowerLog.csv"
+MAC_INTELPOWERLOG_FILENAME = "intelPowerLog.csv"
+WIN_INTELPOWERLOG_FILENAME = "PwrData_*.csv"
 NVIDIAPOWERLOG_FILENAME = "nvidiaPowerLog.csv"
 
 LOGGING_FILE = "power_logs.csv"

@@ -142,7 +142,7 @@ class PowerMeter:
         co2_emitted = used_energy * self.energy_mix * 1e-3
         print(
             "This process emitted %.3fg of CO2 (using the energy mix of %s)"
-            % (co2_emitted, self.location)
+            % (co2_emitted, self.location_name)
         )
 
         return co2_emitted

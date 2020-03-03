@@ -7,3 +7,4 @@ dist/
 *powerLog.csv
 *power_logs.csv
 .DS_STORE
+PyPowerGadget/requirements.txt
