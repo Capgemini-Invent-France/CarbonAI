@@ -9,6 +9,7 @@ MSI_PATH = Path("C:\\tmp\\IntelPowerGadget.msi")
 
 POWERLOG_PATH_MAC = Path("/Applications/Intel Power Gadget/PowerLog")
 POWERLOG_PATH_WIN = Path("C:/Program Files/Intel/Power Gadget 3.5/IntelPowerGadget.exe")
+POWERLOG_PATH_LINUX = Path("/sys/class/powercap/intel-rapl")
 
 ENERGY_MIX_DATABASE = Path("ademe_energy_mix_by_country.csv")
 ENERGY_MIX_COLUMN = "Energy mix (kgCO2/kWh)"
@@ -17,7 +18,7 @@ COUNTRY_NAME_COLUMN = "Country"
 
 MAC_PLATFORM = "darwin"
 WIN_PLATFORM = "win32"
-LINUX_PLATFORM = "linux"
+LINUX_PLATFORM = "linux2"
 # PROJECT_PATH = "/Users/martinchauvin/Capgemini/Green AI - General/green_ai_code/"
 MAC_INTELPOWERLOG_FILENAME = "intelPowerLog.csv"
 WIN_INTELPOWERLOG_FILENAME = "PwrData_*.csv"

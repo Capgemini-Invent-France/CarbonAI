@@ -200,6 +200,7 @@ class PowerGadgetWin(PowerGadget):
 class PowerGadgetLinux(PowerGadget):
     def __init__(self, power_log_path=""):
         super().__init__()
+        raise NotImplementedError("This module is not implemented on linux for now")
         # if len(power_log_path) > 0:
         #     self.power_log_path = Path(power_log_path)
         # else:

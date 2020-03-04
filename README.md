@@ -7,10 +7,24 @@ This project aims at creating a python package that allows you to monitor the po
 First of all you need to install the intel utility allowing you to monitor power consumption ([support](https://software.intel.com/en-us/articles/intel-power-gadget)):
 * [Windows](https://software.intel.com/file/823776/download)
 * [MacOS](https://software.intel.com/sites/default/files/managed/91/6b/Intel%20Power%20Gadget.dmg)
-* Linux : no need of power gadgets ;)
+* Linux : WIP
 
-To install this package, clone this repo and run `pip install .`
+To install this package :
+```
+git clone https://gitlab.com/martinChauvin/green-ai.git
+cd green-ai
+python setup.py install
+pip install .
+```
 
+## Disclaimer
+This package collects personal data.
+By using it, you agree to the collection of :
+* your username
+* your country
+* the name of your project
+* your computer's power consumption
+* the information you provided
 
 ## Usage
 
@@ -18,14 +32,18 @@ To monitor the power consumption of a function, follow this example:
 ```python
 from PyPowerGadget import PowerMeter
 power_meter = PowerMeter(project="MNIST classifier")
-result_of_your_function = power_meter.mesure_power(
+<result_of_your_function> = power_meter.mesure_power(
     <your_function>,
     package="sklearn",
     algorithm="RandomForestClassifier",
+    data_type="tabular",
+    data_shape=<your_data>.shape
     algorithm_params="n_estimators=300, max_depth=15",
-    comments="Classifier trained on the MNIST dataset, 3 test"
+    comments="Classifier trained on the MNIST dataset, 3rd test"
 )(<your_function_arguments>)
 ```
+
+
 You just have to import the `PowerMeter` object, initialise it and call the function you want to monitor.
 Please insert a description of the running function, the dataset, the model, any info would be useful.
 
@@ -63,7 +81,7 @@ logged_data
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Whether use user country location or not
 <hr/>
 
-> &nbsp;&nbsp;&nbsp;&nbsp;**mesure_power**(*func, package, algorithm, algorithm_params="", comments=""*)
+> &nbsp;&nbsp;&nbsp;&nbsp;**mesure_power**(*func, package, algorithm, data_type="tabular", data_shape="", algorithm_params="", comments=""*)
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Mesure the power consumption of any given function
 
@@ -77,6 +95,15 @@ logged_data
 > &nbsp;&nbsp;&nbsp;&nbsp;algorithm : str
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;A string describing the algorithm used in the function monitored (e.g. RandomForestClassifier, ResNet121, ...)
+
+> &nbsp;&nbsp;&nbsp;&nbsp;data_type : str (among : tabular, image, text, time series, other)
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;A string describing the type of data used for training
+
+> &nbsp;&nbsp;&nbsp;&nbsp;data_shape : str or tuple
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;A string or tuple describing the quantity of data used
+
 > &nbsp;&nbsp;&nbsp;&nbsp;algorithm_params (optional) : str
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;A string describing the parameters used by the algorithm

@@ -81,6 +81,8 @@ class PowerMeter:
             "Package",
             "Algorithm",
             "Algorithm's parameters",
+            "Data type",
+            "Data shape",
             "Comment",
         ]
         self.__init_logging_file()
@@ -148,7 +150,16 @@ class PowerMeter:
 
         return co2_emitted
 
-    def mesure_power(self, func, package, algorithm, algorithm_params="", comments=""):
+    def mesure_power(
+        self,
+        func,
+        package,
+        algorithm,
+        data_type="tabular",
+        data_shape="",
+        algorithm_params="",
+        comments="",
+    ):
         """
         Mesure the power consumption of a given function
 
@@ -160,6 +171,10 @@ class PowerMeter:
             A string describing the package used by this function (e.g. sklearn, Pytorch, ...)
         algorithm : str
             A string describing the algorithm used in the function monitored (e.g. RandomForestClassifier, ResNet121, ...)
+        data_type : str (among : tabular, image, text, time series, other)
+            A string describing the type of data used for training
+        data_shape : str or tuple
+            A string or tuple describing the quantity of data used
         algorithm_params (optional) : str
             A string describing the parameters used by the algorithm
         comments (optional) : str
@@ -186,6 +201,8 @@ class PowerMeter:
                 self.gpu_power.recorded_power,
                 algorithm=algorithm,
                 package=package,
+                data_type=data_type,
+                data_shape=data_shape,
                 algorithm_params=algorithm_params,
                 comments=comments,
             )
@@ -212,6 +229,8 @@ class PowerMeter:
         gpu_recorded_power,
         algorithm="",
         package="",
+        data_type="tabular",
+        data_shape="",
         algorithm_params="",
         comments="",
     ):
@@ -236,6 +255,8 @@ class PowerMeter:
             package.replace(",", ";"),
             algorithm.replace(",", ";"),
             algorithm_params.replace(",", ";"),
+            data_type.replace(",", ";"),
+            str(data_shape).replace(",", ";"),
             comments.replace(",", ";"),
         ]
         self.logging_filename.open("a").write("\n" + (",".join(info)))
