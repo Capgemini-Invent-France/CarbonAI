@@ -31,7 +31,7 @@ By using it, you agree to the collection of :
 To monitor the power consumption of a function, follow this example:
 ```python
 from PyPowerGadget import PowerMeter
-power_meter = PowerMeter(project="MNIST classifier")
+power_meter = PowerMeter(project_name="MNIST classifier")
 <result_of_your_function> = power_meter.mesure_power(
     <your_function>,
     package="sklearn",
