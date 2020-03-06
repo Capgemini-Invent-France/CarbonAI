@@ -8,7 +8,8 @@ DMG_PATH = Path("/tmp/IntelPowerGadget.dmg")
 MSI_PATH = Path("C:\\tmp\\IntelPowerGadget.msi")
 
 POWERLOG_PATH_MAC = Path("/Applications/Intel Power Gadget/PowerLog")
-POWERLOG_PATH_WIN = Path("C:/Program Files/Intel/Power Gadget 3.5/IntelPowerGadget.exe")
+POWERLOG_PATH_WIN = Path("/Program Files/Intel/Power Gadget 3.5")
+POWERLOG_TOOL_WIN = "IntelPowerGadget.exe"
 POWERLOG_PATH_LINUX = Path("/sys/class/powercap/intel-rapl")
 
 ENERGY_MIX_DATABASE = Path("ademe_energy_mix_by_country.csv")

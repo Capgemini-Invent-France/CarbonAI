@@ -63,21 +63,22 @@ class PowerGadget:
         }
 
         results[TOTAL_CPU_TIME] = float(
-            re.search('(?<=Total Elapsed Time \(sec\) = )(.*)(?=")', content).group(0)
+            re.search('(?<=Total Elapsed Time \(sec\) = )(.*)(?="|)', content).group(0)
         )
         results[TOTAL_ENERGY_ALL] = float(
             re.search(
-                '(?<=Cumulative Package Energy_0 \(mWh\) = )(.*)(?=")', content
+                '((?<=Cumulative Package Energy_0 \(mWh\) = )|(?<=Cumulative Processor Energy_0 \(mWh\) = ))(.*)(?="|)',
+                content,
             ).group(0)
         )
         results[TOTAL_ENERGY_CPU] = float(
-            re.search('(?<=Cumulative IA Energy_0 \(mWh\) = )(.*)(?=")', content).group(
-                0
-            )
+            re.search(
+                '(?<=Cumulative IA Energy_0 \(mWh\) = )(.*)(?="|)', content
+            ).group(0)
         )
         results[TOTAL_ENERGY_MEMORY] = float(
             re.search(
-                '(?<=Cumulative DRAM Energy_0 \(mWh\) = )(.*)(?=")', content
+                '(?<=Cumulative DRAM Energy_0 \(mWh\) = )(.*)(?="|)', content
             ).group(0)
         )
         return results
@@ -163,8 +164,7 @@ class PowerGadgetWin(PowerGadget):
         if len(power_log_path) > 0:
             self.power_log_path = Path(power_log_path)
         else:
-            self.power_log_path = POWERLOG_PATH_WIN
-        print(self.power_log_path)
+            self.power_log_path = POWERLOG_PATH_WIN / POWERLOG_TOOL_WIN
         if not self.power_log_path.exists():
             raise ModuleNotFoundError(
                 "We didn't find the Intel Power Gadget tool. \nMake sure it is installed (download available here : https://software.intel.com/file/823776/download).\nIf it is installed, we looked for it here:"
@@ -174,21 +174,27 @@ class PowerGadgetWin(PowerGadget):
 
     def wrapper(self, func, *args, time_interval=1, **kwargs):
         print("starting CPU power monitoring ...")
-        out = subprocess.run(
-            ["start", '"' + str(self.power_log_path) + '"', "/min"],
-            stdout=open(os.devnull, "wb"),
+        out = subprocess.Popen(
+            '"' + str(self.power_log_path) + '" /min',
+            stdin=None,
+            stdout=None,
+            stderr=None,
+            shell=True,
         )
-        print("starting logging")
-        out = subprocess.run(
-            [self.power_log_path, "-start"], stdout=open(os.devnull, "wb")
-        )
+        time.sleep(1)
+        print("start logging")
+        out = subprocess.run('"' + str(self.power_log_path) + '" -start', shell=True)
         results = func(*args, **kwargs)
         print("stoping CPU power monitoring ...")
+        out = subprocess.run('"' + str(self.power_log_path) + '" -stop', shell=True)
         out = subprocess.run(
-            [self.power_log_path, "-stop"], stdout=open(os.devnull, "wb")
+            'taskkill /IM "' + POWERLOG_TOOL_WIN + '"',
+            stdout=open(os.devnull, "wb"),
+            shell=True,
         )
-        print("parsing")
-        self.recorded_power = self.parse_power_log(self.__get_log_file())
+        log_file = self.__get_log_file()
+        self.recorded_power = self.parse_power_log(log_file)
+        os.remove(log_file)
         return results
 
     def __get_log_file(self):
