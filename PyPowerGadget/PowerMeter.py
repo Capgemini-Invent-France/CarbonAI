@@ -37,7 +37,7 @@ class PowerMeter:
         elif self.platform == WIN_PLATFORM:
             self.power_gadget = PowerGadgetWin(power_log_path=cpu_power_log_path)
             self.pue = 1.3  # pue for my laptop
-        elif self.platform == LINUX_PLATFORM:
+        elif self.platform in LINUX_PLATFORMS:
             self.power_gadget = PowerGadgetLinux(power_log_path=cpu_power_log_path)
             self.pue = 1.58  # pue for a server
 
