@@ -4,7 +4,8 @@ build/
 .ipynb_checkpoints/
 dist/
 *.egg*
-*powerLog.csv
+*powerLog*.csv
 *power_logs.csv
 .DS_STORE
 PyPowerGadget/requirements.txt
+PyPowerGadget/test_*

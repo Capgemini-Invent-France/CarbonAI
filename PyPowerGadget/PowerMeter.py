@@ -1,12 +1,12 @@
 __all__ = ["PowerMeter"]
 
 import json
-import requests
 import datetime
 import getpass
 import os
 import sys
 import warnings
+import requests
 
 from PyPowerGadget.PowerGadget import *
 from PyPowerGadget.NvidiaPower import *
@@ -14,6 +14,7 @@ from PyPowerGadget.settings import *
 
 
 class PowerMeter:
+
     """PowerMeter is a general tool to monitor and log the power consumption of any given function.
 
     Parameters
