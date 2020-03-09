@@ -89,7 +89,7 @@ class PowerMeter:
         self.__init_logging_file()
 
     def __load_energy_mix_db(self):
-        return pd.read_csv(PACKAGE_PATH / ENERGY_MIX_DATABASE)
+        return pd.read_csv(PACKAGE_PATH / ENERGY_MIX_DATABASE, encoding="utf-8")
 
     def __get_energy_mix(self):
         return self.energy_mix_db.loc[
@@ -146,7 +146,7 @@ class PowerMeter:
         co2_emitted = used_energy * self.energy_mix * 1e-3
         print(
             "This process emitted %.3fg of CO2 (using the energy mix of %s)"
-            % (co2_emitted, self.location_name)
+            % (co2_emitted, self.location_name.encode("utf-8"))
         )
 
         return co2_emitted
@@ -260,4 +260,6 @@ class PowerMeter:
             str(data_shape).replace(",", ";"),
             comments.replace(",", ";"),
         ]
-        self.logging_filename.open("a").write("\n" + (",".join(info)))
+        self.logging_filename.open("ab").write(
+            ("\n" + (",".join(info))).encode("utf-8")
+        )
