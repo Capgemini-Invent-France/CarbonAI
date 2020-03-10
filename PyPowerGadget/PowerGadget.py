@@ -291,9 +291,9 @@ class PowerGadgetLinux(PowerGadget):
                 )
                 current_dram_energy = self.__get_dram_energy(cpu, dram_energy_units)
                 current_cpu_energy = self.__get_cpu_energy(cpu, cpu_energy_units)
-                if prev_cpu_energies > cpu_energy_units:
+                if prev_cpu_energies[i] > cpu_energy_units:
                     cpu_energy_units *= 2
-                if prev_dram_energies > dram_energy_units:
+                if prev_dram_energies[i] > dram_energy_units:
                     dram_energy_units *= 2
                 power_draws[TOTAL_ENERGY_CPU] += (
                     current_cpu_energy - prev_cpu_energies[i]
