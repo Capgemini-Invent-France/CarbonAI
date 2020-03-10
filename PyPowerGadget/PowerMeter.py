@@ -1,3 +1,6 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+
 __all__ = ["PowerMeter"]
 
 import json
@@ -214,7 +217,9 @@ class PowerMeter:
     def __init_logging_file(self):
         if not self.logging_filename.exists():
             self.logging_filename.write_text(self.__written_columns())
-        elif self.__written_columns() not in self.logging_filename.read_text():
+        elif self.__written_columns() not in self.logging_filename.read_text(
+            encoding="utf-8"
+        ):
             warnings.warn(
                 "The column names of the log file are not right, it will be overwritten"
             )

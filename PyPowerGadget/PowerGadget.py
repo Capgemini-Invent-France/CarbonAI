@@ -1,3 +1,6 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+
 """
 Introduction
 Intel(R) Power Gadget is a software-based power estimation tool enabled for 2nd Generation Intel(R) Core(TM) processors or later. It includes a application, driver, and libraries to monitor and estimate real-time processor package power information in watts using the energy counters in the processor
@@ -279,6 +282,7 @@ class PowerGadgetLinux(PowerGadget):
             )
             prev_dram_energies.append(self.__get_dram_energy(cpu, dram_energy_units))
             prev_cpu_energies.append(self.__get_cpu_energy(cpu, cpu_energy_units))
+        t0 = time.time()
         while True:
             time.sleep(interval)
             for i, cpu in enumerate(self.cpu_ids):
@@ -287,6 +291,10 @@ class PowerGadgetLinux(PowerGadget):
                 )
                 current_dram_energy = self.__get_dram_energy(cpu, dram_energy_units)
                 current_cpu_energy = self.__get_cpu_energy(cpu, cpu_energy_units)
+                if prev_cpu_energies > cpu_energy_units:
+                    cpu_energy_units *= 2
+                if prev_dram_energies > dram_energy_units:
+                    dram_energy_units *= 2
                 power_draws[TOTAL_ENERGY_CPU] += (
                     current_cpu_energy - prev_cpu_energies[i]
                 )
@@ -295,7 +303,9 @@ class PowerGadgetLinux(PowerGadget):
                 )
                 prev_cpu_energies[i] = current_cpu_energy
                 prev_dram_energies[i] = current_dram_energy
-            power_draws[TOTAL_CPU_TIME] += interval
+            t1 = time.time()
+            power_draws[TOTAL_CPU_TIME] += t1 - t0
+            t0 = t1
 
     def execute_function(self, fun, fun_args, results):
         results["results"] = fun(*fun_args[0], **fun_args[1])
