@@ -48,6 +48,7 @@ import struct
 import time
 import multiprocessing
 from multiprocessing import Process, Manager
+import threading
 
 
 class PowerGadget:
@@ -103,6 +104,7 @@ class PowerGadgetMac(PowerGadget):
                 + ", try passing the path to the powerLog tool to the powerMeter."
             )
         self.log_file = self.__get_log_file()
+        self.thread = None
 
     def __get_log_file(self):
         return PACKAGE_PATH / MAC_INTELPOWERLOG_FILENAME
@@ -123,43 +125,42 @@ class PowerGadgetMac(PowerGadget):
         consumption = self.parse_power_log(self.log_file)
         return consumption
 
-    def extract_power(self, list_of_power, interval=1):
-        list_of_power.append(self.__get_power_consumption(duration=interval))
-        while True:
-            list_of_power.append(self.__get_power_consumption(duration=interval))
+    def extract_power(self, interval=1):
+        self.power_draws.append(self.__get_power_consumption(duration=interval))
+        while getattr(self.thread, "do_run", True):
+            self.power_draws.append(self.__get_power_consumption(duration=interval))
 
     def execute_function(self, fun, fun_args, results):
         results["results"] = fun(*fun_args[0], **fun_args[1])
 
-    def wrapper(self, func, *args, time_interval=1, **kwargs):
-        multiprocessing.set_start_method("spawn", force=True)
-        with Manager() as manager:
-            power_draws = manager.list()
-            return_dict = manager.dict()
-            return_dict["results"] = None
-            func_process = Process(
-                target=self.execute_function, args=(func, (args, kwargs), return_dict)
-            )
-            power_process = Process(
-                target=self.extract_power, args=(power_draws, time_interval)
-            )
-            print("starting CPU power monitoring ...")
+    # def wrapper(self, func, *args, time_interval=1, **kwargs):
+    #     print("starting CPU power monitoring ...")
+    #     self.power_draws = []
+    #     self.thread = threading.Thread(target=self.extract_power, args=())
+    #     self.thread.start()
+    #     results = func(*args, **kwargs)
+    #     print("stoping CPU power monitoring ...")
+    #     self.thread.do_run = False
+    #     self.thread.join()
+    #     self.recorded_power = pd.DataFrame.from_records(self.power_draws)
+    #     self.recorded_power = self.recorded_power.sum(axis=0)
+    #
+    #     return results
 
-            power_process.start()
-            func_process.start()
+    def start_mesure(self):
+        print("starting CPU power monitoring ...")
+        if self.thread and self.thread.is_alive():
+            self.stop_mesure()
+        self.power_draws = []
+        self.thread = threading.Thread(target=self.extract_power, args=())
+        self.thread.start()
 
-            func_process.join()
-            power_process.terminate()
-            power_process.join()
-            print("stoping CPU power monitoring ...")
-
-            power_draws_list = list(power_draws)
-            time.sleep(2)
-            power_draws_list.append(self.parse_power_log(self.log_file))
-            results = return_dict["results"]
-        self.recorded_power = pd.DataFrame.from_records(power_draws_list)
+    def stop_mesure(self):
+        print("stoping CPU power monitoring ...")
+        self.thread.do_run = False
+        self.thread.join()
+        self.recorded_power = pd.DataFrame.from_records(self.power_draws)
         self.recorded_power = self.recorded_power.sum(axis=0)
-        return results
 
 
 class PowerGadgetWin(PowerGadget):
@@ -176,7 +177,32 @@ class PowerGadgetWin(PowerGadget):
                 + ", try passing the path to the powerLog tool to the powerMeter."
             )
 
-    def wrapper(self, func, *args, time_interval=1, **kwargs):
+    # def wrapper(self, func, *args, time_interval=1, **kwargs):
+    #     print("starting CPU power monitoring ...")
+    #     out = subprocess.Popen(
+    #         '"' + str(self.power_log_path) + '" /min',
+    #         stdin=None,
+    #         stdout=None,
+    #         stderr=None,
+    #         shell=True,
+    #     )
+    #     time.sleep(1)
+    #     print("start logging")
+    #     out = subprocess.run('"' + str(self.power_log_path) + '" -start', shell=True)
+    #     results = func(*args, **kwargs)
+    #     print("stoping CPU power monitoring ...")
+    #     out = subprocess.run('"' + str(self.power_log_path) + '" -stop', shell=True)
+    #     out = subprocess.run(
+    #         'taskkill /IM "' + POWERLOG_TOOL_WIN + '"',
+    #         stdout=open(os.devnull, "wb"),
+    #         shell=True,
+    #     )
+    #     log_file = self.__get_log_file()
+    #     self.recorded_power = self.parse_power_log(log_file)
+    #     os.remove(log_file)
+    #     return results
+
+    def start_mesure(self, time_interval=1):
         print("starting CPU power monitoring ...")
         out = subprocess.Popen(
             '"' + str(self.power_log_path) + '" /min',
@@ -188,7 +214,8 @@ class PowerGadgetWin(PowerGadget):
         time.sleep(1)
         print("start logging")
         out = subprocess.run('"' + str(self.power_log_path) + '" -start', shell=True)
-        results = func(*args, **kwargs)
+
+    def stop_mesure(self):
         print("stoping CPU power monitoring ...")
         out = subprocess.run('"' + str(self.power_log_path) + '" -stop', shell=True)
         out = subprocess.run(
@@ -199,7 +226,6 @@ class PowerGadgetWin(PowerGadget):
         log_file = self.__get_log_file()
         self.recorded_power = self.parse_power_log(log_file)
         os.remove(log_file)
-        return results
 
     def __get_log_file(self):
         file_names = glob.glob(str(HOME_DIR / "Documents" / WIN_INTELPOWERLOG_FILENAME))

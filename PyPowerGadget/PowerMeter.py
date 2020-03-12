@@ -156,21 +156,18 @@ class PowerMeter:
 
     def mesure_power(
         self,
-        func,
         package,
         algorithm,
-        data_type="tabular",
+        data_type="",
         data_shape="",
         algorithm_params="",
         comments="",
     ):
         """
-        Mesure the power consumption of a given function
+        A decorator to mesure the power consumption of a given function
 
         Parameters
         ----------
-        func : python function
-            The python function that will be monitored
         package : str
             A string describing the package used by this function (e.g. sklearn, Pytorch, ...)
         algorithm : str
@@ -186,33 +183,136 @@ class PowerMeter:
 
         Returns
         -------
-        The result of the execution the provided function
         """
         if len(algorithm) == 0 or len(package) == 0:
             raise SyntaxError(
                 "Please input a description for the function you are trying to monitor. Pass in the algorithm and the package you are trying to monitor"
             )
 
-        def wrapper(*args, **kwargs):
-            self.gpu_power.start_mesure()
-            try:
-                results = self.power_gadget.wrapper(func, *args, **kwargs)
-            finally:
-                self.gpu_power.stop_mesure()
-                self.gpu_power.parse_power_log()
-            self.__log_records(
-                self.power_gadget.recorded_power,
-                self.gpu_power.recorded_power,
-                algorithm=algorithm,
-                package=package,
-                data_type=data_type,
-                data_shape=data_shape,
-                algorithm_params=algorithm_params,
-                comments=comments,
-            )
-            return results
+        def decorator(func):
+            def wrapper(*args, **kwargs):
+                self.start_mesure(
+                    package,
+                    algorithm,
+                    data_type=data_type,
+                    data_shape=data_shape,
+                    algorithm_params=algorithm_params,
+                    comments=comments,
+                )
+                try:
+                    results = func(*args, **kwargs)
+                finally:
+                    self.stop_mesure()
+                return results
 
-        return wrapper
+            return wrapper
+
+        return decorator
+
+    def __set_used_arguments(
+        self,
+        package,
+        algorithm,
+        data_type="",
+        data_shape="",
+        algorithm_params="",
+        comments="",
+    ):
+        self.used_package = package
+        self.used_algorithm = algorithm
+        self.used_data_type = data_type
+        self.used_data_shape = data_shape
+        self.used_algorithm_params = algorithm_params
+        self.used_comments = comments
+
+    def __call__(
+        self,
+        package,
+        algorithm,
+        data_type="",
+        data_shape="",
+        algorithm_params="",
+        comments="",
+    ):
+        self.__set_used_arguments(
+            package,
+            algorithm,
+            data_type=data_type,
+            data_shape=data_shape,
+            algorithm_params=algorithm_params,
+            comments=comments,
+        )
+        return self
+
+    def __enter__(self,):
+        self.start_mesure(
+            self.used_package,
+            self.used_algorithm,
+            data_type=self.used_data_type,
+            data_shape=self.used_data_shape,
+            algorithm_params=self.used_algorithm_params,
+            comments=self.used_comments,
+        )
+
+    def __exit__(self, type, value, traceback):
+        self.stop_mesure()
+
+    def start_mesure(
+        self,
+        package,
+        algorithm,
+        data_type="",
+        data_shape="",
+        algorithm_params="",
+        comments="",
+    ):
+        """
+        Start mesuring the power consumption of a given  sample of code
+
+        Parameters
+        ----------
+        package : str
+            A string describing the package used by this function (e.g. sklearn, Pytorch, ...)
+        algorithm : str
+            A string describing the algorithm used in the function monitored (e.g. RandomForestClassifier, ResNet121, ...)
+        data_type : str (among : tabular, image, text, time series, other)
+            A string describing the type of data used for training
+        data_shape : str or tuple
+            A string or tuple describing the quantity of data used
+        algorithm_params (optional) : str
+            A string describing the parameters used by the algorithm
+        comments (optional) : str
+            A string to provide any useful information
+
+        Returns
+        -------
+        None
+        """
+        self.gpu_power.start_mesure()
+        self.power_gadget.start_mesure()
+        self.__set_used_arguments(
+            package,
+            algorithm,
+            data_type=data_type,
+            data_shape=data_shape,
+            algorithm_params=algorithm_params,
+            comments=comments,
+        )
+
+    def stop_mesure(self):
+        self.power_gadget.stop_mesure()
+        self.gpu_power.stop_mesure()
+        self.gpu_power.parse_power_log()
+        self.__log_records(
+            self.power_gadget.recorded_power,
+            self.gpu_power.recorded_power,
+            algorithm=self.used_algorithm,
+            package=self.used_package,
+            data_type=self.used_data_type,
+            data_shape=self.used_data_shape,
+            algorithm_params=self.used_algorithm_params,
+            comments=self.used_comments,
+        )
 
     def __init_logging_file(self):
         if not self.logging_filename.exists():
@@ -235,7 +335,7 @@ class PowerMeter:
         gpu_recorded_power,
         algorithm="",
         package="",
-        data_type="tabular",
+        data_type="",
         data_shape="",
         algorithm_params="",
         comments="",
