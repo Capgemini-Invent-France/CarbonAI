@@ -207,7 +207,7 @@ class PowerGadgetWin(PowerGadget):
         return Path(file_names[-1])
 
 
-class PowerGadgetLinux(PowerGadget):
+class PowerGadgetLinuxMSR(PowerGadget):
     def __init__(self, power_log_path=""):
         super().__init__()
 
@@ -270,6 +270,23 @@ class PowerGadgetLinux(PowerGadget):
         os.close(fd)
         return result * unit / 3.6
 
+    def __get_computer_consomption(self, prev_cpu_energies, prev_dram_energies):
+        cpu_power = 0
+        dram_power = 0
+        for i, cpu in enumerate(self.cpu_ids):
+            _, cpu_energy_units, dram_energy_units, _ = self.__get_used_units(cpu)
+            current_dram_energy = self.__get_dram_energy(cpu, dram_energy_units)
+            current_cpu_energy = self.__get_cpu_energy(cpu, cpu_energy_units)
+            if prev_cpu_energies[i] > cpu_energy_units:
+                cpu_energy_units *= 2
+            if prev_dram_energies[i] > dram_energy_units:
+                dram_energy_units *= 2
+            cpu_power += current_cpu_energy - prev_cpu_energies[i]
+            dram_power += current_dram_energy - prev_dram_energies[i]
+            prev_cpu_energies[i] = current_cpu_energy
+            prev_dram_energies[i] = current_dram_energy
+        return cpu_power, dram_power, prev_cpu_energies, prev_dram_energies
+
     def extract_power(self, power_draws, interval=1):
         power_draws[TOTAL_CPU_TIME] = 0
         power_draws[TOTAL_ENERGY_CPU] = 0
@@ -285,24 +302,11 @@ class PowerGadgetLinux(PowerGadget):
         t0 = time.time()
         while True:
             time.sleep(interval)
-            for i, cpu in enumerate(self.cpu_ids):
-                power_units, cpu_energy_units, dram_energy_units, time_units = self.__get_used_units(
-                    cpu
-                )
-                current_dram_energy = self.__get_dram_energy(cpu, dram_energy_units)
-                current_cpu_energy = self.__get_cpu_energy(cpu, cpu_energy_units)
-                if prev_cpu_energies[i] > cpu_energy_units:
-                    cpu_energy_units *= 2
-                if prev_dram_energies[i] > dram_energy_units:
-                    dram_energy_units *= 2
-                power_draws[TOTAL_ENERGY_CPU] += (
-                    current_cpu_energy - prev_cpu_energies[i]
-                )
-                power_draws[TOTAL_ENERGY_MEMORY] += (
-                    current_dram_energy - prev_dram_energies[i]
-                )
-                prev_cpu_energies[i] = current_cpu_energy
-                prev_dram_energies[i] = current_dram_energy
+            cpu_power, dram_power, prev_cpu_energies, prev_dram_energies = self.__get_computer_consomption(
+                prev_cpu_energies, prev_dram_energies
+            )
+            power_draws[TOTAL_ENERGY_CPU] += cpu_power
+            power_draws[TOTAL_ENERGY_MEMORY] += dram_power
             t1 = time.time()
             power_draws[TOTAL_CPU_TIME] += t1 - t0
             t0 = t1

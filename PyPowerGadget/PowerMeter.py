@@ -41,7 +41,7 @@ class PowerMeter:
             self.power_gadget = PowerGadgetWin(power_log_path=cpu_power_log_path)
             self.pue = 1.3  # pue for my laptop
         elif self.platform in LINUX_PLATFORMS:
-            self.power_gadget = PowerGadgetLinux(power_log_path=cpu_power_log_path)
+            self.power_gadget = PowerGadgetLinuxMSR(power_log_path=cpu_power_log_path)
             self.pue = 1.58  # pue for a server
 
         self.cuda_available = self.__check_gpu()
