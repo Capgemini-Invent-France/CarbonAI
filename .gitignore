@@ -8,3 +8,5 @@ dist/
 *power_logs.csv
 .DS_STORE
 PyPowerGadget/requirements.txt
+*test_*.py
+*.zip

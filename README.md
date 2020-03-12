@@ -61,6 +61,11 @@ logged_data
 |2020-03-04 17:54:29.610171|martinchauvin|FR |France |darwin  |green_ai    |10.09472         |0                           |27.315876            |13.769294                 |0                          |2.562374                    |1.3|0.001679385|Pytorch   |ResNet121| layers=(Conv(3x3), BatchNorm,...)                     |images  |(7000, 64)  |3rd training|
 
 </div>
+For sharing purposes, you can save a copy of the logged data where you want :
+```python
+import PyPowerGadget
+PyPowerGadget.save_logged_data("~/Downloads/log_project1.csv")
+```
 
 ### Documentation
 

@@ -63,24 +63,25 @@ class PowerGadget:
         }
 
         results[TOTAL_CPU_TIME] = float(
-            re.search('(?<=Total Elapsed Time \(sec\) = )(.*)(?="|)', content).group(0)
+            re.search("(?<=Total Elapsed Time \(sec\) = )(\d|\.)*", content).group(0)
         )
         results[TOTAL_ENERGY_ALL] = float(
             re.search(
-                '((?<=Cumulative Package Energy_0 \(mWh\) = )|(?<=Cumulative Processor Energy_0 \(mWh\) = ))(.*)(?="|)',
+                "((?<=Cumulative Package Energy_0 \(mWh\) = )|(?<=Cumulative Processor Energy_0 \(mWh\) = ))(\d|\.)*",
                 content,
             ).group(0)
         )
         results[TOTAL_ENERGY_CPU] = float(
-            re.search(
-                '(?<=Cumulative IA Energy_0 \(mWh\) = )(.*)(?="|)', content
-            ).group(0)
+            re.search("(?<=Cumulative IA Energy_0 \(mWh\) = )(\d|\.)*", content).group(
+                0
+            )
         )
         results[TOTAL_ENERGY_MEMORY] = float(
             re.search(
-                '(?<=Cumulative DRAM Energy_0 \(mWh\) = )(.*)(?="|)', content
+                "(?<=Cumulative DRAM Energy_0 \(mWh\) = )(\d|\.)*", content
             ).group(0)
         )
+
         return results
 
 
