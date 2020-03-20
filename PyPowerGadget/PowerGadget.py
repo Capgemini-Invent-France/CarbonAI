@@ -207,22 +207,10 @@ class PowerGadgetWin(PowerGadget):
         return Path(file_names[-1])
 
 
-class PowerGadgetLinuxMSR(PowerGadget):
-    def __init__(self, power_log_path=""):
+class PowerGadgetLinux(PowerGadget):
+    def __init__(self):
         super().__init__()
-
-        # the user needs to execute as root
-        if os.geteuid() != 0:
-            raise PermissionError("You need to execute this program as root")
-
         self.cpu_ids = self.__get_cpu_ids()
-        self.MSR_RAPL_POWER_UNIT = 0x606
-        self.MSR_PKG_RAPL_POWER_LIMIT = 0x610
-        self.MSR_PKG_ENERGY_STATUS = 0x611  #  reports measured actual energy usage
-        self.MSR_DRAM_ENERGY_STATUS = 0x619
-        self.MSR_PKG_PERF_STATUS = 0x613
-        self.MSR_PKG_POWER_INFO = 0x614
-        self.MSR_PP0_ENERGY_STATUS = 0x639
 
     def __get_cpu_ids(self):
         """
@@ -242,6 +230,52 @@ class PowerGadgetLinuxMSR(PowerGadget):
 
         os.lseek(fd, msr, os.SEEK_SET)
         return struct.unpack("Q", os.read(fd, 8))[0]
+
+
+class PowerGadgetLinuxRAPL(PowerGadgetLinux):
+    def __init__(self):
+        super().__init__()
+
+    def wrapper(self, func, *args, time_interval=1, **kwargs):
+        print("starting CPU power monitoring ...")
+        out = subprocess.Popen(
+            '"' + str(self.power_log_path) + '" /min',
+            stdin=None,
+            stdout=None,
+            stderr=None,
+            shell=True,
+        )
+        time.sleep(1)
+        print("start logging")
+        out = subprocess.run('"' + str(self.power_log_path) + '" -start', shell=True)
+        results = func(*args, **kwargs)
+        print("stoping CPU power monitoring ...")
+        out = subprocess.run('"' + str(self.power_log_path) + '" -stop', shell=True)
+        out = subprocess.run(
+            'taskkill /IM "' + POWERLOG_TOOL_WIN + '"',
+            stdout=open(os.devnull, "wb"),
+            shell=True,
+        )
+        log_file = self.__get_log_file()
+        self.recorded_power = self.parse_power_log(log_file)
+        os.remove(log_file)
+        return results
+
+
+class PowerGadgetLinuxMSR(PowerGadgetLinux):
+    def __init__(self):
+        super().__init__()
+        # the user needs to execute as root
+        if os.geteuid() != 0:
+            raise PermissionError("You need to execute this program as root")
+
+        self.MSR_RAPL_POWER_UNIT = 0x606
+        self.MSR_PKG_RAPL_POWER_LIMIT = 0x610
+        self.MSR_PKG_ENERGY_STATUS = 0x611  #  reports measured actual energy usage
+        self.MSR_DRAM_ENERGY_STATUS = 0x619
+        self.MSR_PKG_PERF_STATUS = 0x613
+        self.MSR_PKG_POWER_INFO = 0x614
+        self.MSR_PP0_ENERGY_STATUS = 0x639
 
     def __read_msr(self, fd, msr):
         os.lseek(fd, msr, os.SEEK_SET)
