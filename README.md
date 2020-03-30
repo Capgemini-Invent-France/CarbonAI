@@ -7,7 +7,7 @@ This project aims at creating a python package that allows you to monitor the po
 First of all you need to install the intel utility allowing you to monitor power consumption ([support](https://software.intel.com/en-us/articles/intel-power-gadget)):
 * [Windows](https://software.intel.com/file/823776/download)
 * [MacOS](https://software.intel.com/sites/default/files/managed/91/6b/Intel%20Power%20Gadget.dmg)
-* Linux, no need to install any software, but the program need to be run as root
+* Linux, no need to install any software, but on some installations the program need to be run as root
 
 To install this package :
 ```
