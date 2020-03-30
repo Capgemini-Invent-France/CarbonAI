@@ -1,3 +1,6 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+
 """
 Introduction
 Intel(R) Power Gadget is a software-based power estimation tool enabled for 2nd Generation Intel(R) Core(TM) processors or later. It includes a application, driver, and libraries to monitor and estimate real-time processor package power information in watts using the energy counters in the processor
@@ -41,6 +44,7 @@ import re
 import glob
 
 import pandas as pd
+import struct
 import time
 import multiprocessing
 from multiprocessing import Process, Manager
@@ -104,7 +108,7 @@ class PowerGadgetMac(PowerGadget):
     def __get_log_file(self):
         return PACKAGE_PATH / MAC_INTELPOWERLOG_FILENAME
 
-    def get_power_consumption(self, duration=1, resolution=500):
+    def __get_power_consumption(self, duration=1, resolution=500):
         out = subprocess.run(
             [
                 self.power_log_path,
@@ -121,9 +125,9 @@ class PowerGadgetMac(PowerGadget):
         return consumption
 
     def extract_power(self, list_of_power, interval=1):
-        list_of_power.append(self.get_power_consumption(duration=interval))
+        list_of_power.append(self.__get_power_consumption(duration=interval))
         while True:
-            list_of_power.append(self.get_power_consumption(duration=interval))
+            list_of_power.append(self.__get_power_consumption(duration=interval))
 
     def execute_function(self, fun, fun_args, results):
         results["results"] = fun(*fun_args[0], **fun_args[1])
@@ -204,38 +208,189 @@ class PowerGadgetWin(PowerGadget):
         return Path(file_names[-1])
 
 
+
 class PowerGadgetLinux(PowerGadget):
-    def __init__(self, power_log_path=""):
+    def __init__(self):
         super().__init__()
-        raise NotImplementedError("This module is not implemented on linux for now")
-        # if len(power_log_path) > 0:
-        #     self.power_log_path = Path(power_log_path)
-        # else:
-        #     self.power_log_path = POWERLOG_PATH_WIN
-        #
-        # if not self.power_log_path.exists():
-        #     raise ModuleNotFoundError(
-        #         "We didn't find the Intel Power Gadget tool. \nMake sure it is installed (download available here : https://software.intel.com/file/823776/download).\nIf it is installed, we looked for it here:"
-        #         + str(self.power_log_path)
-        #         + ", try passing the path to the powerLog tool to the powerMeter."
-        #     )
+        self.cpu_ids = self.__get_cpu_ids()
+
+    def __get_cpu_ids(self):
+        """
+        Returns the cpu id of this machine
+        """
+        cpu_id_list = []
+        for filename in glob.glob(CPU_IDS_DIR):
+            with open(filename,'r') as f:
+                package_id = int(f.read())
+            if package_id not in cpu_id_list:
+                cpu_id_list.append(package_id)
+        return cpu_id_list
+
+
+class PowerGadgetLinuxRAPL(PowerGadgetLinux):
+    def __init__(self):
+        super().__init__()
+        self.dram_ids = self.__get_drams_ids()
+
+    def __get_drams_ids(self):
+        dram_id_list = []
+        for cpu in self.cpu_ids:
+            dram_paths = glob.glob(READ_RAPL_PATH.format(cpu) +RAPL_DRAM_PATH.format(cpu, "*")+RAPL_DEVICENAME_FILE)
+            for i, dram_file in enumerate(dram_paths):
+                dram_file = Path(dram_file)
+                if "dram" in dram_file.read_text():
+                    dram_id_list.append((cpu, i))
+                    break
+        return dram_id_list
 
     def wrapper(self, func, *args, time_interval=1, **kwargs):
+        self.recorded_power = {}
         print("starting CPU power monitoring ...")
+        cpu_powers = []
+        dram_powers = []
+        t0 = time.time()
+        for cpu_id in self.cpu_ids:
+            cpu_powers.append(self.__get_cpu_energy(cpu_id))
+        for cpu_id, dram_id in self.dram_ids:
+            dram_powers.append(self.__get_dram_energy(cpu_id, dram_id))
 
-        # out = subprocess.run(
-        #     ["start", self.power_log_path, "/min"], stdout=open(os.devnull, "wb")
-        # )
-        # out = subprocess.run(
-        #     [self.power_log_path, "-start"], stdout=open(os.devnull, "wb")
-        # )
         results = func(*args, **kwargs)
-        # out = subprocess.run(
-        #     [self.power_log_path, "-stop"], stdout=open(os.devnull, "wb")
-        # )
-        print("stoping CPU power monitoring ...")
 
-        self.recorded_power = self.parse_power_log()
+        print("stoping CPU power monitoring ...")
+        for i, cpu_id in enumerate(self.cpu_ids):
+            cpu_powers[i] = self.__get_cpu_energy(cpu_id) - cpu_powers[i]
+        for i, (cpu_id, dram_id) in enumerate(self.dram_ids):
+            dram_powers[i] = self.__get_dram_energy(cpu_id, dram_id) -dram_powers[i]
+        self.recorded_power[TOTAL_ENERGY_CPU] = sum(cpu_powers) / 3600 /1000
+        self.recorded_power[TOTAL_ENERGY_MEMORY] = sum(dram_powers) / 3600 /1000
+        t1 = time.time()
+        self.recorded_power[TOTAL_CPU_TIME] = t1 - t0
+        self.recorded_power[TOTAL_ENERGY_ALL] = None
+        return results
+
+    def __get_cpu_energy(self, cpu):
+        cpu_energy_file = Path(READ_RAPL_PATH.format(cpu)) / RAPL_ENERGY_FILE
+        energy = int(cpu_energy_file.read_text())
+        return energy
+
+    def __get_dram_energy(self, cpu, dram):
+        dram_energy_file = Path(READ_RAPL_PATH.format(cpu)) / (RAPL_DRAM_PATH.format(cpu, dram)) / RAPL_ENERGY_FILE
+        energy = int(dram_energy_file.read_text())
+        return energy
+
+
+
+
+class PowerGadgetLinuxMSR(PowerGadgetLinux):
+    def __init__(self):
+        super().__init__()
+        # the user needs to execute as root
+        if os.geteuid() != 0:
+            raise PermissionError("You need to execute this program as root")
+
+        self.MSR_RAPL_POWER_UNIT = 0x606
+        self.MSR_PKG_RAPL_POWER_LIMIT = 0x610
+        self.MSR_PKG_ENERGY_STATUS = 0x611 #  reports measured actual energy usage
+        self.MSR_DRAM_ENERGY_STATUS = 0x619
+        self.MSR_PKG_PERF_STATUS = 0x613
+        self.MSR_PKG_POWER_INFO = 0x614
+        self.MSR_PP0_ENERGY_STATUS = 0x639
+
+    def __read_msr(self, fd, msr):
+        os.lseek(fd, msr, os.SEEK_SET)
+        return struct.unpack("Q", os.read(fd, 8))[0]
+
+    def __get_used_units(self, cpu):
+        fd = os.open(READ_MSR_PATH.format(cpu), os.O_RDONLY)
+        # Calculate the units used
+        result = self.__read_msr(fd, self.MSR_RAPL_POWER_UNIT)
+        power_units = 0.5 ** (result & 0xF)
+        cpu_energy_units = 0.5 ** ((result >> 8) & 0x1F)
+        dram_energy_units = cpu_energy_units
+        time_units = 0.5 ** ((result >> 16) & 0xF)
+        os.close(fd)
+        return power_units, cpu_energy_units, dram_energy_units, time_units
+
+    def __get_cpu_energy(self, cpu, unit):
+        fd = os.open(READ_MSR_PATH.format(cpu), os.O_RDONLY)
+        result = self.__read_msr(fd, self.MSR_PKG_ENERGY_STATUS)
+        os.close(fd)
+        return result * unit / 3.6
+
+    def __get_dram_energy(self, cpu, unit):
+        fd = os.open(READ_MSR_PATH.format(cpu), os.O_RDONLY)
+        result = self.__read_msr(fd, self.MSR_DRAM_ENERGY_STATUS)
+        os.close(fd)
+        return result * unit / 3.6
+
+    def __get_computer_consomption(self, prev_cpu_energies, prev_dram_energies):
+        cpu_power = 0
+        dram_power = 0
+        for i, cpu in enumerate(self.cpu_ids):
+            _, cpu_energy_units, dram_energy_units, _ = self.__get_used_units(cpu)
+            current_dram_energy = self.__get_dram_energy(cpu, dram_energy_units)
+            current_cpu_energy = self.__get_cpu_energy(cpu, cpu_energy_units)
+            if prev_cpu_energies[i] > cpu_energy_units:
+                cpu_energy_units *= 2
+            if prev_dram_energies[i] > dram_energy_units:
+                dram_energy_units *= 2
+            cpu_power += current_cpu_energy - prev_cpu_energies[i]
+            dram_power += current_dram_energy - prev_dram_energies[i]
+            prev_cpu_energies[i] = current_cpu_energy
+            prev_dram_energies[i] = current_dram_energy
+        return cpu_power, dram_power, prev_cpu_energies, prev_dram_energies
+
+    def extract_power(self, power_draws, interval=1):
+        power_draws[TOTAL_CPU_TIME] = 0
+        power_draws[TOTAL_ENERGY_CPU] = 0
+        power_draws[TOTAL_ENERGY_MEMORY] = 0
+        prev_dram_energies = []
+        prev_cpu_energies = []
+        for cpu in self.cpu_ids:
+            power_units, cpu_energy_units, dram_energy_units, time_units = self.__get_used_units(
+                cpu
+            )
+            prev_dram_energies.append(self.__get_dram_energy(cpu, dram_energy_units))
+            prev_cpu_energies.append(self.__get_cpu_energy(cpu, cpu_energy_units))
+        t0 = time.time()
+        while True:
+            time.sleep(interval)
+            cpu_power, dram_power, prev_cpu_energies, prev_dram_energies = self.__get_computer_consomption(
+                prev_cpu_energies, prev_dram_energies
+            )
+            power_draws[TOTAL_ENERGY_CPU] += cpu_power
+            power_draws[TOTAL_ENERGY_MEMORY] += dram_power
+            t1 = time.time()
+            power_draws[TOTAL_CPU_TIME] += t1 - t0
+            t0 = t1
+
+    def execute_function(self, fun, fun_args, results):
+        results["results"] = fun(*fun_args[0], **fun_args[1])
+
+    def wrapper(self, func, *args, time_interval=1, **kwargs):
+        multiprocessing.set_start_method("spawn", force=True)
+        with Manager() as manager:
+            power_draws = manager.dict()
+            return_dict = manager.dict()
+            return_dict["results"] = None
+            func_process = Process(
+                target=self.execute_function, args=(func, (args, kwargs), return_dict)
+            )
+            power_process = Process(
+                target=self.extract_power, args=(power_draws, time_interval)
+            )
+            print("starting CPU power monitoring ...")
+
+            power_process.start()
+            func_process.start()
+
+            func_process.join()
+            power_process.terminate()
+            power_process.join()
+            print("stoping CPU power monitoring ...")
+            results = return_dict["results"]
+            self.recorded_power = dict(power_draws)
+            self.recorded_power[TOTAL_ENERGY_ALL] = None
         return results
 
 

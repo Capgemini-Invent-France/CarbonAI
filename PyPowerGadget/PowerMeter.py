@@ -1,12 +1,15 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+
 __all__ = ["PowerMeter"]
 
 import json
-import requests
 import datetime
 import getpass
 import os
 import sys
 import warnings
+import requests
 
 from PyPowerGadget.PowerGadget import *
 from PyPowerGadget.NvidiaPower import *
@@ -14,6 +17,7 @@ from PyPowerGadget.settings import *
 
 
 class PowerMeter:
+
     """PowerMeter is a general tool to monitor and log the power consumption of any given function.
 
     Parameters
@@ -36,8 +40,11 @@ class PowerMeter:
         elif self.platform == WIN_PLATFORM:
             self.power_gadget = PowerGadgetWin(power_log_path=cpu_power_log_path)
             self.pue = 1.3  # pue for my laptop
-        elif self.platform == LINUX_PLATFORM:
-            self.power_gadget = PowerGadgetLinux(power_log_path=cpu_power_log_path)
+        elif self.platform in LINUX_PLATFORMS:
+            if POWERLOG_PATH_LINUX.exists():
+                self.power_gadget = PowerGadgetLinuxRAPL()
+            else:
+                self.power_gadget = PowerGadgetLinuxMSR()
             self.pue = 1.58  # pue for a server
 
         self.cuda_available = self.__check_gpu()
@@ -88,7 +95,7 @@ class PowerMeter:
         self.__init_logging_file()
 
     def __load_energy_mix_db(self):
-        return pd.read_csv(PACKAGE_PATH / ENERGY_MIX_DATABASE)
+        return pd.read_csv(PACKAGE_PATH / ENERGY_MIX_DATABASE, encoding="utf-8")
 
     def __get_energy_mix(self):
         return self.energy_mix_db.loc[
@@ -145,7 +152,7 @@ class PowerMeter:
         co2_emitted = used_energy * self.energy_mix * 1e-3
         print(
             "This process emitted %.3fg of CO2 (using the energy mix of %s)"
-            % (co2_emitted, self.location_name)
+            % (co2_emitted, self.location_name.encode("utf-8"))
         )
 
         return co2_emitted
@@ -213,7 +220,9 @@ class PowerMeter:
     def __init_logging_file(self):
         if not self.logging_filename.exists():
             self.logging_filename.write_text(self.__written_columns())
-        elif self.__written_columns() not in self.logging_filename.read_text():
+        elif self.__written_columns() not in self.logging_filename.read_text(
+            encoding="utf-8"
+        ):
             warnings.warn(
                 "The column names of the log file are not right, it will be overwritten"
             )
@@ -259,4 +268,6 @@ class PowerMeter:
             str(data_shape).replace(",", ";"),
             comments.replace(",", ";"),
         ]
-        self.logging_filename.open("a").write("\n" + (",".join(info)))
+        self.logging_filename.open("ab").write(
+            ("\n" + (",".join(info))).encode("utf-8")
+        )
