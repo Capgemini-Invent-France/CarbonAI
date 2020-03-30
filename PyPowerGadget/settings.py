@@ -12,6 +12,14 @@ POWERLOG_PATH_WIN = Path("/Program Files/Intel/Power Gadget 3.5")
 POWERLOG_TOOL_WIN = "IntelPowerGadget.exe"
 POWERLOG_PATH_LINUX = Path("/sys/class/powercap/intel-rapl")
 
+CPU_IDS_DIR = "/sys/devices/system/cpu/cpu*/topology/physical_package_id"
+READ_MSR_PATH = "/dev/cpu/{}/msr"
+READ_RAPL_PATH = "/sys/class/powercap/intel-rapl/intel-rapl:{}/" #rapl_socket_id
+RAPL_DEVICENAME_FILE = "name"
+RAPL_ENERGY_FILE = "energy_uj"
+RAPL_DRAM_PATH = "intel-rapl:{}:{}/" #rapl_socket_id, rapl_device_id
+
+
 ENERGY_MIX_DATABASE = Path("ademe_energy_mix_by_country.csv")
 ENERGY_MIX_COLUMN = "Energy mix (kgCO2/kWh)"
 COUNTRY_CODE_COLUMN = "ISO"
@@ -20,7 +28,7 @@ COUNTRY_NAME_COLUMN = "Country"
 MAC_PLATFORM = "darwin"
 WIN_PLATFORM = "win32"
 LINUX_PLATFORMS = ["linux", "linux2"]
-# PROJECT_PATH = "/Users/martinchauvin/Capgemini/Green AI - General/green_ai_code/"
+
 MAC_INTELPOWERLOG_FILENAME = "intelPowerLog.csv"
 WIN_INTELPOWERLOG_FILENAME = "PwrData_*.csv"
 NVIDIAPOWERLOG_FILENAME = "nvidiaPowerLog.csv"

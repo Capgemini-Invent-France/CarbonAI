@@ -207,6 +207,7 @@ class PowerGadgetWin(PowerGadget):
         return Path(file_names[-1])
 
 
+
 class PowerGadgetLinux(PowerGadget):
     def __init__(self):
         super().__init__()
@@ -216,50 +217,67 @@ class PowerGadgetLinux(PowerGadget):
         """
         Returns the cpu id of this machine
         """
-        api_file = open("/sys/devices/system/cpu/present", "r")
-
-        cpu_id_tmp = re.findall("\d+|-", api_file.readline().strip())
         cpu_id_list = []
-        for i in range(len(cpu_id_tmp)):
-            if cpu_id_tmp[i] == "-":
-                for cpu_id in range(int(cpu_id_tmp[i - 1]) + 1, int(cpu_id_tmp[i + 1])):
-                    cpu_id_list.append(int(cpu_id))
-            else:
-                cpu_id_list.append(int(cpu_id_tmp[i]))
+        for filename in glob.glob(CPU_IDS_DIR):
+            with open(filename,'r') as f:
+                package_id = int(f.read())
+            if package_id not in cpu_id_list:
+                cpu_id_list.append(package_id)
         return cpu_id_list
-
-        os.lseek(fd, msr, os.SEEK_SET)
-        return struct.unpack("Q", os.read(fd, 8))[0]
 
 
 class PowerGadgetLinuxRAPL(PowerGadgetLinux):
     def __init__(self):
         super().__init__()
+        self.dram_ids = self.__get_drams_ids()
+
+    def __get_drams_ids(self):
+        dram_id_list = []
+        for cpu in self.cpu_ids:
+            dram_paths = glob.glob(READ_RAPL_PATH.format(cpu) +RAPL_DRAM_PATH.format(cpu, "*")+RAPL_DEVICENAME_FILE)
+            for i, dram_file in enumerate(dram_paths):
+                dram_file = Path(dram_file)
+                if "dram" in dram_file.read_text():
+                    dram_id_list.append((cpu, i))
+                    break
+        return dram_id_list
 
     def wrapper(self, func, *args, time_interval=1, **kwargs):
+        self.recorded_power = {}
         print("starting CPU power monitoring ...")
-        out = subprocess.Popen(
-            '"' + str(self.power_log_path) + '" /min',
-            stdin=None,
-            stdout=None,
-            stderr=None,
-            shell=True,
-        )
-        time.sleep(1)
-        print("start logging")
-        out = subprocess.run('"' + str(self.power_log_path) + '" -start', shell=True)
+        cpu_powers = []
+        dram_powers = []
+        t0 = time.time()
+        for cpu_id in self.cpu_ids:
+            cpu_powers.append(self.__get_cpu_energy(cpu_id))
+        for cpu_id, dram_id in self.dram_ids:
+            dram_powers.append(self.__get_dram_energy(cpu_id, dram_id))
+
         results = func(*args, **kwargs)
+
         print("stoping CPU power monitoring ...")
-        out = subprocess.run('"' + str(self.power_log_path) + '" -stop', shell=True)
-        out = subprocess.run(
-            'taskkill /IM "' + POWERLOG_TOOL_WIN + '"',
-            stdout=open(os.devnull, "wb"),
-            shell=True,
-        )
-        log_file = self.__get_log_file()
-        self.recorded_power = self.parse_power_log(log_file)
-        os.remove(log_file)
+        for i, cpu_id in enumerate(self.cpu_ids):
+            cpu_powers[i] = self.__get_cpu_energy(cpu_id) - cpu_powers[i]
+        for i, (cpu_id, dram_id) in enumerate(self.dram_ids):
+            dram_powers[i] = self.__get_dram_energy(cpu_id, dram_id) -dram_powers[i]
+        self.recorded_power[TOTAL_ENERGY_CPU] = sum(cpu_powers) / 3600 /1000
+        self.recorded_power[TOTAL_ENERGY_MEMORY] = sum(dram_powers) / 3600 /1000
+        t1 = time.time()
+        self.recorded_power[TOTAL_CPU_TIME] = t1 - t0
+        self.recorded_power[TOTAL_ENERGY_ALL] = None
         return results
+
+    def __get_cpu_energy(self, cpu):
+        cpu_energy_file = Path(READ_RAPL_PATH.format(cpu)) / RAPL_ENERGY_FILE
+        energy = int(cpu_energy_file.read_text())
+        return energy
+
+    def __get_dram_energy(self, cpu, dram):
+        dram_energy_file = Path(READ_RAPL_PATH.format(cpu)) / (RAPL_DRAM_PATH.format(cpu, dram)) / RAPL_ENERGY_FILE
+        energy = int(dram_energy_file.read_text())
+        return energy
+
+
 
 
 class PowerGadgetLinuxMSR(PowerGadgetLinux):
@@ -271,7 +289,7 @@ class PowerGadgetLinuxMSR(PowerGadgetLinux):
 
         self.MSR_RAPL_POWER_UNIT = 0x606
         self.MSR_PKG_RAPL_POWER_LIMIT = 0x610
-        self.MSR_PKG_ENERGY_STATUS = 0x611  #  reports measured actual energy usage
+        self.MSR_PKG_ENERGY_STATUS = 0x611 #  reports measured actual energy usage
         self.MSR_DRAM_ENERGY_STATUS = 0x619
         self.MSR_PKG_PERF_STATUS = 0x613
         self.MSR_PKG_POWER_INFO = 0x614
@@ -282,7 +300,7 @@ class PowerGadgetLinuxMSR(PowerGadgetLinux):
         return struct.unpack("Q", os.read(fd, 8))[0]
 
     def __get_used_units(self, cpu):
-        fd = os.open("/dev/cpu/%d/msr" % (cpu,), os.O_RDONLY)
+        fd = os.open(READ_MSR_PATH.format(cpu), os.O_RDONLY)
         # Calculate the units used
         result = self.__read_msr(fd, self.MSR_RAPL_POWER_UNIT)
         power_units = 0.5 ** (result & 0xF)
@@ -293,13 +311,13 @@ class PowerGadgetLinuxMSR(PowerGadgetLinux):
         return power_units, cpu_energy_units, dram_energy_units, time_units
 
     def __get_cpu_energy(self, cpu, unit):
-        fd = os.open("/dev/cpu/%d/msr" % (cpu,), os.O_RDONLY)
+        fd = os.open(READ_MSR_PATH.format(cpu), os.O_RDONLY)
         result = self.__read_msr(fd, self.MSR_PKG_ENERGY_STATUS)
         os.close(fd)
         return result * unit / 3.6
 
     def __get_dram_energy(self, cpu, unit):
-        fd = os.open("/dev/cpu/%d/msr" % (cpu,), os.O_RDONLY)
+        fd = os.open(READ_MSR_PATH.format(cpu), os.O_RDONLY)
         result = self.__read_msr(fd, self.MSR_DRAM_ENERGY_STATUS)
         os.close(fd)
         return result * unit / 3.6

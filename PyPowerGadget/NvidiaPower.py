@@ -66,7 +66,7 @@ class NvidiaPower(GpuPower):
             [
                 "nvidia-smi",
                 "-f",
-                self.log_file,
+                str(self.log_file),
                 "-q",
                 "-d",
                 "POWER",
