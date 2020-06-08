@@ -58,6 +58,7 @@ class PowerGadget:
     def parse_power_log(self, log_file):
         content = log_file.read_text()
         if not "Total Elapsed Time" in content:
+            print("The log file does not seem to written yet, we'll wait 2 secs.")
             time.sleep(2)
             content = log_file.read_text()
         results = {
@@ -129,6 +130,7 @@ class PowerGadgetMac(PowerGadget):
         self.power_draws.append(self.__get_power_consumption(duration=interval))
         while getattr(self.thread, "do_run", True):
             self.power_draws.append(self.__get_power_consumption(duration=interval))
+        self.power_draws.append(self.__get_power_consumption(duration=interval))
 
     def execute_function(self, fun, fun_args, results):
         results["results"] = fun(*fun_args[0], **fun_args[1])

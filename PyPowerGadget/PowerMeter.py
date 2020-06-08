@@ -10,6 +10,7 @@ import os
 import sys
 import warnings
 import requests
+import pandas as pd
 
 from PyPowerGadget.PowerGadget import *
 from PyPowerGadget.NvidiaPower import *
@@ -67,29 +68,30 @@ class PowerMeter:
         self.location_name = self.__get_location_name()
 
         self.logging_filename = PACKAGE_PATH / LOGGING_FILE
-        self.logging_columns = [
-            "Datetime",
-            "User ID",
-            COUNTRY_CODE_COLUMN,
-            COUNTRY_NAME_COLUMN,
-            "Platform",
-            "Project name",
-            TOTAL_CPU_TIME,
-            TOTAL_GPU_TIME,
-            TOTAL_ENERGY_ALL,
-            TOTAL_ENERGY_CPU,
-            TOTAL_ENERGY_GPU,
-            TOTAL_ENERGY_MEMORY,
-            "PUE",
-            "CO2 emitted (gCO2e)",
-            "Package",
-            "Algorithm",
-            "Algorithm's parameters",
-            "Data type",
-            "Data shape",
-            "Comment",
-        ]
-        self.__init_logging_file()
+        # self.logging_columns = [
+        #     "Datetime",
+        #     "User ID",
+        #     COUNTRY_CODE_COLUMN,
+        #     COUNTRY_NAME_COLUMN,
+        #     "Platform",
+        #     "Project name",
+        #     TOTAL_CPU_TIME,
+        #     TOTAL_GPU_TIME,
+        #     TOTAL_ENERGY_ALL,
+        #     TOTAL_ENERGY_CPU,
+        #     TOTAL_ENERGY_GPU,
+        #     TOTAL_ENERGY_MEMORY,
+        #     "PUE",
+        #     "CO2 emitted (gCO2e)",
+        #     "Package",
+        #     "Algorithm",
+        #     "Algorithm's parameters",
+        #     "Data type",
+        #     "Data shape",
+        #     "Comment",
+        # ]
+        self.endpoint = API_ENDPOINT
+        # self.__init_logging_file()
 
     def __load_energy_mix_db(self):
         return pd.read_csv(PACKAGE_PATH / ENERGY_MIX_DATABASE, encoding="utf-8")
@@ -329,6 +331,12 @@ class PowerMeter:
     def __written_columns(self):
         return ",".join(self.logging_columns)
 
+    def __record_data_to_server(self, payload):
+        headers = {"Content-Type": "application/json"}
+        data = json.dumps(payload)
+        response = requests.request("POST", self.endpoint, headers=headers, data=data)
+        return response
+
     def __log_records(
         self,
         cpu_recorded_power,
@@ -343,28 +351,53 @@ class PowerMeter:
         co2_emitted = self.__aggregate_power(
             self.power_gadget.recorded_power, self.gpu_power.recorded_power
         )
-        info = [
-            str(datetime.datetime.now()),
-            self.user,
-            self.location,
-            self.location_name,
-            self.platform,
-            self.project,
-            str(cpu_recorded_power[TOTAL_CPU_TIME]),
-            str(gpu_recorded_power[TOTAL_GPU_TIME]),
-            str(cpu_recorded_power[TOTAL_ENERGY_ALL]),
-            str(cpu_recorded_power[TOTAL_ENERGY_CPU]),
-            str(gpu_recorded_power[TOTAL_ENERGY_GPU]),
-            str(cpu_recorded_power[TOTAL_ENERGY_MEMORY]),
-            str(self.pue),
-            str(co2_emitted),
-            package.replace(",", ";"),
-            algorithm.replace(",", ";"),
-            algorithm_params.replace(",", ";"),
-            data_type.replace(",", ";"),
-            str(data_shape).replace(",", ";"),
-            comments.replace(",", ";"),
-        ]
-        self.logging_filename.open("ab").write(
-            ("\n" + (",".join(info))).encode("utf-8")
-        )
+        payload = {
+            "Datetime": str(datetime.datetime.now()),
+            "Country": self.location_name,
+            "Platform": self.platform,
+            "User ID": self.user,
+            "ISO": self.location,
+            "Project name": self.project,
+            "Total Elapsed CPU Time (sec)": int(cpu_recorded_power[TOTAL_CPU_TIME]),
+            "Total Elapsed GPU Time (sec)": int(gpu_recorded_power[TOTAL_GPU_TIME]),
+            "Cumulative Package Energy (mWh)": int(
+                cpu_recorded_power[TOTAL_ENERGY_ALL]
+            ),
+            "Cumulative IA Energy (mWh)": int(cpu_recorded_power[TOTAL_ENERGY_CPU]),
+            "Cumulative GPU Energy (mWh)": int(gpu_recorded_power[TOTAL_ENERGY_GPU]),
+            "Cumulative DRAM Energy (mWh)": int(
+                cpu_recorded_power[TOTAL_ENERGY_MEMORY]
+            ),
+            "PUE": self.pue,
+            "CO2 emitted (gCO2e)": co2_emitted,
+            "Package": package,
+            "Algorithm": algorithm,
+            "Algorithm's parameters": algorithm_params,
+            "Data type": data_type,
+            "Data shape": data_shape,
+            "Comment": comments,
+        }
+        response = self.__record_data_to_server(payload)
+        if response.status_code >= 400:
+            print(
+                "We couldn't upload the recorded data to the server, we are going to record it for a later upload"
+            )
+            # can't upload we'll record the data
+            data = pd.DataFrame(payload, index=[0])
+            if self.logging_filename.exists():
+                data.to_csv(self.logging_filename, mode="a", index=False, header=False)
+            else:
+                data.to_csv(self.logging_filename, index=False)
+
+        if response.status_code == 200:
+            # we successfully uploaded, check if there are other locally recorded data
+            if self.logging_filename.exists():
+                data = pd.read_csv(self.logging_filename, index_col=None)
+                payloads = data.to_dict(orient="records")
+                for i, payload in enumerate(payloads):
+                    res = self.__record_data_to_server(payload)
+                    if res.status_code != 200:
+                        data.iloc[i:].to_csv(self.logging_filename, index=False)
+                        break
+                else:
+                    self.logging_filename.unlink()
