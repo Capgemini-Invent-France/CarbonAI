@@ -6,5 +6,7 @@ __version__ = "0.0.5"
 
 from PyPowerGadget.PowerMeter import PowerMeter
 from PyPowerGadget.functions import get_logged_data
+from PyPowerGadget.MagicPowerMeter import MagicPowerMeter
 
-__all__ = ["PowerMeter", "get_logged_data"]
+
+__all__ = ["PowerMeter", "MagicPowerMeter", "get_logged_data"]

@@ -218,12 +218,12 @@ class PowerMeter:
         algorithm_params="",
         comments="",
     ):
-        self.used_package = package
-        self.used_algorithm = algorithm
-        self.used_data_type = data_type
-        self.used_data_shape = data_shape
-        self.used_algorithm_params = algorithm_params
-        self.used_comments = comments
+        self.used_package = package if package else ""
+        self.used_algorithm = algorithm if algorithm else ""
+        self.used_data_type = data_type if data_type else ""
+        self.used_data_shape = data_shape if data_shape else ""
+        self.used_algorithm_params = algorithm_params if algorithm_params else ""
+        self.used_comments = comments if comments else ""
 
     def __call__(
         self,

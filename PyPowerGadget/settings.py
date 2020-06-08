@@ -20,7 +20,6 @@ COUNTRY_NAME_COLUMN = "Country"
 MAC_PLATFORM = "darwin"
 WIN_PLATFORM = "win32"
 LINUX_PLATFORMS = ["linux", "linux2"]
-# PROJECT_PATH = "/Users/martinchauvin/Capgemini/Green AI - General/green_ai_code/"
 MAC_INTELPOWERLOG_FILENAME = "intelPowerLog.csv"
 WIN_INTELPOWERLOG_FILENAME = "PwrData_*.csv"
 NVIDIAPOWERLOG_FILENAME = "nvidiaPowerLog.csv"
