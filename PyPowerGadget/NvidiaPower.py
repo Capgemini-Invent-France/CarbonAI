@@ -17,10 +17,10 @@ class GpuPower:
         self.recorded_power = {TOTAL_GPU_TIME: 0, TOTAL_ENERGY_GPU: 0}
         self.recorded_power = pd.Series(self.recorded_power)
 
-    def start_mesure(self):
+    def start_measure(self):
         pass
 
-    def stop_mesure(self):
+    def stop_measure(self):
         pass
 
     def parse_power_log(self):
@@ -38,8 +38,8 @@ class NvidiaPower(GpuPower):
     Class to monitor the power usage of a gpu
     Usage :
     1. initialiase the class
-    2. call start start_mesure
-    3. call stop stop_mesure
+    2. call start start_measure
+    3. call stop stop_measure
     4. collect the results with parse_power_log
     """
 
@@ -50,15 +50,15 @@ class NvidiaPower(GpuPower):
         )
         self.logging_process = None
 
-    def start_mesure(self, interval=1):
+    def start_measure(self, interval=1):
         """
-        Start the mesure process
+        Start the measure process
         Args:
             interval : interval to which log power in the log_path file
         """
         self.interval = interval
         if self.logging_process is not None:
-            self.stop_mesure()
+            self.stop_measure()
 
         print("starting GPU power monitoring ...")
 
@@ -75,9 +75,9 @@ class NvidiaPower(GpuPower):
             ]
         )
 
-    def stop_mesure(self):
+    def stop_measure(self):
         """
-        Stop the mesure process if started
+        Stop the measure process if started
         """
         print("stopping GPU power monitoring ...")
         self.logging_process.send_signal(signal.SIGINT)
@@ -85,13 +85,13 @@ class NvidiaPower(GpuPower):
 
     def parse_power_log(self):
         """
-        Extract power as logged in the last mesure process
+        Extract power as logged in the last measure process
         Returns:
             A dataframe with all the recorded power and the ellapsed time
         """
         if not self.log_file.exists():
             raise FileNotFoundError(
-                "Logging file not found, make sure you started to run a mesure"
+                "Logging file not found, make sure you started to run a measure"
             )
         content = self.log_file.read_text()
         regex_power = "(?<=Power Draw                  : )(.*)(?= W)"

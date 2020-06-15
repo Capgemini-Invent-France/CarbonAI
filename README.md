@@ -39,11 +39,11 @@ To monitor the power consumption of a function, follow this example:
 from PyPowerGadget import PowerMeter
 power_meter = PowerMeter(project_name="MNIST classifier")
 
-@power_meter.mesure_power(
+@power_meter.measure_power(
   package="sklearn",
   algorithm="RandomForestClassifier",
   data_type="tabular",
-  data_shape=<your_data>.shape
+  data_shape=<your_data>.shape,
   algorithm_params="n_estimators=300, max_depth=15",
   comments="Classifier trained on the MNIST dataset, 3rd test"
 )
@@ -60,7 +60,7 @@ power_meter = PowerMeter(project_name="MNIST classifier")
 
 -----------------
 
-%%mesure_power power_meter "package_name_used" "algorithm" --data_type "tabular" --data_shape "your_data_shape" --algorithm_params "n_estimators=300, max_depth=15" --comments "Classifier trained on the MNIST dataset, 3rd test"
+%%measure_power power_meter "package_name_used" "algorithm" --data_type "tabular" --data_shape "your_data_shape" --algorithm_params "n_estimators=300, max_depth=15" --comments "Classifier trained on the MNIST dataset, 3rd test"
 Do somthing
 
 ```
@@ -69,6 +69,7 @@ Do somthing
 To monitor the power consumption of some specific inline code, there are 2 ways:
 
 **Using the with statement**
+
 This is the prefered method as it will stop the process even if you get an error
 ```python
 from PyPowerGadget import PowerMeter
@@ -78,7 +79,7 @@ with power_meter(
   package="sklearn",
   algorithm="RandomForestClassifier",
   data_type="tabular",
-  data_shape=<your_data>.shape
+  data_shape=<your_data>.shape,
   algorithm_params="n_estimators=300, max_depth=15",
   comments="Classifier trained on the MNIST dataset, 3rd test"
 ):
@@ -86,38 +87,24 @@ with power_meter(
 ```
 
 **Using the *start and stop method***
+
 This method won't stop the process unless told to do so
 ```python
 from PyPowerGadget import PowerMeter
 power_meter = PowerMeter(project_name="MNIST classifier")
 
-power_meter.start_mesure(
+power_meter.start_measure(
   package="sklearn",
   algorithm="RandomForestClassifier",
   data_type="tabular",
-  data_shape=<your_data>.shape
+  data_shape=<your_data>.shape,
   algorithm_params="n_estimators=300, max_depth=15",
   comments="Classifier trained on the MNIST dataset, 3rd test"
 )
 # Do something
-power_meter.stop_mesure()
+power_meter.stop_measure()
 ```
 
-
-<!-- Energy usage, CO2 emissions and  other useful stats are logged in a file. You can access this file with the following function:
-```python
-import PyPowerGadget
-logged_data = PyPowerGadget.get_logged_data()
-logged_data
-```
-<div style="font-size:8pt;">
-
-|Datetime                  |User ID      |ISO|Country|Platform|Project name|Total Elapsed CPU Time (sec)|Total Elapsed GPU Time (sec)|Cumulative Package Energy (mWh)|Cumulative IA Energy (mWh)|Cumulative GPU Energy (mWh)|Cumulative DRAM Energy (mWh)|PUE|CO2 emitted (gCO2e)  |Package|Algorithm     |Algorithm's parameters|Data type|Data shape|Comment|
-|--------------------------|-------------|---|-------|--------|------------|----------------------------|----------------------------|-------------------------------|--------------------------|---------------------------|----------------------------|---|---------------------|-------|--------------|----------------------|---------|----------|-------|
-|2020-03-04 17:53:36.289029|martinchauvin|FR |France |darwin  |green_ai    |10.087129                   |0                           |23.081851            |10.375519                 |0                          |2.296532                    |1.3|0.0013     |Sklearn   |MLPClassifier|hidden_layers=(200;)|tabular  |(7000, 64)   |Toy training on the MNIST dataset |
-|2020-03-04 17:54:29.610171|martinchauvin|FR |France |darwin  |green_ai    |10.09472         |0                           |27.315876            |13.769294                 |0                          |2.562374                    |1.3|0.001679385|Pytorch   |ResNet121| layers=(Conv(3x3), BatchNorm,...)                     |images  |(7000, 64)  |3rd training|
-
-</div> -->
 
 ### Documentation
 
@@ -138,9 +125,9 @@ logged_data
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Whether use user country location or not
 <hr/>
 
-> &nbsp;&nbsp;&nbsp;&nbsp;**mesure_power**(*func, package, algorithm, data_type="tabular", data_shape="", algorithm_params="", comments=""*)
+> &nbsp;&nbsp;&nbsp;&nbsp;**measure_power**(*func, package, algorithm, data_type="tabular", data_shape="", algorithm_params="", comments=""*)
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Mesure the power consumption of any given function
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;measure the power consumption of any given function
 
 > &nbsp;&nbsp;&nbsp;&nbsp;func : python function
 

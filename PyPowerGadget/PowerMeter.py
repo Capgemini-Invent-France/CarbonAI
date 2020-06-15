@@ -23,6 +23,8 @@ class PowerMeter:
 
     Parameters
     ----------
+    project_name (optional) : str
+        Name of the project you are working on (default is folder_name)
     cpu_power_log_path (optional) : str
         The path to the tool "PowerLog"
     get_country (optional) : bool
@@ -32,7 +34,7 @@ class PowerMeter:
     """
 
     def __init__(
-        self, cpu_power_log_path="", get_country=True, user_name="", project_name=""
+        self, project_name="", cpu_power_log_path="", get_country=True, user_name=""
     ):
         self.platform = sys.platform
         if self.platform == MAC_PLATFORM:
@@ -156,7 +158,7 @@ class PowerMeter:
 
         return co2_emitted
 
-    def mesure_power(
+    def measure_power(
         self,
         package,
         algorithm,
@@ -166,7 +168,7 @@ class PowerMeter:
         comments="",
     ):
         """
-        A decorator to mesure the power consumption of a given function
+        A decorator to measure the power consumption of a given function
 
         Parameters
         ----------
@@ -193,7 +195,7 @@ class PowerMeter:
 
         def decorator(func):
             def wrapper(*args, **kwargs):
-                self.start_mesure(
+                self.start_measure(
                     package,
                     algorithm,
                     data_type=data_type,
@@ -204,7 +206,7 @@ class PowerMeter:
                 try:
                     results = func(*args, **kwargs)
                 finally:
-                    self.stop_mesure()
+                    self.stop_measure()
                 return results
 
             return wrapper
@@ -247,7 +249,7 @@ class PowerMeter:
         return self
 
     def __enter__(self,):
-        self.start_mesure(
+        self.start_measure(
             self.used_package,
             self.used_algorithm,
             data_type=self.used_data_type,
@@ -257,9 +259,9 @@ class PowerMeter:
         )
 
     def __exit__(self, type, value, traceback):
-        self.stop_mesure()
+        self.stop_measure()
 
-    def start_mesure(
+    def start_measure(
         self,
         package,
         algorithm,
@@ -290,8 +292,8 @@ class PowerMeter:
         -------
         None
         """
-        self.gpu_power.start_mesure()
-        self.power_gadget.start_mesure()
+        self.gpu_power.start_measure()
+        self.power_gadget.start_measure()
         self.__set_used_arguments(
             package,
             algorithm,
@@ -301,9 +303,9 @@ class PowerMeter:
             comments=comments,
         )
 
-    def stop_mesure(self):
-        self.power_gadget.stop_mesure()
-        self.gpu_power.stop_mesure()
+    def stop_measure(self):
+        self.power_gadget.stop_measure()
+        self.gpu_power.stop_measure()
         self.gpu_power.parse_power_log()
         self.__log_records(
             self.power_gadget.recorded_power,

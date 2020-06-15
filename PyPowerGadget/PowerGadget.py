@@ -149,15 +149,15 @@ class PowerGadgetMac(PowerGadget):
     #
     #     return results
 
-    def start_mesure(self):
+    def start_measure(self):
         print("starting CPU power monitoring ...")
         if self.thread and self.thread.is_alive():
-            self.stop_mesure()
+            self.stop_measure()
         self.power_draws = []
         self.thread = threading.Thread(target=self.extract_power, args=())
         self.thread.start()
 
-    def stop_mesure(self):
+    def stop_measure(self):
         print("stoping CPU power monitoring ...")
         self.thread.do_run = False
         self.thread.join()
@@ -204,7 +204,7 @@ class PowerGadgetWin(PowerGadget):
     #     os.remove(log_file)
     #     return results
 
-    def start_mesure(self, time_interval=1):
+    def start_measure(self, time_interval=1):
         print("starting CPU power monitoring ...")
         out = subprocess.Popen(
             '"' + str(self.power_log_path) + '" /min',
@@ -217,7 +217,7 @@ class PowerGadgetWin(PowerGadget):
         print("start logging")
         out = subprocess.run('"' + str(self.power_log_path) + '" -start', shell=True)
 
-    def stop_mesure(self):
+    def stop_measure(self):
         print("stoping CPU power monitoring ...")
         out = subprocess.run('"' + str(self.power_log_path) + '" -stop', shell=True)
         out = subprocess.run(

@@ -7,10 +7,10 @@ from PyPowerGadget.PowerMeter import *
 from PyPowerGadget.settings import *
 import time
 
-power_meter = PowerMeter(project_name="Test mesure power")
+power_meter = PowerMeter(project_name="Test measure power")
 
 
-@power_meter.mesure_power(algorithm="classic python", package="None")
+@power_meter.measure_power(algorithm="classic python", package="None")
 def say_whee():
 
     # for i in range(11):
@@ -31,7 +31,7 @@ def say_whee():
 #     "Platform": "darwin",
 #     "User ID": "martinchauvin",
 #     "ISO": "FR",
-#     "Project name": "Test mesure power",
+#     "Project name": "Test measure power",
 #     "Total Elapsed CPU Time (sec)": 12.108349,
 #     "Total Elapsed GPU Time (sec)": 0,
 #     "Cumulative Package Energy (mWh)": 9.496732,
@@ -68,11 +68,11 @@ if __name__ == "__main__":
     print(say_whee())
 
     # a notebook like program
-    power_meter.start_mesure(algorithm="classic python", package="None")
+    power_meter.start_measure(algorithm="classic python", package="None")
     time.sleep(11)
     print("Whee!")
     # raise "test"
-    power_meter.stop_mesure()
+    power_meter.stop_measure()
 
     with power_meter(algorithm="classic python", package="None") as p_m:
         time.sleep(11)
