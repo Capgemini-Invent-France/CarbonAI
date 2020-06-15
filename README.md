@@ -27,29 +27,84 @@ By using it, you agree to the collection of :
 * the information you provided
 
 ## Usage
-
 *On linux you need to run python as root : `sudo python3 main.py`*
 
+There are several ways to use this package depending on how you develop.
+You just have to import the `PowerMeter` object, initialise it and call the function you want to monitor.
+Please insert a description of the running function, the dataset, the model, any info would be useful.
+
+### Function decorator
 To monitor the power consumption of a function, follow this example:
 ```python
 from PyPowerGadget import PowerMeter
 power_meter = PowerMeter(project_name="MNIST classifier")
-<result_of_your_function> = power_meter.mesure_power(
-    <your_function>,
-    package="sklearn",
-    algorithm="RandomForestClassifier",
-    data_type="tabular",
-    data_shape=<your_data>.shape
-    algorithm_params="n_estimators=300, max_depth=15",
-    comments="Classifier trained on the MNIST dataset, 3rd test"
-)(<your_function_arguments>)
+
+@power_meter.mesure_power(
+  package="sklearn",
+  algorithm="RandomForestClassifier",
+  data_type="tabular",
+  data_shape=<your_data>.shape
+  algorithm_params="n_estimators=300, max_depth=15",
+  comments="Classifier trained on the MNIST dataset, 3rd test"
+)
+def my_func(arg1, arg2, ...):
+  # Do something
+```
+
+### Jupyter notebook magic function
+To monitor the power consumption of a jupyter notebook cell, follow this example:
+```jupyter
+%load_ext PyPowerGadget.MagicPowerMeter
+from PyPowerGadget import PowerMeter
+power_meter = PowerMeter(project_name="MNIST classifier")
+
+-----------------
+
+%%mesure_power power_meter "package_name_used" "algorithm" --data_type "tabular" --data_shape "your_data_shape" --algorithm_params "n_estimators=300, max_depth=15" --comments "Classifier trained on the MNIST dataset, 3rd test"
+Do somthing
+
+```
+
+### Inline code
+To monitor the power consumption of some specific inline code, there are 2 ways:
+
+#### Using the with statement
+This is the prefered method as it will stop the process even if you get an error
+```python
+from PyPowerGadget import PowerMeter
+power_meter = PowerMeter(project_name="MNIST classifier")
+
+with power_meter(
+  package="sklearn",
+  algorithm="RandomForestClassifier",
+  data_type="tabular",
+  data_shape=<your_data>.shape
+  algorithm_params="n_estimators=300, max_depth=15",
+  comments="Classifier trained on the MNIST dataset, 3rd test"
+):
+  # Do something
+```
+
+#### Using the *start and stop method*
+This method won't stop the process unless told to do so
+```python
+from PyPowerGadget import PowerMeter
+power_meter = PowerMeter(project_name="MNIST classifier")
+
+power_meter.start_mesure(
+  package="sklearn",
+  algorithm="RandomForestClassifier",
+  data_type="tabular",
+  data_shape=<your_data>.shape
+  algorithm_params="n_estimators=300, max_depth=15",
+  comments="Classifier trained on the MNIST dataset, 3rd test"
+)
+# Do something
+power_meter.stop_mesure()
 ```
 
 
-You just have to import the `PowerMeter` object, initialise it and call the function you want to monitor.
-Please insert a description of the running function, the dataset, the model, any info would be useful.
-
-Energy usage, CO2 emissions and  other useful stats are logged in a file. You can access this file with the following function:
+<!-- Energy usage, CO2 emissions and  other useful stats are logged in a file. You can access this file with the following function:
 ```python
 import PyPowerGadget
 logged_data = PyPowerGadget.get_logged_data()
@@ -62,7 +117,7 @@ logged_data
 |2020-03-04 17:53:36.289029|martinchauvin|FR |France |darwin  |green_ai    |10.087129                   |0                           |23.081851            |10.375519                 |0                          |2.296532                    |1.3|0.0013     |Sklearn   |MLPClassifier|hidden_layers=(200;)|tabular  |(7000, 64)   |Toy training on the MNIST dataset |
 |2020-03-04 17:54:29.610171|martinchauvin|FR |France |darwin  |green_ai    |10.09472         |0                           |27.315876            |13.769294                 |0                          |2.562374                    |1.3|0.001679385|Pytorch   |ResNet121| layers=(Conv(3x3), BatchNorm,...)                     |images  |(7000, 64)  |3rd training|
 
-</div>
+</div> -->
 
 ### Documentation
 
