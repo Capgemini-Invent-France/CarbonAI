@@ -68,7 +68,7 @@ Do somthing
 ### Inline code
 To monitor the power consumption of some specific inline code, there are 2 ways:
 
-#### Using the with statement
+**Using the with statement**
 This is the prefered method as it will stop the process even if you get an error
 ```python
 from PyPowerGadget import PowerMeter
@@ -85,7 +85,7 @@ with power_meter(
   # Do something
 ```
 
-#### Using the *start and stop method*
+**Using the *start and stop method***
 This method won't stop the process unless told to do so
 ```python
 from PyPowerGadget import PowerMeter
