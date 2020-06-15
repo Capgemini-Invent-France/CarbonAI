@@ -10,6 +10,7 @@ import os
 import sys
 import warnings
 import requests
+import pandas as pd
 
 from PyPowerGadget.PowerGadget import *
 from PyPowerGadget.NvidiaPower import *
@@ -22,6 +23,8 @@ class PowerMeter:
 
     Parameters
     ----------
+    project_name (optional) : str
+        Name of the project you are working on (default is folder_name)
     cpu_power_log_path (optional) : str
         The path to the tool "PowerLog"
     get_country (optional) : bool
@@ -31,7 +34,7 @@ class PowerMeter:
     """
 
     def __init__(
-        self, cpu_power_log_path="", get_country=True, user_name="", project_name=""
+        self, project_name="", cpu_power_log_path="", get_country=True, user_name=""
     ):
         self.platform = sys.platform
         if self.platform == MAC_PLATFORM:
@@ -70,29 +73,30 @@ class PowerMeter:
         self.location_name = self.__get_location_name()
 
         self.logging_filename = PACKAGE_PATH / LOGGING_FILE
-        self.logging_columns = [
-            "Datetime",
-            "User ID",
-            COUNTRY_CODE_COLUMN,
-            COUNTRY_NAME_COLUMN,
-            "Platform",
-            "Project name",
-            TOTAL_CPU_TIME,
-            TOTAL_GPU_TIME,
-            TOTAL_ENERGY_ALL,
-            TOTAL_ENERGY_CPU,
-            TOTAL_ENERGY_GPU,
-            TOTAL_ENERGY_MEMORY,
-            "PUE",
-            "CO2 emitted (gCO2e)",
-            "Package",
-            "Algorithm",
-            "Algorithm's parameters",
-            "Data type",
-            "Data shape",
-            "Comment",
-        ]
-        self.__init_logging_file()
+        # self.logging_columns = [
+        #     "Datetime",
+        #     "User ID",
+        #     COUNTRY_CODE_COLUMN,
+        #     COUNTRY_NAME_COLUMN,
+        #     "Platform",
+        #     "Project name",
+        #     TOTAL_CPU_TIME,
+        #     TOTAL_GPU_TIME,
+        #     TOTAL_ENERGY_ALL,
+        #     TOTAL_ENERGY_CPU,
+        #     TOTAL_ENERGY_GPU,
+        #     TOTAL_ENERGY_MEMORY,
+        #     "PUE",
+        #     "CO2 emitted (gCO2e)",
+        #     "Package",
+        #     "Algorithm",
+        #     "Algorithm's parameters",
+        #     "Data type",
+        #     "Data shape",
+        #     "Comment",
+        # ]
+        self.endpoint = API_ENDPOINT
+        # self.__init_logging_file()
 
     def __load_energy_mix_db(self):
         return pd.read_csv(PACKAGE_PATH / ENERGY_MIX_DATABASE, encoding="utf-8")
@@ -157,23 +161,20 @@ class PowerMeter:
 
         return co2_emitted
 
-    def mesure_power(
+    def measure_power(
         self,
-        func,
         package,
         algorithm,
-        data_type="tabular",
+        data_type="",
         data_shape="",
         algorithm_params="",
         comments="",
     ):
         """
-        Mesure the power consumption of a given function
+        A decorator to measure the power consumption of a given function
 
         Parameters
         ----------
-        func : python function
-            The python function that will be monitored
         package : str
             A string describing the package used by this function (e.g. sklearn, Pytorch, ...)
         algorithm : str
@@ -189,33 +190,136 @@ class PowerMeter:
 
         Returns
         -------
-        The result of the execution the provided function
         """
         if len(algorithm) == 0 or len(package) == 0:
             raise SyntaxError(
                 "Please input a description for the function you are trying to monitor. Pass in the algorithm and the package you are trying to monitor"
             )
 
-        def wrapper(*args, **kwargs):
-            self.gpu_power.start_mesure()
-            try:
-                results = self.power_gadget.wrapper(func, *args, **kwargs)
-            finally:
-                self.gpu_power.stop_mesure()
-                self.gpu_power.parse_power_log()
-            self.__log_records(
-                self.power_gadget.recorded_power,
-                self.gpu_power.recorded_power,
-                algorithm=algorithm,
-                package=package,
-                data_type=data_type,
-                data_shape=data_shape,
-                algorithm_params=algorithm_params,
-                comments=comments,
-            )
-            return results
+        def decorator(func):
+            def wrapper(*args, **kwargs):
+                self.start_measure(
+                    package,
+                    algorithm,
+                    data_type=data_type,
+                    data_shape=data_shape,
+                    algorithm_params=algorithm_params,
+                    comments=comments,
+                )
+                try:
+                    results = func(*args, **kwargs)
+                finally:
+                    self.stop_measure()
+                return results
 
-        return wrapper
+            return wrapper
+
+        return decorator
+
+    def __set_used_arguments(
+        self,
+        package,
+        algorithm,
+        data_type="",
+        data_shape="",
+        algorithm_params="",
+        comments="",
+    ):
+        self.used_package = package if package else ""
+        self.used_algorithm = algorithm if algorithm else ""
+        self.used_data_type = data_type if data_type else ""
+        self.used_data_shape = data_shape if data_shape else ""
+        self.used_algorithm_params = algorithm_params if algorithm_params else ""
+        self.used_comments = comments if comments else ""
+
+    def __call__(
+        self,
+        package,
+        algorithm,
+        data_type="",
+        data_shape="",
+        algorithm_params="",
+        comments="",
+    ):
+        self.__set_used_arguments(
+            package,
+            algorithm,
+            data_type=data_type,
+            data_shape=data_shape,
+            algorithm_params=algorithm_params,
+            comments=comments,
+        )
+        return self
+
+    def __enter__(self,):
+        self.start_measure(
+            self.used_package,
+            self.used_algorithm,
+            data_type=self.used_data_type,
+            data_shape=self.used_data_shape,
+            algorithm_params=self.used_algorithm_params,
+            comments=self.used_comments,
+        )
+
+    def __exit__(self, type, value, traceback):
+        self.stop_measure()
+
+    def start_measure(
+        self,
+        package,
+        algorithm,
+        data_type="",
+        data_shape="",
+        algorithm_params="",
+        comments="",
+    ):
+        """
+        Start mesuring the power consumption of a given  sample of code
+
+        Parameters
+        ----------
+        package : str
+            A string describing the package used by this function (e.g. sklearn, Pytorch, ...)
+        algorithm : str
+            A string describing the algorithm used in the function monitored (e.g. RandomForestClassifier, ResNet121, ...)
+        data_type : str (among : tabular, image, text, time series, other)
+            A string describing the type of data used for training
+        data_shape : str or tuple
+            A string or tuple describing the quantity of data used
+        algorithm_params (optional) : str
+            A string describing the parameters used by the algorithm
+        comments (optional) : str
+            A string to provide any useful information
+
+        Returns
+        -------
+        None
+        """
+        self.gpu_power.start_measure()
+        self.power_gadget.start_measure()
+        self.__set_used_arguments(
+            package,
+            algorithm,
+            data_type=data_type,
+            data_shape=data_shape,
+            algorithm_params=algorithm_params,
+            comments=comments,
+        )
+
+    def stop_measure(self):
+        self.power_gadget.stop_measure()
+        self.gpu_power.stop_measure()
+        self.gpu_power.parse_power_log()
+        self.__log_records(
+            self.power_gadget.recorded_power,
+            self.gpu_power.recorded_power,
+            algorithm=self.used_algorithm,
+            package=self.used_package,
+            data_type=self.used_data_type,
+            data_shape=self.used_data_shape,
+            algorithm_params=self.used_algorithm_params,
+            comments=self.used_comments,
+        )
 
     def __init_logging_file(self):
         if not self.logging_filename.exists():
@@ -232,13 +336,19 @@ class PowerMeter:
     def __written_columns(self):
         return ",".join(self.logging_columns)
 
+    def __record_data_to_server(self, payload):
+        headers = {"Content-Type": "application/json"}
+        data = json.dumps(payload)
+        response = requests.request("POST", self.endpoint, headers=headers, data=data)
+        return response
+
     def __log_records(
         self,
         cpu_recorded_power,
         gpu_recorded_power,
         algorithm="",
         package="",
-        data_type="tabular",
+        data_type="",
         data_shape="",
         algorithm_params="",
         comments="",
@@ -246,28 +356,53 @@ class PowerMeter:
         co2_emitted = self.__aggregate_power(
             self.power_gadget.recorded_power, self.gpu_power.recorded_power
         )
-        info = [
-            str(datetime.datetime.now()),
-            self.user,
-            self.location,
-            self.location_name,
-            self.platform,
-            self.project,
-            str(cpu_recorded_power[TOTAL_CPU_TIME]),
-            str(gpu_recorded_power[TOTAL_GPU_TIME]),
-            str(cpu_recorded_power[TOTAL_ENERGY_ALL]),
-            str(cpu_recorded_power[TOTAL_ENERGY_CPU]),
-            str(gpu_recorded_power[TOTAL_ENERGY_GPU]),
-            str(cpu_recorded_power[TOTAL_ENERGY_MEMORY]),
-            str(self.pue),
-            str(co2_emitted),
-            package.replace(",", ";"),
-            algorithm.replace(",", ";"),
-            algorithm_params.replace(",", ";"),
-            data_type.replace(",", ";"),
-            str(data_shape).replace(",", ";"),
-            comments.replace(",", ";"),
-        ]
-        self.logging_filename.open("ab").write(
-            ("\n" + (",".join(info))).encode("utf-8")
-        )
+        payload = {
+            "Datetime": str(datetime.datetime.now()),
+            "Country": self.location_name,
+            "Platform": self.platform,
+            "User ID": self.user,
+            "ISO": self.location,
+            "Project name": self.project,
+            "Total Elapsed CPU Time (sec)": int(cpu_recorded_power[TOTAL_CPU_TIME]),
+            "Total Elapsed GPU Time (sec)": int(gpu_recorded_power[TOTAL_GPU_TIME]),
+            "Cumulative Package Energy (mWh)": int(
+                cpu_recorded_power[TOTAL_ENERGY_ALL]
+            ),
+            "Cumulative IA Energy (mWh)": int(cpu_recorded_power[TOTAL_ENERGY_CPU]),
+            "Cumulative GPU Energy (mWh)": int(gpu_recorded_power[TOTAL_ENERGY_GPU]),
+            "Cumulative DRAM Energy (mWh)": int(
+                cpu_recorded_power[TOTAL_ENERGY_MEMORY]
+            ),
+            "PUE": self.pue,
+            "CO2 emitted (gCO2e)": co2_emitted,
+            "Package": package,
+            "Algorithm": algorithm,
+            "Algorithm's parameters": algorithm_params,
+            "Data type": data_type,
+            "Data shape": data_shape,
+            "Comment": comments,
+        }
+        response = self.__record_data_to_server(payload)
+        if response.status_code >= 400:
+            print(
+                "We couldn't upload the recorded data to the server, we are going to record it for a later upload"
+            )
+            # can't upload we'll record the data
+            data = pd.DataFrame(payload, index=[0])
+            if self.logging_filename.exists():
+                data.to_csv(self.logging_filename, mode="a", index=False, header=False)
+            else:
+                data.to_csv(self.logging_filename, index=False)
+
+        if response.status_code == 200:
+            # we successfully uploaded, check if there are other locally recorded data
+            if self.logging_filename.exists():
+                data = pd.read_csv(self.logging_filename, index_col=None)
+                payloads = data.to_dict(orient="records")
+                for i, payload in enumerate(payloads):
+                    res = self.__record_data_to_server(payload)
+                    if res.status_code != 200:
+                        data.iloc[i:].to_csv(self.logging_filename, index=False)
+                        break
+                else:
+                    self.logging_filename.unlink()

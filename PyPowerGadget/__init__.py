@@ -1,10 +1,12 @@
 """
-    This package allows you to mesure the power drained by your computer or server during the execution of a function
+    This package allows you to measure the power drained by your computer or server during the execution of a function
 """
 
-__version__ = "0.0.4"
+__version__ = "0.0.5"
 
 from PyPowerGadget.PowerMeter import PowerMeter
-from PyPowerGadget.functions import get_logged_data, save_logged_data
+from PyPowerGadget.functions import get_logged_data
+from PyPowerGadget.MagicPowerMeter import MagicPowerMeter
 
-__all__ = ["PowerMeter", "get_logged_data", "save_logged_data"]
+
+__all__ = ["PowerMeter", "MagicPowerMeter", "get_logged_data"]

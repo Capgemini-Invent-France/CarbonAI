@@ -28,7 +28,6 @@ COUNTRY_NAME_COLUMN = "Country"
 MAC_PLATFORM = "darwin"
 WIN_PLATFORM = "win32"
 LINUX_PLATFORMS = ["linux", "linux2"]
-
 MAC_INTELPOWERLOG_FILENAME = "intelPowerLog.csv"
 WIN_INTELPOWERLOG_FILENAME = "PwrData_*.csv"
 NVIDIAPOWERLOG_FILENAME = "nvidiaPowerLog.csv"
@@ -41,3 +40,7 @@ TOTAL_ENERGY_ALL = "Cumulative Package Energy (mWh)"
 TOTAL_ENERGY_CPU = "Cumulative IA Energy (mWh)"
 TOTAL_ENERGY_GPU = "Cumulative GPU Energy (mWh)"
 TOTAL_ENERGY_MEMORY = "Cumulative DRAM Energy (mWh)"
+
+API_ENDPOINT = (
+    "https://50esc1hzja.execute-api.eu-west-3.amazonaws.com/green-ai-db-handling"
+)

@@ -5,8 +5,8 @@ build/
 dist/
 *.egg*
 *powerLog*.csv
-*power_logs.csv
+*power_logs*.csv
 .DS_STORE
 PyPowerGadget/requirements.txt
-*test_*.py
+PyPowerGadget/test*
 *.zip

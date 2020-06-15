@@ -48,6 +48,7 @@ import struct
 import time
 import multiprocessing
 from multiprocessing import Process, Manager
+import threading
 
 
 class PowerGadget:
@@ -57,6 +58,7 @@ class PowerGadget:
     def parse_power_log(self, log_file):
         content = log_file.read_text()
         if not "Total Elapsed Time" in content:
+            print("The log file does not seem to written yet, we'll wait 2 secs.")
             time.sleep(2)
             content = log_file.read_text()
         results = {
@@ -104,6 +106,7 @@ class PowerGadgetMac(PowerGadget):
                 + ", try passing the path to the powerLog tool to the powerMeter."
             )
         self.log_file = self.__get_log_file()
+        self.thread = None
 
     def __get_log_file(self):
         return PACKAGE_PATH / MAC_INTELPOWERLOG_FILENAME
@@ -124,43 +127,30 @@ class PowerGadgetMac(PowerGadget):
         consumption = self.parse_power_log(self.log_file)
         return consumption
 
-    def extract_power(self, list_of_power, interval=1):
-        list_of_power.append(self.__get_power_consumption(duration=interval))
-        while True:
-            list_of_power.append(self.__get_power_consumption(duration=interval))
+    def extract_power(self, interval=1):
+        self.power_draws.append(self.__get_power_consumption(duration=interval))
+        while getattr(self.thread, "do_run", True):
+            self.power_draws.append(self.__get_power_consumption(duration=interval))
+        self.power_draws.append(self.__get_power_consumption(duration=interval))
 
     def execute_function(self, fun, fun_args, results):
         results["results"] = fun(*fun_args[0], **fun_args[1])
 
-    def wrapper(self, func, *args, time_interval=1, **kwargs):
-        multiprocessing.set_start_method("spawn", force=True)
-        with Manager() as manager:
-            power_draws = manager.list()
-            return_dict = manager.dict()
-            return_dict["results"] = None
-            func_process = Process(
-                target=self.execute_function, args=(func, (args, kwargs), return_dict)
-            )
-            power_process = Process(
-                target=self.extract_power, args=(power_draws, time_interval)
-            )
-            print("starting CPU power monitoring ...")
 
-            power_process.start()
-            func_process.start()
+    def start_measure(self):
+        print("starting CPU power monitoring ...")
+        if self.thread and self.thread.is_alive():
+            self.stop_measure()
+        self.power_draws = []
+        self.thread = threading.Thread(target=self.extract_power, args=())
+        self.thread.start()
 
-            func_process.join()
-            power_process.terminate()
-            power_process.join()
-            print("stoping CPU power monitoring ...")
-
-            power_draws_list = list(power_draws)
-            time.sleep(2)
-            power_draws_list.append(self.parse_power_log(self.log_file))
-            results = return_dict["results"]
-        self.recorded_power = pd.DataFrame.from_records(power_draws_list)
+    def stop_measure(self):
+        print("stoping CPU power monitoring ...")
+        self.thread.do_run = False
+        self.thread.join()
+        self.recorded_power = pd.DataFrame.from_records(self.power_draws)
         self.recorded_power = self.recorded_power.sum(axis=0)
-        return results
 
 
 class PowerGadgetWin(PowerGadget):
@@ -177,7 +167,8 @@ class PowerGadgetWin(PowerGadget):
                 + ", try passing the path to the powerLog tool to the powerMeter."
             )
 
-    def wrapper(self, func, *args, time_interval=1, **kwargs):
+
+    def start_measure(self, time_interval=1):
         print("starting CPU power monitoring ...")
         out = subprocess.Popen(
             '"' + str(self.power_log_path) + '" /min',
@@ -189,7 +180,8 @@ class PowerGadgetWin(PowerGadget):
         time.sleep(1)
         print("start logging")
         out = subprocess.run('"' + str(self.power_log_path) + '" -start', shell=True)
-        results = func(*args, **kwargs)
+
+    def stop_measure(self):
         print("stoping CPU power monitoring ...")
         out = subprocess.run('"' + str(self.power_log_path) + '" -stop', shell=True)
         out = subprocess.run(
@@ -200,7 +192,6 @@ class PowerGadgetWin(PowerGadget):
         log_file = self.__get_log_file()
         self.recorded_power = self.parse_power_log(log_file)
         os.remove(log_file)
-        return results
 
     def __get_log_file(self):
         file_names = glob.glob(str(HOME_DIR / "Documents" / WIN_INTELPOWERLOG_FILENAME))
@@ -243,30 +234,57 @@ class PowerGadgetLinuxRAPL(PowerGadgetLinux):
                     break
         return dram_id_list
 
-    def wrapper(self, func, *args, time_interval=1, **kwargs):
-        self.recorded_power = {}
-        print("starting CPU power monitoring ...")
-        cpu_powers = []
-        dram_powers = []
-        t0 = time.time()
-        for cpu_id in self.cpu_ids:
-            cpu_powers.append(self.__get_cpu_energy(cpu_id))
-        for cpu_id, dram_id in self.dram_ids:
-            dram_powers.append(self.__get_dram_energy(cpu_id, dram_id))
-
-        results = func(*args, **kwargs)
-
-        print("stoping CPU power monitoring ...")
+    def collect_power_usage(self):
         for i, cpu_id in enumerate(self.cpu_ids):
-            cpu_powers[i] = self.__get_cpu_energy(cpu_id) - cpu_powers[i]
+            self.cpu_powers[i] = self.__get_cpu_energy(cpu_id) - self.cpu_powers[i]
         for i, (cpu_id, dram_id) in enumerate(self.dram_ids):
-            dram_powers[i] = self.__get_dram_energy(cpu_id, dram_id) -dram_powers[i]
-        self.recorded_power[TOTAL_ENERGY_CPU] = sum(cpu_powers) / 3600 /1000
-        self.recorded_power[TOTAL_ENERGY_MEMORY] = sum(dram_powers) / 3600 /1000
-        t1 = time.time()
-        self.recorded_power[TOTAL_CPU_TIME] = t1 - t0
+            self.dram_powers[i] = self.__get_dram_energy(cpu_id, dram_id) - self.dram_powers[i]
+
+    def start_measure(self):
+        print("starting CPU power monitoring ...")
+        self.start_time = time.time()
+        self.power_draws = []
+        self.recorded_power = {}
+        self.cpu_powers = []
+        self.dram_powers = []
+        for cpu_id in self.cpu_ids:
+            self.cpu_powers.append(self.__get_cpu_energy(cpu_id))
+        for cpu_id, dram_id in self.dram_ids:
+            self.dram_powers.append(self.__get_dram_energy(cpu_id, dram_id))
+
+    def stop_measure(self):
+        print("stoping CPU power monitoring ...")
+        self.collect_power_usage()
+        self.recorded_power[TOTAL_ENERGY_CPU] = sum(self.cpu_powers) / 3600 /1000
+        self.recorded_power[TOTAL_ENERGY_MEMORY] = sum(self.dram_powers) / 3600 /1000
+        end_time = time.time()
+        self.recorded_power[TOTAL_CPU_TIME] = end_time - self.start_time
         self.recorded_power[TOTAL_ENERGY_ALL] = None
-        return results
+
+    # def wrapper(self, func, *args, time_interval=1, **kwargs):
+    #     self.recorded_power = {}
+    #     print("starting CPU power monitoring ...")
+    #     cpu_powers = []
+    #     dram_powers = []
+    #     t0 = time.time()
+    #     for cpu_id in self.cpu_ids:
+    #         cpu_powers.append(self.__get_cpu_energy(cpu_id))
+    #     for cpu_id, dram_id in self.dram_ids:
+    #         dram_powers.append(self.__get_dram_energy(cpu_id, dram_id))
+    #
+    #     results = func(*args, **kwargs)
+    #
+    #     print("stoping CPU power monitoring ...")
+    #     for i, cpu_id in enumerate(self.cpu_ids):
+    #         cpu_powers[i] = self.__get_cpu_energy(cpu_id) - cpu_powers[i]
+    #     for i, (cpu_id, dram_id) in enumerate(self.dram_ids):
+    #         dram_powers[i] = self.__get_dram_energy(cpu_id, dram_id) -dram_powers[i]
+    #     self.recorded_power[TOTAL_ENERGY_CPU] = sum(cpu_powers) / 3600 /1000
+    #     self.recorded_power[TOTAL_ENERGY_MEMORY] = sum(dram_powers) / 3600 /1000
+    #     t1 = time.time()
+    #     self.recorded_power[TOTAL_CPU_TIME] = t1 - t0
+    #     self.recorded_power[TOTAL_ENERGY_ALL] = None
+    #     return results
 
     def __get_cpu_energy(self, cpu):
         cpu_energy_file = Path(READ_RAPL_PATH.format(cpu)) / RAPL_ENERGY_FILE
@@ -287,6 +305,7 @@ class PowerGadgetLinuxMSR(PowerGadgetLinux):
         # the user needs to execute as root
         if os.geteuid() != 0:
             raise PermissionError("You need to execute this program as root")
+        self.thread = None
 
         self.MSR_RAPL_POWER_UNIT = 0x606
         self.MSR_PKG_RAPL_POWER_LIMIT = 0x610
@@ -340,10 +359,10 @@ class PowerGadgetLinuxMSR(PowerGadgetLinux):
             prev_dram_energies[i] = current_dram_energy
         return cpu_power, dram_power, prev_cpu_energies, prev_dram_energies
 
-    def extract_power(self, power_draws, interval=1):
-        power_draws[TOTAL_CPU_TIME] = 0
-        power_draws[TOTAL_ENERGY_CPU] = 0
-        power_draws[TOTAL_ENERGY_MEMORY] = 0
+    def extract_power(self, interval=1):
+        self.power_draws[TOTAL_CPU_TIME] = 0
+        self.power_draws[TOTAL_ENERGY_CPU] = 0
+        self.power_draws[TOTAL_ENERGY_MEMORY] = 0
         prev_dram_energies = []
         prev_cpu_energies = []
         for cpu in self.cpu_ids:
@@ -358,40 +377,56 @@ class PowerGadgetLinuxMSR(PowerGadgetLinux):
             cpu_power, dram_power, prev_cpu_energies, prev_dram_energies = self.__get_computer_consomption(
                 prev_cpu_energies, prev_dram_energies
             )
-            power_draws[TOTAL_ENERGY_CPU] += cpu_power
-            power_draws[TOTAL_ENERGY_MEMORY] += dram_power
+            self.power_draws[TOTAL_ENERGY_CPU] += cpu_power
+            self.power_draws[TOTAL_ENERGY_MEMORY] += dram_power
             t1 = time.time()
-            power_draws[TOTAL_CPU_TIME] += t1 - t0
+            self.power_draws[TOTAL_CPU_TIME] += t1 - t0
             t0 = t1
 
-    def execute_function(self, fun, fun_args, results):
-        results["results"] = fun(*fun_args[0], **fun_args[1])
+    # def execute_function(self, fun, fun_args, results):
+    #     results["results"] = fun(*fun_args[0], **fun_args[1])
+    #
+    # def wrapper(self, func, *args, time_interval=1, **kwargs):
+    #     multiprocessing.set_start_method("spawn", force=True)
+    #     with Manager() as manager:
+    #         power_draws = manager.dict()
+    #         return_dict = manager.dict()
+    #         return_dict["results"] = None
+    #         func_process = Process(
+    #             target=self.execute_function, args=(func, (args, kwargs), return_dict)
+    #         )
+    #         power_process = Process(
+    #             target=self.extract_power, args=(power_draws, time_interval)
+    #         )
+    #         print("starting CPU power monitoring ...")
+    #
+    #         power_process.start()
+    #         func_process.start()
+    #
+    #         func_process.join()
+    #         power_process.terminate()
+    #         power_process.join()
+    #         print("stoping CPU power monitoring ...")
+    #         results = return_dict["results"]
+    #         self.recorded_power = dict(power_draws)
+    #         self.recorded_power[TOTAL_ENERGY_ALL] = None
+    #     return results
 
-    def wrapper(self, func, *args, time_interval=1, **kwargs):
-        multiprocessing.set_start_method("spawn", force=True)
-        with Manager() as manager:
-            power_draws = manager.dict()
-            return_dict = manager.dict()
-            return_dict["results"] = None
-            func_process = Process(
-                target=self.execute_function, args=(func, (args, kwargs), return_dict)
-            )
-            power_process = Process(
-                target=self.extract_power, args=(power_draws, time_interval)
-            )
-            print("starting CPU power monitoring ...")
+    def start_measure(self):
+        print("starting CPU power monitoring ...")
 
-            power_process.start()
-            func_process.start()
+        if self.thread and self.thread.is_alive():
+            self.stop_measure()
+        self.power_draws = []
+        self.thread = threading.Thread(target=self.extract_power, args=())
+        self.thread.start()
 
-            func_process.join()
-            power_process.terminate()
-            power_process.join()
-            print("stoping CPU power monitoring ...")
-            results = return_dict["results"]
-            self.recorded_power = dict(power_draws)
-            self.recorded_power[TOTAL_ENERGY_ALL] = None
-        return results
+    def stop_measure(self):
+        print("stoping CPU power monitoring ...")
+        self.thread.do_run = False
+        self.thread.join()
+        self.recorded_power = pd.DataFrame.from_records(self.power_draws)
+        self.recorded_power = self.recorded_power.sum(axis=0)
 
 
 if __name__ == "__main__":
