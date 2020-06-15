@@ -135,19 +135,6 @@ class PowerGadgetMac(PowerGadget):
     def execute_function(self, fun, fun_args, results):
         results["results"] = fun(*fun_args[0], **fun_args[1])
 
-    # def wrapper(self, func, *args, time_interval=1, **kwargs):
-    #     print("starting CPU power monitoring ...")
-    #     self.power_draws = []
-    #     self.thread = threading.Thread(target=self.extract_power, args=())
-    #     self.thread.start()
-    #     results = func(*args, **kwargs)
-    #     print("stoping CPU power monitoring ...")
-    #     self.thread.do_run = False
-    #     self.thread.join()
-    #     self.recorded_power = pd.DataFrame.from_records(self.power_draws)
-    #     self.recorded_power = self.recorded_power.sum(axis=0)
-    #
-    #     return results
 
     def start_measure(self):
         print("starting CPU power monitoring ...")
@@ -179,30 +166,6 @@ class PowerGadgetWin(PowerGadget):
                 + ", try passing the path to the powerLog tool to the powerMeter."
             )
 
-    # def wrapper(self, func, *args, time_interval=1, **kwargs):
-    #     print("starting CPU power monitoring ...")
-    #     out = subprocess.Popen(
-    #         '"' + str(self.power_log_path) + '" /min',
-    #         stdin=None,
-    #         stdout=None,
-    #         stderr=None,
-    #         shell=True,
-    #     )
-    #     time.sleep(1)
-    #     print("start logging")
-    #     out = subprocess.run('"' + str(self.power_log_path) + '" -start', shell=True)
-    #     results = func(*args, **kwargs)
-    #     print("stoping CPU power monitoring ...")
-    #     out = subprocess.run('"' + str(self.power_log_path) + '" -stop', shell=True)
-    #     out = subprocess.run(
-    #         'taskkill /IM "' + POWERLOG_TOOL_WIN + '"',
-    #         stdout=open(os.devnull, "wb"),
-    #         shell=True,
-    #     )
-    #     log_file = self.__get_log_file()
-    #     self.recorded_power = self.parse_power_log(log_file)
-    #     os.remove(log_file)
-    #     return results
 
     def start_measure(self, time_interval=1):
         print("starting CPU power monitoring ...")
