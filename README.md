@@ -27,7 +27,7 @@ By using it, you agree to the collection of :
 * the information you provided
 
 ## Usage
-*On linux you need to run python as root : `sudo python3 main.py`*
+*On linux you need to run python as root : `sudo python3 main.py` and sometimes you will also have to add other info `sudo PYTHONUSERBASE=/home/ec2-user/.local python3 main.py`*
 
 There are several ways to use this package depending on how you develop.
 You just have to import the `PowerMeter` object, initialise it and call the function you want to monitor.

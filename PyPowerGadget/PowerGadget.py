@@ -417,7 +417,7 @@ class PowerGadgetLinuxMSR(PowerGadgetLinux):
 
         if self.thread and self.thread.is_alive():
             self.stop_measure()
-        self.power_draws = []
+        self.power_draws = {}
         self.thread = threading.Thread(target=self.extract_power, args=())
         self.thread.start()
 
