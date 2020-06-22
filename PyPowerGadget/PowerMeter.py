@@ -311,8 +311,8 @@ class PowerMeter:
         self.gpu_power.stop_measure()
         self.gpu_power.parse_power_log()
         self.__log_records(
-            self.power_gadget.recorded_power,
-            self.gpu_power.recorded_power,
+            self.power_gadget.recorded_power,  # recorded_power must be a dict
+            self.gpu_power.recorded_power,  # recorded_power must be a dict
             algorithm=self.used_algorithm,
             package=self.used_package,
             data_type=self.used_data_type,
@@ -339,8 +339,13 @@ class PowerMeter:
     def __record_data_to_server(self, payload):
         headers = {"Content-Type": "application/json"}
         data = json.dumps(payload)
-        response = requests.request("POST", self.endpoint, headers=headers, data=data)
-        return response
+        try:
+            response = requests.request(
+                "POST", self.endpoint, headers=headers, data=data, timeout=1
+            )
+            return response.status_code
+        except requests.exceptions.Timeout:
+            return 408
 
     def __log_records(
         self,
@@ -382,8 +387,8 @@ class PowerMeter:
             "Data shape": data_shape,
             "Comment": comments,
         }
-        response = self.__record_data_to_server(payload)
-        if response.status_code >= 400:
+        response_status_code = self.__record_data_to_server(payload)
+        if response_status_code >= 400:
             print(
                 "We couldn't upload the recorded data to the server, we are going to record it for a later upload"
             )
@@ -394,14 +399,14 @@ class PowerMeter:
             else:
                 data.to_csv(self.logging_filename, index=False)
 
-        if response.status_code == 200:
+        if response_status_code == 200:
             # we successfully uploaded, check if there are other locally recorded data
             if self.logging_filename.exists():
                 data = pd.read_csv(self.logging_filename, index_col=None)
                 payloads = data.to_dict(orient="records")
                 for i, payload in enumerate(payloads):
-                    res = self.__record_data_to_server(payload)
-                    if res.status_code != 200:
+                    res_status_code = self.__record_data_to_server(payload)
+                    if res_status_code != 200:
                         data.iloc[i:].to_csv(self.logging_filename, index=False)
                         break
                 else:
