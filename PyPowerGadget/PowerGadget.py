@@ -1,37 +1,36 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-"""
-Introduction
-Intel(R) Power Gadget is a software-based power estimation tool enabled for 2nd Generation Intel(R) Core(TM) processors or later. It includes a application, driver, and libraries to monitor and estimate real-time processor package power information in watts using the energy counters in the processor
+#
+# Introduction
+# Intel(R) Power Gadget is a software-based power estimation tool enabled for 2nd Generation Intel(R) Core(TM) processors or later. It includes a application, driver, and libraries to monitor and estimate real-time processor package power information in watts using the energy counters in the processor
 
-Uninstall
-To uninstall Intel(R) Power Gadget and all its components, run Uninstaller.pkg.
+# Uninstall
+# To uninstall Intel(R) Power Gadget and all its components, run Uninstaller.pkg.
 
-PowerLog
-Intel(R) Power Gadget data can be logged from the command line (without running the GUI app) using PowerLog
-Usage:
-log power data to logfile for a period of time:
-	PowerLog [-resolution ] -duration  [-verbose] [-file ]
-start a command and log power data to logfile until the command finish
-	PowerLog [-resolution ] [-file ] [-verbose] -cmd
-Default for resolution = 50 ms
-Default for logfile = PowerLog.ipg
--cmd must be the last parameter
-API
-The Intel(R) Power Gadget API is a framework (IntelPowerGadget.framework) that provides a C interface for reading current estimated processor power, current processor frequency, base frequency, thermal design power (TDP), current temperature, maximum temperature, timestamps, and elapsed time. It also provides logging functionality.
+# PowerLog
+# Intel(R) Power Gadget data can be logged from the command line (without running the GUI app) using PowerLog
+# Usage:
+# log power data to logfile for a period of time:
+# 	PowerLog [-resolution ] -duration  [-verbose] [-file ]
+# start a command and log power data to logfile until the command finish
+# 	PowerLog [-resolution ] [-file ] [-verbose] -cmd
+# Default for resolution = 50 ms
+# Default for logfile = PowerLog.ipg
+# -cmd must be the last parameter
+# API
+# The Intel(R) Power Gadget API is a framework (IntelPowerGadget.framework) that provides a C interface for reading current estimated processor power, current processor frequency, base frequency, thermal design power (TDP), current temperature, maximum temperature, timestamps, and elapsed time. It also provides logging functionality.
 
-To use the API you'll need the Intel(R) Power Gadget for Mac driver and framework. These are included in the Intel(R) Power Gadget installer, or as a standalone API installer. The driver is installed to /Library/Extensions/EnergyDriver.kext, and the framework is installed to /Library/Frameworks/IntelPowerGadget.framework. See the API specification in /Library/Frameworks/IntelPowerGadget.framework/Headers/EnergyLib.h (C version) or /Library/Frameworks/IntelPowerGadget.framework/Headers/IntelPowerGadgetLib.h (C++ version)
+# To use the API you'll need the Intel(R) Power Gadget for Mac driver and framework. These are included in the Intel(R) Power Gadget installer, or as a standalone API installer. The driver is installed to /Library/Extensions/EnergyDriver.kext, and the framework is installed to /Library/Frameworks/IntelPowerGadget.framework. See the API specification in /Library/Frameworks/IntelPowerGadget.framework/Headers/EnergyLib.h (C version) or /Library/Frameworks/IntelPowerGadget.framework/Headers/IntelPowerGadgetLib.h (C++ version)
 
-To link with the Intel(R) Power Gadget API you simply need to include -framework IntelPowerGadget in your link command.
+# To link with the Intel(R) Power Gadget API you simply need to include -framework IntelPowerGadget in your link command.
 
-For more information, see Using the Intel Power Gadget API on Mac OS X.
+# For more information, see Using the Intel Power Gadget API on Mac OS X.
 
-Processor Energy (Total energy of the processor) = IA Energy + GT Energy (if applicable) + Others (not measured)
-IA Energy (Energy of the CPU/processor cores)
-GT Energy (Energy of the processor graphics) – If applicable , some processors for desktops and servers don’t have it or may have use discrete graphics
-"""
-
+# Processor Energy (Total energy of the processor) = IA Energy + GT Energy (if applicable) + Others (not measured)
+# IA Energy (Energy of the CPU/processor cores)
+# GT Energy (Energy of the processor graphics) – If applicable , some processors for desktops and servers don’t have it or may have use discrete graphics
+#
 
 import os
 import sys

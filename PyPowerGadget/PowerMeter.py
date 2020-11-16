@@ -38,10 +38,12 @@ class PowerMeter:
     ):
         self.platform = sys.platform
         if self.platform == MAC_PLATFORM:
-            self.power_gadget = PowerGadgetMac(power_log_path=cpu_power_log_path)
+            self.power_gadget = PowerGadgetMac(
+                power_log_path=cpu_power_log_path)
             self.pue = 1.3  # pue for my laptop
         elif self.platform == WIN_PLATFORM:
-            self.power_gadget = PowerGadgetWin(power_log_path=cpu_power_log_path)
+            self.power_gadget = PowerGadgetWin(
+                power_log_path=cpu_power_log_path)
             self.pue = 1.3  # pue for my laptop
         elif self.platform in LINUX_PLATFORMS:
             if POWERLOG_PATH_LINUX.exists():
@@ -241,6 +243,25 @@ class PowerMeter:
         algorithm_params="",
         comments="",
     ):
+        """
+        The function used by the with statement
+
+        Parameters
+        ----------
+        package : str
+            A string describing the package used by this function (e.g. sklearn, Pytorch, ...)
+        algorithm : str
+            A string describing the algorithm used in the function monitored (e.g. RandomForestClassifier, ResNet121, ...)
+        data_type : str (among : tabular, image, text, time series, other)
+            A string describing the type of data used for training
+        data_shape : str or tuple
+            A string or tuple describing the quantity of data used
+        algorithm_params (optional) : str
+            A string describing the parameters used by the algorithm
+        comments (optional) : str
+            A string to provide any useful information
+
+        """
         self.__set_used_arguments(
             package,
             algorithm,
@@ -274,7 +295,7 @@ class PowerMeter:
         comments="",
     ):
         """
-        Start mesuring the power consumption of a given  sample of code
+        Starts mesuring the power consumption of a given sample of code
 
         Parameters
         ----------
@@ -291,9 +312,6 @@ class PowerMeter:
         comments (optional) : str
             A string to provide any useful information
 
-        Returns
-        -------
-        None
         """
         self.gpu_power.start_measure()
         self.power_gadget.start_measure()
@@ -307,6 +325,10 @@ class PowerMeter:
         )
 
     def stop_measure(self):
+        """
+        Stops the measure started with start_measure
+
+        """
         self.power_gadget.stop_measure()
         self.gpu_power.stop_measure()
         self.gpu_power.parse_power_log()
@@ -395,7 +417,8 @@ class PowerMeter:
             # can't upload we'll record the data
             data = pd.DataFrame(payload, index=[0])
             if self.logging_filename.exists():
-                data.to_csv(self.logging_filename, mode="a", index=False, header=False)
+                data.to_csv(self.logging_filename, mode="a",
+                            index=False, header=False)
             else:
                 data.to_csv(self.logging_filename, index=False)
 
@@ -407,7 +430,8 @@ class PowerMeter:
                 for i, payload in enumerate(payloads):
                     res_status_code = self.__record_data_to_server(payload)
                     if res_status_code != 200:
-                        data.iloc[i:].to_csv(self.logging_filename, index=False)
+                        data.iloc[i:].to_csv(
+                            self.logging_filename, index=False)
                         break
                 else:
                     self.logging_filename.unlink()
