@@ -3,6 +3,7 @@ image: python:3.7-alpine
 pages:
   stage: deploy
   script:
+  - apk update && apk add make
   - pip install -U sphinx sphinx-rtd-theme
   - mkdir public
   - cd docs
