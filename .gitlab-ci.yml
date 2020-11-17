@@ -5,7 +5,7 @@ pages:
   script:
   - apk update
   - apk add make automake gcc g++ subversion python3-dev
-  - pip install -U sphinx sphinx-rtd-theme pandas
+  - pip install -U sphinx sphinx-rtd-theme pandas IPython
   - sphinx-build -b html docs/source public
 
   artifacts:
