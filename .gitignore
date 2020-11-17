@@ -10,3 +10,4 @@ dist/
 PyPowerGadget/requirements.txt
 PyPowerGadget/test*
 *.zip
+public

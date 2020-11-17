@@ -4,9 +4,11 @@ pages:
   stage: deploy
   script:
   - pip install -U sphinx sphinx-rtd-theme
-  - sphinx-build -b html -a docs/source public
-  - ls .
-  - ls PyPowerGadget
+  - pip install -e .
+  - mkdir public
+  - cd docs
+  - make html
+  - cp -r build/html/* ../public
   artifacts:
     paths:
     - public
