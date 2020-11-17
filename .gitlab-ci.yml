@@ -3,6 +3,8 @@ image: python:3.7-alpine
 pages:
   stage: deploy
   script:
+  - RUN apk update
+  - RUN apk add make automake gcc g++ subversion python3-dev
   - pip install -U sphinx sphinx-rtd-theme pandas
   - sphinx-build -b html docs/source public
 
