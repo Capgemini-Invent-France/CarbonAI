@@ -5,6 +5,8 @@ pages:
   script:
   - pip install -U sphinx sphinx-rtd-theme
   - sphinx-build -b html -a docs/source public
+  - ls .
+  - ls PyPowerGadget
   artifacts:
     paths:
     - public
