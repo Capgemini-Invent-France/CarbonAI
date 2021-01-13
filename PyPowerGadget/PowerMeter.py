@@ -4,6 +4,7 @@
 __all__ = ["PowerMeter"]
 
 from pathlib import Path
+import logging
 import json
 import datetime
 import getpass
@@ -17,6 +18,8 @@ from PyPowerGadget.PowerGadget import *
 from PyPowerGadget.NvidiaPower import *
 from PyPowerGadget.settings import *
 
+
+LOGGER = logging.getLogger(__name__)
 
 class PowerMeter:
 
@@ -34,10 +37,13 @@ class PowerMeter:
         The name of the user using the tool (for logging purpose)
     filepath (optional) : str
         Path of the file where all the green ai logs are written
+    api_endpoint (optional):
+        Endpoint of the API
     """
 
     def __init__(
-        self, project_name="", cpu_power_log_path="", get_country=True, user_name="", filepath=None
+        self, project_name="", cpu_power_log_path="", get_country=True, user_name="", filepath=None,
+        api_endpoint = None
     ):
         self.platform = sys.platform
         if self.platform == MAC_PLATFORM:
@@ -78,11 +84,20 @@ class PowerMeter:
         self.location_name = self.__get_location_name()
 
         if not filepath:
-            print("No current filepath")
+            LOGGER.info("No current filepath")
             self.filepath = Path.cwd() / "emissions.csv"
         else:
-            print("filepath ok then")
+            LOGGER.info("filepath ok then")
             self.filepath = filepath
+
+
+        if api_endpoint:
+            LOGGER.info("No current api endpoint")
+            self.api_endpoint = api_endpoint
+        else:
+            LOGGER.info("api endpoint ok then")
+            self.api_endpoint = ""
+
 
         self.logging_filename = PACKAGE_PATH / LOGGING_FILE
         # self.logging_columns = [
@@ -107,7 +122,7 @@ class PowerMeter:
         #     "Data shape",
         #     "Comment",
         # ]
-        self.endpoint = API_ENDPOINT
+        # self.endpoint = API_ENDPOINT
         # self.__init_logging_file()
 
     def __load_energy_mix_db(self):
@@ -158,7 +173,7 @@ class PowerMeter:
         return cuda_available
 
     def __aggregate_power(self, cpu_recorded_power, gpu_recorded_power):
-        # print(pd.concat([cpu_recorded_power, gpu_recorded_power]))
+        # LOGGER.info(pd.concat([cpu_recorded_power, gpu_recorded_power]))
 
         used_energy = self.pue * (
             cpu_recorded_power[TOTAL_ENERGY_CPU]
@@ -166,7 +181,7 @@ class PowerMeter:
             + gpu_recorded_power[TOTAL_ENERGY_GPU]
         )  # mWh
         co2_emitted = used_energy * self.energy_mix * 1e-3
-        print(
+        LOGGER.info(
             "This process emitted %.3fg of CO2 (using the energy mix of %s)"
             % (co2_emitted, self.location_name.encode("utf-8"))
         )
@@ -373,7 +388,7 @@ class PowerMeter:
         data = json.dumps(payload)
         try:
             response = requests.request(
-                "POST", self.endpoint, headers=headers, data=data, timeout=1
+                "POST", self.api_endpoint, headers=headers, data=data, timeout=1
             )
             return response.status_code
         except requests.exceptions.Timeout:
@@ -389,7 +404,7 @@ class PowerMeter:
                 data.to_csv(self.filepath, index=False)
             return True
         except:
-            print("* error during the writing process *")
+            LOGGER.error("* error during the writing process *")
             return False
 
     def __log_records(
@@ -432,12 +447,12 @@ class PowerMeter:
             "Data shape": data_shape,
             "Comment": comments,
         }
-        print("* add in a local csv*")
+        LOGGER.warn("* add in a local csv *")
         written = self.__record_data_to_file(payload)
-        print("* written is ", written, " *")
+        LOGGER.warn(f"* written is {written} *")
         response_status_code = self.__record_data_to_server(payload)
         if response_status_code >= 400:
-            print(
+            LOGGER.warn(
                 "We couldn't upload the recorded data to the server, we are going to record it for a later upload"
             )
             # can't upload we'll record the data
