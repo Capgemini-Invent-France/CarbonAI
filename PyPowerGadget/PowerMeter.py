@@ -41,25 +41,37 @@ class PowerMeter:
         Endpoint of the API
     """
 
+    LAPTOP_PUE = 1.3 # pue for my laptop
+    SERVER_PUE = 1.58 # pue for a server
+    DEFAULT_LOCATION = "France"
+
+    @classmethod
+    def from_config(cls, path):
+        """ """
+        with open(path) as file:
+            args = json.load(file)
+        return cls(**args)
+
+    
     def __init__(
-        self, project_name="", cpu_power_log_path="", get_country=True, user_name="", filepath=None,
-        api_endpoint = None
+        self, project_name="", program_name="", client_name="", cpu_power_log_path="", get_country=True, user_name="", filepath=None,
+        api_endpoint = None, location="", is_online=True
     ):
         self.platform = sys.platform
         if self.platform == MAC_PLATFORM:
             self.power_gadget = PowerGadgetMac(
                 power_log_path=cpu_power_log_path)
-            self.pue = 1.3  # pue for my laptop
+            self.pue = self.LAPTOP_PUE  # pue for my laptop
         elif self.platform == WIN_PLATFORM:
             self.power_gadget = PowerGadgetWin(
                 power_log_path=cpu_power_log_path)
-            self.pue = 1.3  # pue for my laptop
+            self.pue = self.LAPTOP_PUE  # pue for my laptop
         elif self.platform in LINUX_PLATFORMS:
             if POWERLOG_PATH_LINUX.exists():
                 self.power_gadget = PowerGadgetLinuxRAPL()
             else:
                 self.power_gadget = PowerGadgetLinuxMSR()
-            self.pue = 1.58  # pue for a server
+            self.pue = self.SERVER_PUE  # pue for a server
 
         self.cuda_available = self.__check_gpu()
         if self.cuda_available:
@@ -76,9 +88,28 @@ class PowerMeter:
         else:
             self.project = self.__extract_env_name()
 
+
+        if len(program_name) > 0:
+            self.program_name = program_name
+        else:
+            self.program_name = "--"
+
+
+        if len(client_name) > 0:
+            self.client_name = client_name
+        else:
+            self.client_name = "--"
+
         self.location = "US"
         if get_country:
-            self.location = self.__get_country()
+            if location:
+                self.location = location
+            elif is_online:
+                self.location = self.__get_country()
+            else:
+                self.location = self.DEFAULT_LOCATION
+
+        self.is_online = is_online
         self.energy_mix_db = self.__load_energy_mix_db()
         self.energy_mix = self.__get_energy_mix()  # kgCO2e/kWh
         self.location_name = self.__get_location_name()
@@ -390,6 +421,8 @@ class PowerMeter:
             response = requests.request(
                 "POST", self.api_endpoint, headers=headers, data=data, timeout=1
             )
+            print("reponse   ")
+            print(response.text)
             return response.status_code
         except requests.exceptions.Timeout:
             return 408
@@ -428,6 +461,8 @@ class PowerMeter:
             "User ID": self.user,
             "ISO": self.location,
             "Project name": self.project,
+            "Program name": self.program_name,
+            "Client name": self.client_name,
             "Total Elapsed CPU Time (sec)": int(cpu_recorded_power[TOTAL_CPU_TIME]),
             "Total Elapsed GPU Time (sec)": int(gpu_recorded_power[TOTAL_GPU_TIME]),
             "Cumulative Package Energy (mWh)": int(
@@ -450,29 +485,31 @@ class PowerMeter:
         LOGGER.warn("* add in a local csv *")
         written = self.__record_data_to_file(payload)
         LOGGER.warn(f"* written is {written} *")
-        response_status_code = self.__record_data_to_server(payload)
-        if response_status_code >= 400:
-            LOGGER.warn(
-                "We couldn't upload the recorded data to the server, we are going to record it for a later upload"
-            )
-            # can't upload we'll record the data
-            data = pd.DataFrame(payload, index=[0])
-            if self.logging_filename.exists():
-                data.to_csv(self.logging_filename, mode="a",
-                            index=False, header=False)
-            else:
-                data.to_csv(self.logging_filename, index=False)
 
-        if response_status_code == 200:
-            # we successfully uploaded, check if there are other locally recorded data
-            if self.logging_filename.exists():
-                data = pd.read_csv(self.logging_filename, index_col=None)
-                payloads = data.to_dict(orient="records")
-                for i, payload in enumerate(payloads):
-                    res_status_code = self.__record_data_to_server(payload)
-                    if res_status_code != 200:
-                        data.iloc[i:].to_csv(
-                            self.logging_filename, index=False)
-                        break
+        if self.is_online:
+            response_status_code = self.__record_data_to_server(payload)
+            if response_status_code >= 400:
+                LOGGER.warn(
+                    "We couldn't upload the recorded data to the server, we are going to record it for a later upload"
+                )
+                # can't upload we'll record the data
+                data = pd.DataFrame(payload, index=[0])
+                if self.logging_filename.exists():
+                    data.to_csv(self.logging_filename, mode="a",
+                                index=False, header=False)
                 else:
-                    self.logging_filename.unlink()
+                    data.to_csv(self.logging_filename, index=False)
+
+            if response_status_code == 200:
+                # we successfully uploaded, check if there are other locally recorded data
+                if self.logging_filename.exists():
+                    data = pd.read_csv(self.logging_filename, index_col=None)
+                    payloads = data.to_dict(orient="records")
+                    for i, payload in enumerate(payloads):
+                        res_status_code = self.__record_data_to_server(payload)
+                        if res_status_code != 200:
+                            data.iloc[i:].to_csv(
+                                self.logging_filename, index=False)
+                            break
+                    else:
+                        self.logging_filename.unlink()
