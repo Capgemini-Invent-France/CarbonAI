@@ -3,6 +3,7 @@
 
 __all__ = ["PowerMeter"]
 
+from pathlib import Path
 import json
 import datetime
 import getpass
@@ -31,10 +32,12 @@ class PowerMeter:
         Whether use user country location or not
     user_name (optional) : str
         The name of the user using the tool (for logging purpose)
+    filepath (optional) : str
+        Path of the file where all the green ai logs are written
     """
 
     def __init__(
-        self, project_name="", cpu_power_log_path="", get_country=True, user_name=""
+        self, project_name="", cpu_power_log_path="", get_country=True, user_name="", filepath=None
     ):
         self.platform = sys.platform
         if self.platform == MAC_PLATFORM:
@@ -73,6 +76,13 @@ class PowerMeter:
         self.energy_mix_db = self.__load_energy_mix_db()
         self.energy_mix = self.__get_energy_mix()  # kgCO2e/kWh
         self.location_name = self.__get_location_name()
+
+        if not filepath:
+            print("No current filepath")
+            self.filepath = Path.cwd() / "emissions.csv"
+        else:
+            print("filepath ok then")
+            self.filepath = filepath
 
         self.logging_filename = PACKAGE_PATH / LOGGING_FILE
         # self.logging_columns = [
@@ -369,6 +379,19 @@ class PowerMeter:
         except requests.exceptions.Timeout:
             return 408
 
+    def __record_data_to_file(self, payload):
+        try:
+            data = pd.DataFrame(payload, index=[0])
+            if Path(self.filepath).exists():
+                data.to_csv(self.filepath, mode="a",
+                            index=False, header=False)
+            else:
+                data.to_csv(self.filepath, index=False)
+            return True
+        except:
+            print("* error during the writing process *")
+            return False
+
     def __log_records(
         self,
         cpu_recorded_power,
@@ -409,6 +432,9 @@ class PowerMeter:
             "Data shape": data_shape,
             "Comment": comments,
         }
+        print("* add in a local csv*")
+        written = self.__record_data_to_file(payload)
+        print("* written is ", written, " *")
         response_status_code = self.__record_data_to_server(payload)
         if response_status_code >= 400:
             print(
