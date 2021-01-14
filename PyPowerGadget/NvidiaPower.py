@@ -1,33 +1,56 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+"""
+TODO: add docstring
+"""
 import os
-import sys
-
-sys.path.insert(0, os.path.dirname(os.getcwd()))
-
+from pathlib import Path
+import logging
 import re
 import subprocess
 import signal
 import pandas as pd
 import numpy as np
 
-from PyPowerGadget.settings import *
+from PyPowerGadget.settings import NVIDIAPOWERLOG_FILENAME, TOTAL_GPU_TIME, TOTAL_ENERGY_GPU
 
 
+LOGGER = logging.getLogger(__name__)
 class GpuPower:
+    """
+    Class to monitor the power usage of a gpu
+    Usage :
+    1. initialiase the class
+    2. call start
+    3. call stop
+    4. collect the results with parse_log
+    """
     def __init__(self):
-        self.recorded_power = {TOTAL_GPU_TIME: 0, TOTAL_ENERGY_GPU: 0}
-        self.recorded_power = pd.Series(self.recorded_power)
+        self.record = pd.Series({TOTAL_GPU_TIME: 0, TOTAL_ENERGY_GPU: 0})
 
-    def start_measure(self):
+    def start(self):
+        """
+        Starts the recording processus
+        """
         pass
 
-    def stop_measure(self):
+    def stop(self):
+        """
+        Stops the recording processus
+        """
         pass
 
-    def parse_power_log(self):
+    def parse_log(self):
+        """
+        Extract relevant information from the logs.
+        """
         pass
 
 
 class NoGpuPower(GpuPower):
+    """
+    TODO: add docstring. A quoi sert cette classe ?
+    """
     def __init__(self):
         super().__init__()
         pass
@@ -35,32 +58,30 @@ class NoGpuPower(GpuPower):
 
 class NvidiaPower(GpuPower):
     """
-    Class to monitor the power usage of a gpu
-    Usage :
-    1. initialiase the class
-    2. call start start_measure
-    3. call stop stop_measure
-    4. collect the results with parse_power_log
+    NVIDIA-based GPU class
+
+    Parameters
+    ----------
+    interval (int)
+        interval to which log power in the log_path file
     """
 
-    def __init__(self):
+    def __init__(self, interval=1):
         super().__init__()
         self.log_file = (
             Path(os.path.dirname(os.path.abspath(__file__))) / NVIDIAPOWERLOG_FILENAME
         )
         self.logging_process = None
+        self.interval = interval
 
-    def start_measure(self, interval=1):
+    def start(self):
         """
         Start the measure process
-        Args:
-            interval : interval to which log power in the log_path file
         """
-        self.interval = interval
         if self.logging_process is not None:
-            self.stop_measure()
+            self.stop()
 
-        print("starting GPU power monitoring ...")
+        LOGGER.info("starting GPU power monitoring ...")
 
         self.logging_process = subprocess.Popen(
             [
@@ -71,23 +92,25 @@ class NvidiaPower(GpuPower):
                 "-d",
                 "POWER",
                 "-l",
-                str(interval),
+                str(self.interval),
             ]
         )
 
-    def stop_measure(self):
+    def stop(self):
         """
         Stop the measure process if started
         """
-        print("stopping GPU power monitoring ...")
+        LOGGER.info("stopping GPU power monitoring ...")
         self.logging_process.send_signal(signal.SIGINT)
         self.logging_process = None
 
-    def parse_power_log(self):
+    def parse_log(self):
         """
         Extract power as logged in the last measure process
         Returns:
-            A dataframe with all the recorded power and the ellapsed time
+        -------
+        results (pandas.DataFrame)
+            all records with associated ellapsed times
         """
         if not self.log_file.exists():
             raise FileNotFoundError(
@@ -100,7 +123,7 @@ class NvidiaPower(GpuPower):
         prev_power = 0
         times = []
         powers = []
-        for i, record in enumerate(records[1:]):
+        for record in records[1:]:
             regex_power = "(?<=Power Draw                  : )(.*)(?= W)"
             regex_time = "(?<=Timestamp                           : )(.*)"
             time = re.search(regex_time, record).group(0)
@@ -112,12 +135,12 @@ class NvidiaPower(GpuPower):
             prev_power = power
             times.append(time)
             powers.append(power)
-        df = pd.DataFrame(np.array([times, powers]).T, columns=["Time", "Power"])
-        df["Power"] = df["Power"].astype("float32")
-        df["Time"] = pd.to_datetime(df["Time"], infer_datetime_format=True)
-        df["Elapsed time"] = df["Time"] - df.loc[0, "Time"]
-        df["Elapsed time"] = df["Elapsed time"].dt.total_seconds()
-        self.recorded_power[TOTAL_GPU_TIME] = df["Elapsed time"].iloc[-1]
-        self.recorded_power[TOTAL_ENERGY_GPU] = (
-            df["Power"].sum() * self.interval * 1000 / 3600
+        results = pd.DataFrame(np.array([times, powers]).T, columns=["Time", "Power"])
+        results["Power"] = results["Power"].astype("float32")
+        results["Time"] = pd.to_datetime(results["Time"], infer_datetime_format=True)
+        results["Elapsed time"] = results["Time"] - results.loc[0, "Time"]
+        results["Elapsed time"] = results["Elapsed time"].dt.total_seconds()
+        self.record[TOTAL_GPU_TIME] = results["Elapsed time"].iloc[-1]
+        self.record[TOTAL_ENERGY_GPU] = (
+            results["Power"].sum() * self.interval * 1000 / 3600
         )

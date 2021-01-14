@@ -22,8 +22,6 @@ import pandas as pd
 from PyPowerGadget.settings import *
 
 
-
-
 LOGGER = logging.getLogger(__name__)
 
 class PowerGadget(abc.ABC):

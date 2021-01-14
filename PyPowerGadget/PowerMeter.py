@@ -369,7 +369,7 @@ class PowerMeter:
             A string to provide any useful information
 
         """
-        self.gpu_power.start_measure()
+        self.gpu_power.start()
         self.power_gadget.start()
         self.__set_used_arguments(
             package,
@@ -386,11 +386,11 @@ class PowerMeter:
 
         """
         self.power_gadget.stop()
-        self.gpu_power.stop_measure()
-        self.gpu_power.parse_power_log()
+        self.gpu_power.stop()
+        self.gpu_power.parse_log()
         self.__log_records(
             self.power_gadget.record,  # recorded_power must be a dict
-            self.gpu_power.recorded_power,  # recorded_power must be a dict
+            self.gpu_power.record,  # recorded_power must be a dict
             algorithm=self.used_algorithm,
             package=self.used_package,
             data_type=self.used_data_type,
@@ -452,7 +452,7 @@ class PowerMeter:
         comments="",
     ):
         co2_emitted = self.__aggregate_power(
-            self.power_gadget.record, self.gpu_power.recorded_power
+            self.power_gadget.record, self.gpu_power.record
         )
         payload = {
             "Datetime": str(datetime.datetime.now()),
