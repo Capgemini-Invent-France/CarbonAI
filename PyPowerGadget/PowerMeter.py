@@ -60,11 +60,11 @@ class PowerMeter:
         self.platform = sys.platform
         if self.platform == MAC_PLATFORM:
             self.power_gadget = PowerGadgetMac(
-                power_log_path=cpu_power_log_path)
+                powerlog_path=cpu_power_log_path)
             self.pue = self.LAPTOP_PUE  # pue for my laptop
         elif self.platform == WIN_PLATFORM:
             self.power_gadget = PowerGadgetWin(
-                power_log_path=cpu_power_log_path)
+                powerlog_path=cpu_power_log_path)
             self.pue = self.LAPTOP_PUE  # pue for my laptop
         elif self.platform in LINUX_PLATFORMS:
             if POWERLOG_PATH_LINUX.exists():
@@ -370,7 +370,7 @@ class PowerMeter:
 
         """
         self.gpu_power.start_measure()
-        self.power_gadget.start_measure()
+        self.power_gadget.start()
         self.__set_used_arguments(
             package,
             algorithm,
@@ -385,11 +385,11 @@ class PowerMeter:
         Stops the measure started with start_measure
 
         """
-        self.power_gadget.stop_measure()
+        self.power_gadget.stop()
         self.gpu_power.stop_measure()
         self.gpu_power.parse_power_log()
         self.__log_records(
-            self.power_gadget.recorded_power,  # recorded_power must be a dict
+            self.power_gadget.record,  # recorded_power must be a dict
             self.gpu_power.recorded_power,  # recorded_power must be a dict
             algorithm=self.used_algorithm,
             package=self.used_package,
@@ -452,7 +452,7 @@ class PowerMeter:
         comments="",
     ):
         co2_emitted = self.__aggregate_power(
-            self.power_gadget.recorded_power, self.gpu_power.recorded_power
+            self.power_gadget.record, self.gpu_power.recorded_power
         )
         payload = {
             "Datetime": str(datetime.datetime.now()),
