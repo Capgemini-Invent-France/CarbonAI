@@ -6,6 +6,7 @@ dist/
 *.egg*
 *powerLog*.csv
 *power_logs*.csv
+emissions.csv
 .DS_STORE
 PyPowerGadget/requirements.txt
 PyPowerGadget/test*
