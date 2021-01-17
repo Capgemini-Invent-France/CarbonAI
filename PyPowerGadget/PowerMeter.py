@@ -101,7 +101,7 @@ class PowerMeter:
         self.location = "US"
         if get_country:
             if location:
-                self.location = location
+                self.location = str(location).upper()
             elif is_online:
                 self.location = self.__get_country()
             else:
@@ -156,6 +156,9 @@ class PowerMeter:
         return pd.read_csv(PACKAGE_PATH / ENERGY_MIX_DATABASE, encoding="utf-8")
 
     def __get_energy_mix(self):
+        if not (self.energy_mix_db[COUNTRY_CODE_COLUMN] == self.location).any():
+            raise NameError(
+                "The location inputed was not found, make sure you wrote the isocode of your country. You used "+self.location)
         return self.energy_mix_db.loc[
             self.energy_mix_db[COUNTRY_CODE_COLUMN] == self.location, ENERGY_MIX_COLUMN
         ].values[0]
