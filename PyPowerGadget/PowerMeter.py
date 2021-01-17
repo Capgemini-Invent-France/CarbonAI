@@ -21,6 +21,7 @@ from PyPowerGadget.settings import *
 
 LOGGER = logging.getLogger(__name__)
 
+
 class PowerMeter:
 
     """PowerMeter is a general tool to monitor and log the power consumption of any given function.
@@ -41,8 +42,8 @@ class PowerMeter:
         Endpoint of the API
     """
 
-    LAPTOP_PUE = 1.3 # pue for my laptop
-    SERVER_PUE = 1.58 # pue for a server
+    LAPTOP_PUE = 1.3  # pue for my laptop
+    SERVER_PUE = 1.58  # pue for a server
     DEFAULT_LOCATION = "France"
 
     @classmethod
@@ -52,10 +53,9 @@ class PowerMeter:
             args = json.load(file)
         return cls(**args)
 
-    
     def __init__(
         self, project_name="", program_name="", client_name="", cpu_power_log_path="", get_country=True, user_name="", filepath=None,
-        api_endpoint = None, location="", is_online=True
+        api_endpoint=None, location="", is_online=True
     ):
         self.platform = sys.platform
         if self.platform == MAC_PLATFORM:
@@ -88,12 +88,10 @@ class PowerMeter:
         else:
             self.project = self.__extract_env_name()
 
-
         if len(program_name) > 0:
             self.program_name = program_name
         else:
             self.program_name = "--"
-
 
         if len(client_name) > 0:
             self.client_name = client_name
@@ -121,14 +119,12 @@ class PowerMeter:
             LOGGER.info("filepath ok then")
             self.filepath = filepath
 
-
         if api_endpoint:
             LOGGER.info("No current api endpoint")
             self.api_endpoint = api_endpoint
         else:
             LOGGER.info("api endpoint ok then")
             self.api_endpoint = ""
-
 
         self.logging_filename = PACKAGE_PATH / LOGGING_FILE
         # self.logging_columns = [
@@ -436,7 +432,8 @@ class PowerMeter:
             else:
                 data.to_csv(self.filepath, index=False)
             return True
-        except:
+        except Exception as e:
+            print(e)
             LOGGER.error("* error during the writing process *")
             return False
 
@@ -482,9 +479,9 @@ class PowerMeter:
             "Data shape": data_shape,
             "Comment": comments,
         }
-        LOGGER.warn("* add in a local csv *")
+        LOGGER.info("* add in a local csv *")
         written = self.__record_data_to_file(payload)
-        LOGGER.warn(f"* written is {written} *")
+        LOGGER.info(f"* written is {written} *")
 
         if self.is_online:
             response_status_code = self.__record_data_to_server(payload)
