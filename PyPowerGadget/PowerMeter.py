@@ -120,10 +120,10 @@ class PowerMeter:
             self.filepath = filepath
 
         if api_endpoint:
-            LOGGER.info("No current api endpoint")
+            LOGGER.info("api endpoint ok then")
             self.api_endpoint = api_endpoint
         else:
-            LOGGER.info("api endpoint ok then")
+            LOGGER.info("No current api endpoint")
             self.api_endpoint = ""
 
         self.logging_filename = PACKAGE_PATH / LOGGING_FILE
@@ -279,12 +279,13 @@ class PowerMeter:
         algorithm_params="",
         comments="",
     ):
-        self.used_package = package if package else ""
-        self.used_algorithm = algorithm if algorithm else ""
-        self.used_data_type = data_type if data_type else ""
-        self.used_data_shape = data_shape if data_shape else ""
-        self.used_algorithm_params = algorithm_params if algorithm_params else ""
-        self.used_comments = comments if comments else ""
+        self.used_package = str(package) if package else ""
+        self.used_algorithm = str(algorithm) if algorithm else ""
+        self.used_data_type = str(data_type) if data_type else ""
+        self.used_data_shape = str(data_shape) if data_shape else ""
+        self.used_algorithm_params = str(
+            algorithm_params) if algorithm_params else ""
+        self.used_comments = str(comments) if comments else ""
 
     def __call__(
         self,
@@ -395,20 +396,20 @@ class PowerMeter:
             comments=self.used_comments,
         )
 
-    def __init_logging_file(self):
-        if not self.logging_filename.exists():
-            self.logging_filename.write_text(self.__written_columns())
-        elif self.__written_columns() not in self.logging_filename.read_text(
-            encoding="utf-8"
-        ):
-            warnings.warn(
-                "The column names of the log file are not right, it will be overwritten"
-            )
-            time.sleep(5)
-            self.logging_filename.write_text(self.__written_columns())
+    # def __init_logging_file(self):
+    #     if not self.logging_filename.exists():
+    #         self.logging_filename.write_text(self.__written_columns())
+    #     elif self.__written_columns() not in self.logging_filename.read_text(
+    #         encoding="utf-8"
+    #     ):
+    #         warnings.warn(
+    #             "The column names of the log file are not right, it will be overwritten"
+    #         )
+    #         time.sleep(5)
+    #         self.logging_filename.write_text(self.__written_columns())
 
-    def __written_columns(self):
-        return ",".join(self.logging_columns)
+    # def __written_columns(self):
+    #     return ",".join(self.logging_columns)
 
     def __record_data_to_server(self, payload):
         headers = {"Content-Type": "application/json"}
@@ -432,8 +433,7 @@ class PowerMeter:
             else:
                 data.to_csv(self.filepath, index=False)
             return True
-        except Exception as e:
-            print(e)
+        except:
             LOGGER.error("* error during the writing process *")
             return False
 

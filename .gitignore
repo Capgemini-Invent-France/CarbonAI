@@ -9,5 +9,6 @@ dist/
 .DS_STORE
 PyPowerGadget/requirements.txt
 PyPowerGadget/test*
+PyPowerGadget/mesure_power.py
 *.zip
 public
