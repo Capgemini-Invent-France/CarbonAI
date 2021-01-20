@@ -2,4 +2,4 @@
 Maintain a single source of truth for the package version number
 cf. https://packaging.python.org/guides/single-sourcing-package-version/
 """
-__version__ = "1.0.1"
+__version__ = "1.0.2"

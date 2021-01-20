@@ -19,7 +19,7 @@ import abc
 
 import pandas as pd
 
-from PyPowerGadget.settings import *
+from PyPowerGadget.utils import *
 
 
 LOGGER = logging.getLogger(__name__)

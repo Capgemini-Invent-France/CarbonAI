@@ -1,6 +1,8 @@
 from pathlib import Path
 import os
 
+import pandas as pd
+
 PACKAGE_PATH = Path(os.path.dirname(os.path.abspath(__file__)))
 HOME_DIR = Path.home()
 
@@ -20,7 +22,7 @@ RAPL_ENERGY_FILE = "energy_uj"
 RAPL_DRAM_PATH = "intel-rapl:{}:{}/" #rapl_socket_id, rapl_device_id
 
 
-ENERGY_MIX_DATABASE = Path("ademe_energy_mix_by_country.csv")
+ENERGY_MIX_DATABASE = Path("data/ademe_energy_mix_by_country.csv")
 ENERGY_MIX_COLUMN = "Energy mix (kgCO2/kWh)"
 COUNTRY_CODE_COLUMN = "ISO"
 COUNTRY_NAME_COLUMN = "Country"
@@ -41,6 +43,11 @@ TOTAL_ENERGY_CPU = "Cumulative IA Energy (mWh)"
 TOTAL_ENERGY_GPU = "Cumulative GPU Energy (mWh)"
 TOTAL_ENERGY_MEMORY = "Cumulative DRAM Energy (mWh)"
 
-API_ENDPOINT = (
-    "https://50esc1hzja.execute-api.eu-west-3.amazonaws.com/green-ai-db-handling"
-)
+
+def get_logged_data():
+    return pd.read_csv(PACKAGE_PATH / LOGGING_FILE, encoding="utf-8")
+
+
+def save_logged_data(path):
+    df = get_logged_data()
+    df.to_csv(path)

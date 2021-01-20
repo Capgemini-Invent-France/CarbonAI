@@ -16,7 +16,7 @@ import pandas as pd
 
 from PyPowerGadget.PowerGadget import *
 from PyPowerGadget.NvidiaPower import *
-from PyPowerGadget.settings import *
+from PyPowerGadget.utils import *
 
 
 LOGGER = logging.getLogger(__name__)
@@ -44,7 +44,7 @@ class PowerMeter:
 
     LAPTOP_PUE = 1.3  # pue for my laptop
     SERVER_PUE = 1.58  # pue for a server
-    DEFAULT_LOCATION = "France"
+    DEFAULT_LOCATION = "FR"
 
     @classmethod
     def from_config(cls, path):
