@@ -10,7 +10,6 @@ import datetime
 import getpass
 import os
 import sys
-import warnings
 import requests
 import pandas as pd
 
@@ -58,15 +57,15 @@ class PowerMeter:
         api_endpoint=None, location="", is_online=True
     ):
         self.platform = sys.platform
-        if self.platform == MAC_PLATFORM:
+        if self.platform == "darwin":
             self.power_gadget = PowerGadgetMac(
                 powerlog_path=cpu_power_log_path)
             self.pue = self.LAPTOP_PUE  # pue for my laptop
-        elif self.platform == WIN_PLATFORM:
+        elif self.platform == "win32":
             self.power_gadget = PowerGadgetWin(
                 powerlog_path=cpu_power_log_path)
             self.pue = self.LAPTOP_PUE  # pue for my laptop
-        elif self.platform in LINUX_PLATFORMS:
+        elif self.platform in ["linux", "linux2"]:
             if POWERLOG_PATH_LINUX.exists():
                 self.power_gadget = PowerGadgetLinuxRAPL()
             else:

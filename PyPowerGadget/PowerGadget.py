@@ -24,7 +24,7 @@ import pandas as pd
 
 from PyPowerGadget.utils import (TOTAL_CPU_TIME, TOTAL_ENERGY_ALL,
 TOTAL_ENERGY_CPU, TOTAL_ENERGY_MEMORY, PACKAGE_PATH, MAC_INTELPOWERLOG_FILENAME,
-HOME_DIR, WIN_INTELPOWERLOG_FILENAME)
+HOME_DIR, WIN_INTELPOWERLOG_FILENAME, POWERLOG_PATH_LINUX)
 
 LOGGER = logging.getLogger(__name__)
 
@@ -34,7 +34,7 @@ MSI_PATH = Path("C:\\tmp\\IntelPowerGadget.msi")
 POWERLOG_PATH_MAC = Path("/Applications/Intel Power Gadget/PowerLog")
 POWERLOG_PATH_WIN = Path("/Program Files/Intel/Power Gadget 3.5")
 POWERLOG_TOOL_WIN = "IntelPowerGadget.exe"
-POWERLOG_PATH_LINUX = Path("/sys/class/powercap/intel-rapl")
+
 
 CPU_IDS_DIR = "/sys/devices/system/cpu/cpu*/topology/physical_package_id"
 READ_MSR_PATH = "/dev/cpu/{}/msr"
