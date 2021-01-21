@@ -6,7 +6,7 @@ import pandas as pd
 PACKAGE_PATH = Path(os.path.dirname(os.path.abspath(__file__)))
 HOME_DIR = Path.home()
 
-DMG_PATH = Path("/tmp/IntelPowerGadget.dmg")
+""" DMG_PATH = Path("/tmp/IntelPowerGadget.dmg")
 MSI_PATH = Path("C:\\tmp\\IntelPowerGadget.msi")
 
 POWERLOG_PATH_MAC = Path("/Applications/Intel Power Gadget/PowerLog")
@@ -19,7 +19,7 @@ READ_MSR_PATH = "/dev/cpu/{}/msr"
 READ_RAPL_PATH = "/sys/class/powercap/intel-rapl/intel-rapl:{}/" #rapl_socket_id
 RAPL_DEVICENAME_FILE = "name"
 RAPL_ENERGY_FILE = "energy_uj"
-RAPL_DRAM_PATH = "intel-rapl:{}:{}/" #rapl_socket_id, rapl_device_id
+RAPL_DRAM_PATH = "intel-rapl:{}:{}/" #rapl_socket_id, rapl_device_id """
 
 
 ENERGY_MIX_DATABASE = Path("data/ademe_energy_mix_by_country.csv")
