@@ -1,5 +1,8 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+"""
+Main Python class or entrypoint to monitor the power consumption of an algorithm. 
+"""
 
 __all__ = ["PowerMeter"]
 
