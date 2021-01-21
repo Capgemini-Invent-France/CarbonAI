@@ -1,8 +1,12 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """
-TODO: add docstring
+Python classes monitoring GPU's power usage
+during a time delimited between a start and a stop methods
 """
+__all__ = ['NoGpuPower', 'NvidiaPower']
+
+import abc
 import os
 from pathlib import Path
 import logging
@@ -12,11 +16,14 @@ import signal
 import pandas as pd
 import numpy as np
 
-from PyPowerGadget.utils import NVIDIAPOWERLOG_FILENAME, TOTAL_GPU_TIME, TOTAL_ENERGY_GPU
+from PyPowerGadget.utils import TOTAL_GPU_TIME, TOTAL_ENERGY_GPU
 
 
 LOGGER = logging.getLogger(__name__)
-class GpuPower:
+
+NVIDIAPOWERLOG_FILENAME = "nvidiaPowerLog.csv"
+
+class GpuPower(abc.ABC):
     """
     Class to monitor the power usage of a gpu
     Usage :
@@ -26,7 +33,7 @@ class GpuPower:
     4. collect the results with parse_log
     """
     def __init__(self):
-        self.record = pd.Series({TOTAL_GPU_TIME: 0, TOTAL_ENERGY_GPU: 0})
+        self.record = {TOTAL_GPU_TIME: 0, TOTAL_ENERGY_GPU: 0}
 
     def start(self):
         """
