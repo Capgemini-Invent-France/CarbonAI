@@ -1,8 +1,6 @@
 from pathlib import Path
 import os
 
-import pandas as pd
-
 PACKAGE_PATH = Path(os.path.dirname(os.path.abspath(__file__)))
 HOME_DIR = Path.home()
 

@@ -8,6 +8,7 @@ __all__ = ["PowerMeter"]
 
 from pathlib import Path
 import logging
+import traceback
 import json
 import datetime
 import getpass
@@ -25,28 +26,71 @@ LOGGER = logging.getLogger(__name__)
 
 
 class PowerMeter:
-
     """PowerMeter is a general tool to monitor and log the power consumption of any given function.
 
     Parameters
     ----------
-    project_name (optional) : str
+    - project_name (optional) : str
         Name of the project you are working on (default is folder_name)
-    cpu_power_log_path (optional) : str
+    - cpu_power_log_path (optional) : str
         The path to the tool "PowerLog"
-    get_country (optional) : bool
+    - get_country (optional) : bool
         Whether use user country location or not
-    user_name (optional) : str
+    - user_name (optional) : str
         The name of the user using the tool (for logging purpose)
-    filepath (optional) : str
+    - filepath (optional) : str
         Path of the file where all the green ai logs are written
-    api_endpoint (optional):
+    - api_endpoint (optional):
         Endpoint of the API
     """
 
     LAPTOP_PUE = 1.3  # pue for my laptop
     SERVER_PUE = 1.58  # pue for a server
     DEFAULT_LOCATION = "FR"
+
+    @staticmethod
+    def __load_energy_mix_db():
+        return pd.read_csv(PACKAGE_PATH / ENERGY_MIX_DATABASE, encoding="utf-8")
+
+    @staticmethod
+    def __extract_env_name():
+        env = "unknown"
+        try:
+            env = os.environ["CONDA_DEFAULT_ENV"]
+        except:
+            pass
+        if hasattr(sys, "real_prefix"):
+            env = sys.real_prefix.split("/")[-1]
+        elif hasattr(sys, "base_prefix") and sys.base_prefix != sys.prefix:
+            env = sys.base_prefix.split("/")[-1]
+        return env
+
+    @staticmethod
+    def __check_gpu():
+        import ctypes
+
+        libnames = ("libcuda.so", "libcuda.dylib", "cuda.dll")
+        cuda_available = False
+        for libname in libnames:
+            try:
+                _ = ctypes.CDLL(libname)
+                cuda_available = True
+                break
+            except OSError:
+                continue
+        return cuda_available
+ 
+    @staticmethod
+    def __get_country():
+        """
+        Retrieve the ISO code country
+        Beware of the encoding
+        cf. from https://stackoverflow.com/questions/40059654/python-convert-a-bytes-array-into-json-format
+        """
+        request = requests.get("http://ipinfo.io/json")
+        response = request.content.decode("utf8").replace("'", '"')
+        user_info = json.loads(response)
+        return user_info["country"]
 
     @classmethod
     def from_config(cls, path):
@@ -56,8 +100,10 @@ class PowerMeter:
         return cls(**args)
 
     def __init__(
-        self, project_name="", program_name="", client_name="", cpu_power_log_path="", get_country=True, user_name="", filepath=None,
-        api_endpoint=None, location="", is_online=True
+        self, project_name="", program_name="", client_name="", cpu_power_log_path="",
+        get_country=True, user_name="", filepath=None,
+        api_endpoint=None, location="", is_online=True,
+        output_format='csv'
     ):
         self.platform = sys.platform
         if self.platform == "darwin":
@@ -81,33 +127,32 @@ class PowerMeter:
         else:
             self.gpu_power = NoGpuPower()
 
-        if len(user_name) > 0:
+        if user_name:
             self.user = user_name
         else:
             self.user = getpass.getuser()
-        if len(project_name) > 0:
+
+        if project_name:
             self.project = project_name
         else:
             self.project = self.__extract_env_name()
 
-        if len(program_name) > 0:
+        if program_name:
             self.program_name = program_name
         else:
             self.program_name = "--"
 
-        if len(client_name) > 0:
+        if client_name:
             self.client_name = client_name
         else:
             self.client_name = "--"
 
-        self.location = "US"
-        if get_country:
-            if location:
-                self.location = str(location).upper()
-            elif is_online:
-                self.location = self.__get_country()
-            else:
-                self.location = self.DEFAULT_LOCATION
+        if is_online:
+            self.location = self.__get_country()
+        elif location:
+            self.location = location
+        else:
+            self.location = self.DEFAULT_LOCATION
 
         self.is_online = is_online
         self.energy_mix_db = self.__load_energy_mix_db()
@@ -120,42 +165,17 @@ class PowerMeter:
         else:
             LOGGER.info("filepath ok then")
             self.filepath = filepath
+        
+        self.output_format = output_format
 
         if api_endpoint:
-            LOGGER.info("api endpoint ok then")
+            LOGGER.info("api endpoint given")
             self.api_endpoint = api_endpoint
         else:
             LOGGER.info("No current api endpoint")
             self.api_endpoint = ""
 
         self.logging_filename = PACKAGE_PATH / LOGGING_FILE
-        # self.logging_columns = [
-        #     "Datetime",
-        #     "User ID",
-        #     COUNTRY_CODE_COLUMN,
-        #     COUNTRY_NAME_COLUMN,
-        #     "Platform",
-        #     "Project name",
-        #     TOTAL_CPU_TIME,
-        #     TOTAL_GPU_TIME,
-        #     TOTAL_ENERGY_ALL,
-        #     TOTAL_ENERGY_CPU,
-        #     TOTAL_ENERGY_GPU,
-        #     TOTAL_ENERGY_MEMORY,
-        #     "PUE",
-        #     "CO2 emitted (gCO2e)",
-        #     "Package",
-        #     "Algorithm",
-        #     "Algorithm's parameters",
-        #     "Data type",
-        #     "Data shape",
-        #     "Comment",
-        # ]
-        # self.endpoint = API_ENDPOINT
-        # self.__init_logging_file()
-
-    def __load_energy_mix_db(self):
-        return pd.read_csv(PACKAGE_PATH / ENERGY_MIX_DATABASE, encoding="utf-8")
 
     def __get_energy_mix(self):
         if not (self.energy_mix_db[COUNTRY_CODE_COLUMN] == self.location).any():
@@ -165,57 +185,35 @@ class PowerMeter:
             self.energy_mix_db[COUNTRY_CODE_COLUMN] == self.location, ENERGY_MIX_COLUMN
         ].values[0]
 
-    def __get_country(self):
-        # from https://stackoverflow.com/questions/40059654/python-convert-a-bytes-array-into-json-format
-        r = requests.get("http://ipinfo.io/json")
-        response = r.content.decode("utf8").replace("'", '"')
-        user_info = json.loads(response)
-        return user_info["country"]
-
     def __get_location_name(self):
         return self.energy_mix_db.loc[
             self.energy_mix_db[COUNTRY_CODE_COLUMN] == self.location,
             COUNTRY_NAME_COLUMN,
         ].values[0]
 
-    def __extract_env_name(self):
-        env = "unknown"
-        try:
-            env = os.environ["CONDA_DEFAULT_ENV"]
-        except:
-            pass
-        if hasattr(sys, "real_prefix"):
-            env = sys.real_prefix.split("/")[-1]
-        elif hasattr(sys, "base_prefix") and sys.base_prefix != sys.prefix:
-            env = sys.base_prefix.split("/")[-1]
-        return env
 
-    def __check_gpu(self):
-        import ctypes
+    def __aggregate_power(self, cpu_record, gpu_record):
+        """
+        Implement the cO2 emission value
 
-        libnames = ("libcuda.so", "libcuda.dylib", "cuda.dll")
-        cuda_available = False
-        for libname in libnames:
-            try:
-                _ = ctypes.CDLL(libname)
-                cuda_available = True
-                break
-            except OSError:
-                continue
-        return cuda_available
-
-    def __aggregate_power(self, cpu_recorded_power, gpu_recorded_power):
-        # LOGGER.info(pd.concat([cpu_recorded_power, gpu_recorded_power]))
-
+        Parameters:
+        -----------
+        cpu_record, gpu_record (dict):
+            Respectively CPU and GPU's records
+        
+        Returns
+        -------
+        co2_emitted (float)
+        """
         used_energy = self.pue * (
-            cpu_recorded_power[TOTAL_ENERGY_CPU]
-            + cpu_recorded_power[TOTAL_ENERGY_MEMORY]
-            + gpu_recorded_power[TOTAL_ENERGY_GPU]
+            cpu_record[TOTAL_ENERGY_CPU]
+            + cpu_record[TOTAL_ENERGY_MEMORY]
+            + gpu_record[TOTAL_ENERGY_GPU]
         )  # mWh
         co2_emitted = used_energy * self.energy_mix * 1e-3
         LOGGER.info(
             "This process emitted %.3fg of CO2 (using the energy mix of %s)"
-            % (co2_emitted, self.location_name.encode("utf-8"))
+            % (co2_emitted, self.location_name)
         )
 
         return co2_emitted
@@ -250,7 +248,7 @@ class PowerMeter:
         Returns
         -------
         """
-        if len(algorithm) == 0 or len(package) == 0:
+        if not algorithm or not package:
             raise SyntaxError(
                 "Please input a description for the function you are trying to monitor. Pass in the algorithm and the package you are trying to monitor"
             )
@@ -391,8 +389,8 @@ class PowerMeter:
         self.gpu_power.stop()
         self.gpu_power.parse_log()
         self.__log_records(
-            self.power_gadget.record,  # recorded_power must be a dict
-            self.gpu_power.record,  # recorded_power must be a dict
+            self.power_gadget.record,  # must be a dict
+            self.gpu_power.record,  # must be a dict
             algorithm=self.used_algorithm,
             package=self.used_package,
             data_type=self.used_data_type,
@@ -416,9 +414,9 @@ class PowerMeter:
     # def __written_columns(self):
     #     return ",".join(self.logging_columns)
 
-    def __record_data_to_server(self, payload):
+    def __record_data_to_server(self, info):
         headers = {"Content-Type": "application/json"}
-        data = json.dumps(payload)
+        data = json.dumps(info)
         try:
             response = requests.request(
                 "POST", self.api_endpoint, headers=headers, data=data, timeout=1
@@ -429,9 +427,9 @@ class PowerMeter:
         except requests.exceptions.Timeout:
             return 408
 
-    def __record_data_to_file(self, payload):
+    def __record_data_to_csv_file(self, info):
         try:
-            data = pd.DataFrame(payload, index=[0])
+            data = pd.DataFrame(info, index=[0])
             if Path(self.filepath).exists():
                 data.to_csv(self.filepath, mode="a",
                             index=False, header=False)
@@ -439,8 +437,36 @@ class PowerMeter:
                 data.to_csv(self.filepath, index=False)
             return True
         except:
-            LOGGER.error("* error during the writing process *")
+            LOGGER.error("* error during the csv writing process *")
             return False
+
+    def __record_data_to_excel_file(self, info):
+        try:
+            
+            if Path(self.filepath).exists():
+                data = pd.read_excel(self.filepath).append(info, ignore_index=True)
+                data.to_excel(self.filepath,
+                            index=False)
+            else:
+                data = pd.DataFrame(info, index=[0])
+                data.to_excel(self.filepath, index=False)
+            return True
+        except:
+            LOGGER.error("* error during the writing process in an excel file *")
+            LOGGER.error(traceback.format_exc())
+            return False
+
+    def __record_data_to_file(self, info):
+        """
+        Only two options so far: CSV or EXCEL
+        """
+        if self.filepath.endswith('.csv'):
+            return self.__record_data_to_csv_file(info)
+        elif self.filepath.endswith('.xls') or self.filepath.endswith('.xlsx'):
+            return self.__record_data_to_excel_file(info)
+        else:
+            LOGGER.info('unknown format: it should be either .csv, .xls or .xlsx')
+            return self.__record_data_to_excel_file(info)
 
     def __log_records(
         self,
@@ -465,16 +491,12 @@ class PowerMeter:
             "Project name": self.project,
             "Program name": self.program_name,
             "Client name": self.client_name,
-            "Total Elapsed CPU Time (sec)": int(cpu_recorded_power[TOTAL_CPU_TIME]),
-            "Total Elapsed GPU Time (sec)": int(gpu_recorded_power[TOTAL_GPU_TIME]),
-            "Cumulative Package Energy (mWh)": int(
-                cpu_recorded_power[TOTAL_ENERGY_ALL]
-            ),
-            "Cumulative IA Energy (mWh)": int(cpu_recorded_power[TOTAL_ENERGY_CPU]),
-            "Cumulative GPU Energy (mWh)": int(gpu_recorded_power[TOTAL_ENERGY_GPU]),
-            "Cumulative DRAM Energy (mWh)": int(
-                cpu_recorded_power[TOTAL_ENERGY_MEMORY]
-            ),
+            "Total Elapsed CPU Time (sec)": cpu_recorded_power[TOTAL_CPU_TIME],
+            "Total Elapsed GPU Time (sec)": gpu_recorded_power[TOTAL_GPU_TIME],
+            "Cumulative Package Energy (mWh)":cpu_recorded_power[TOTAL_ENERGY_ALL],
+            "Cumulative IA Energy (mWh)": cpu_recorded_power[TOTAL_ENERGY_CPU],
+            "Cumulative GPU Energy (mWh)": gpu_recorded_power[TOTAL_ENERGY_GPU],
+            "Cumulative DRAM Energy (mWh)": cpu_recorded_power[TOTAL_ENERGY_MEMORY],
             "PUE": self.pue,
             "CO2 emitted (gCO2e)": co2_emitted,
             "Package": package,
@@ -484,9 +506,8 @@ class PowerMeter:
             "Data shape": data_shape,
             "Comment": comments,
         }
-        LOGGER.info("* add in a local csv *")
         written = self.__record_data_to_file(payload)
-        LOGGER.info(f"* written is {written} *")
+        LOGGER.info("* recorded into a file? {}*".format(written))
 
         if self.is_online:
             response_status_code = self.__record_data_to_server(payload)
