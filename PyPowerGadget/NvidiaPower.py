@@ -16,7 +16,7 @@ import signal
 import pandas as pd
 import numpy as np
 
-from PyPowerGadget.utils import TOTAL_GPU_TIME, TOTAL_ENERGY_GPU
+from .utils import TOTAL_GPU_TIME, TOTAL_ENERGY_GPU
 
 
 LOGGER = logging.getLogger(__name__)

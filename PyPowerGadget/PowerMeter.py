@@ -17,9 +17,9 @@ import sys
 import requests
 import pandas as pd
 
-from PyPowerGadget.PowerGadget import *
-from PyPowerGadget.NvidiaPower import *
-from PyPowerGadget.utils import *
+from .PowerGadget import *
+from .NvidiaPower import *
+from .utils import *
 
 
 LOGGER = logging.getLogger(__name__)
