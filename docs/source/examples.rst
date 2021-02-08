@@ -9,6 +9,36 @@ Please provide a description of the running function, the dataset, the model, or
 
 In most cases, you only have to declare a ``PowerMeter`` once per file/project.
 
+To avoid filling information regarding the project at each instanciation,
+it is possible to use a configuration file to do it only once:
+
+.. code-block:: JSON
+
+{
+    "project_name": "Project X",
+    "program_name": "Program X",
+    "client_name": "Client X",
+    "cpu_power_log_path": "",
+    "get_country": false,
+    "is_online": false,
+    "user_name": "customUsername",
+    "filepath": "",
+    "api_endpoint": "...", 
+    "location":"FR"
+
+}
+
+The JSON-formatted file is then handled by the method **PowerMeter.from_config** where an absolute path must be given.
+
+
+
+.. code-block:: python
+
+    from CarbonAImpact import PowerMeter
+    PROJECT_PATH = ".../path-to-the-config.json"
+    power_meter = PowerMeter.from_config(PROJECT_PATH)
+
+
 Function decorator
 ------------------
 
@@ -16,7 +46,7 @@ To monitor the power consumption of a function, follow this example:
 
 .. code-block:: python
 
-    from PyPowerGadget import PowerMeter
+    from CarbonAImpact import PowerMeter
     power_meter = PowerMeter(project_name="MNIST classifier")
 
     @power_meter.measure_power(
@@ -36,8 +66,8 @@ To monitor the power consumption of a jupyter notebook cell, follow this example
 
 .. code-block:: python
 
-    %load_ext PyPowerGadget.MagicPowerMeter
-    from PyPowerGadget import PowerMeter
+    %load_ext CarbonAImpact.MagicPowerMeter
+    from CarbonAImpact import PowerMeter
     power_meter = PowerMeter(project_name="MNIST classifier")
 
 .. code-block:: python
@@ -51,7 +81,7 @@ This is the prefered inline method as it will stop the process even if you get a
 
 .. code-block:: python
 
-    from PyPowerGadget import PowerMeter
+    from CarbonAImpact import PowerMeter
     power_meter = PowerMeter(project_name="MNIST classifier")
 
     with power_meter(
@@ -72,7 +102,7 @@ This method won't stop the monitoring process unless told to do so, and therefor
 
 .. code-block:: python
 
-    from PyPowerGadget import PowerMeter
+    from CarbonAImpact import PowerMeter
     power_meter = PowerMeter(project_name="MNIST classifier")
 
     power_meter.start_measure(

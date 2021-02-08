@@ -4,7 +4,7 @@ tests for the Python class PowerMeter
 import pytest
 from pathlib import Path
 
-from PyPowerGadget.PowerMeter import PowerMeter
+from CarbonAImpact.PowerMeter import PowerMeter
 
 @pytest.fixture
 def data():

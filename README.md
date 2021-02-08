@@ -1,4 +1,4 @@
-# PyPowerGadget
+# CarbonAImpact
 
 This project aims at creating a python package that allows you to monitor the power consumption of any python function.
 
@@ -38,7 +38,7 @@ Please insert a description of the running function, the dataset, the model, any
 ### Function decorator
 To monitor the power consumption of a function, follow this example:
 ```python
-from PyPowerGadget import PowerMeter
+from CarbonAImpact import PowerMeter
 power_meter = PowerMeter(project_name="MNIST classifier")
 
 @power_meter.measure_power(
@@ -56,8 +56,8 @@ def my_func(arg1, arg2, ...):
 ### Jupyter notebook magic function
 To monitor the power consumption of a jupyter notebook cell, follow this example:
 ```jupyter
-%load_ext PyPowerGadget.MagicPowerMeter
-from PyPowerGadget import PowerMeter
+%load_ext CarbonAImpact.MagicPowerMeter
+from CarbonAImpact import PowerMeter
 power_meter = PowerMeter(project_name="MNIST classifier")
 
 -----------------
@@ -74,7 +74,7 @@ To monitor the power consumption of some specific inline code, there are 2 ways:
 
 This is the prefered method as it will stop the process even if you get an error
 ```python
-from PyPowerGadget import PowerMeter
+from CarbonAImpact import PowerMeter
 power_meter = PowerMeter(project_name="MNIST classifier")
 
 with power_meter(
@@ -92,7 +92,7 @@ with power_meter(
 
 This method won't stop the process unless told to do so
 ```python
-from PyPowerGadget import PowerMeter
+from CarbonAImpact import PowerMeter
 power_meter = PowerMeter(project_name="MNIST classifier")
 
 power_meter.start_measure(
@@ -110,7 +110,7 @@ power_meter.stop_measure()
 
 ### Documentation
 
-*class* **PyPowerGadget.PowerMeter**(*project_name="", user_name="", cpu_power_log_path="", get_country=True*)
+*class* **CarbonAImpact.PowerMeter**(*project_name="", user_name="", cpu_power_log_path="", get_country=True*)
 &nbsp;&nbsp;&nbsp;&nbsp;PowerMeter is a general tool to monitor and log the power consumption of any given function.
 >project_name (optional) : str
 

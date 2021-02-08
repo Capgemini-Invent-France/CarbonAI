@@ -5,7 +5,7 @@ API Reference
 
 PowerMeter
 ----------
-.. autoclass:: PyPowerGadget.PowerMeter
+.. autoclass:: CarbonAImpact.PowerMeter
    :members:
 
    .. automethod:: __call__

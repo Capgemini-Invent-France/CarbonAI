@@ -9,10 +9,10 @@ def get_property(prop, project):
     return result.group(1)
 
 setup(
-    name="PyPowerGadget",
-    version=get_property("__version__", 'PyPowerGadget/version.py'),
+    name="CarbonAImpact",
+    version=get_property("__version__", 'CarbonAImpact/version.py'),
     description="Monitor the power consumption of a function",
-    author="Neyri",
+    author="Capgemini Invent - Martin Chauvin, Francois Lemeille, Jordan Toh",
     package_data={"": ["ademe_energy_mix_by_country.csv"]},
     packages=find_packages(),
     python_requires=">=3.*, <4",
