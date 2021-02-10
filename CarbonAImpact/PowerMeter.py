@@ -47,7 +47,7 @@ class PowerMeter:
     LAPTOP_PUE = 1.3  # pue for my laptop
     SERVER_PUE = 1.58  # pue for a server
     DEFAULT_LOCATION = "FR"
-    DATETIME_FORMAT = "%m/%d/%Y %H:%M:%S"#"%c"
+    DATETIME_FORMAT = "%m/%d/%Y %H:%M:%S"  # "%c"
 
     @staticmethod
     def __load_energy_mix_db():
@@ -80,7 +80,7 @@ class PowerMeter:
             except OSError:
                 continue
         return cuda_available
- 
+
     @staticmethod
     def __get_country():
         """
@@ -166,7 +166,7 @@ class PowerMeter:
         else:
             LOGGER.info("filepath ok then")
             self.filepath = filepath
-        
+
         self.output_format = output_format
 
         if api_endpoint:
@@ -192,7 +192,6 @@ class PowerMeter:
             COUNTRY_NAME_COLUMN,
         ].values[0]
 
-
     def __aggregate_power(self, cpu_record, gpu_record):
         """
         Implement the cO2 emission value
@@ -201,7 +200,7 @@ class PowerMeter:
         -----------
         cpu_record, gpu_record (dict):
             Respectively CPU and GPU's records
-        
+
         Returns
         -------
         co2_emitted (float)
@@ -451,17 +450,19 @@ class PowerMeter:
 
     def __record_data_to_excel_file(self, info):
         try:
-            
+
             if Path(self.filepath).exists():
-                data = pd.read_excel(self.filepath).append(info, ignore_index=True)
+                data = pd.read_excel(self.filepath).append(
+                    info, ignore_index=True)
                 data.to_excel(self.filepath,
-                            index=False)
+                              index=False)
             else:
                 data = pd.DataFrame(info, index=[0])
                 data.to_excel(self.filepath, index=False)
             return True
         except:
-            LOGGER.error("* error during the writing process in an excel file *")
+            LOGGER.error(
+                "* error during the writing process in an excel file *")
             LOGGER.error(traceback.format_exc())
             return False
 
@@ -469,12 +470,13 @@ class PowerMeter:
         """
         Only two options so far: CSV or EXCEL
         """
-        if self.filepath.endswith('.csv'):
+        if self.filepath.suffix == '.csv':
             return self.__record_data_to_csv_file(info)
-        elif self.filepath.endswith('.xls') or self.filepath.endswith('.xlsx'):
+        elif self.filepath.suffix == '.xls' or self.filepath.suffix == '.xlsx':
             return self.__record_data_to_excel_file(info)
         else:
-            LOGGER.info('unknown format: it should be either .csv, .xls or .xlsx')
+            LOGGER.info(
+                'unknown format: it should be either .csv, .xls or .xlsx')
             return self.__record_data_to_excel_file(info)
 
     def __log_records(
@@ -503,7 +505,7 @@ class PowerMeter:
             "Client name": self.client_name,
             "Total Elapsed CPU Time (sec)": cpu_recorded_power[TOTAL_CPU_TIME],
             "Total Elapsed GPU Time (sec)": gpu_recorded_power[TOTAL_GPU_TIME],
-            "Cumulative Package Energy (mWh)":cpu_recorded_power[TOTAL_ENERGY_ALL],
+            "Cumulative Package Energy (mWh)": cpu_recorded_power[TOTAL_ENERGY_ALL],
             "Cumulative IA Energy (mWh)": cpu_recorded_power[TOTAL_ENERGY_CPU],
             "Cumulative GPU Energy (mWh)": gpu_recorded_power[TOTAL_ENERGY_GPU],
             "Cumulative DRAM Energy (mWh)": cpu_recorded_power[TOTAL_ENERGY_MEMORY],
