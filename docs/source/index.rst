@@ -1,9 +1,9 @@
-.. PyPowerGadget documentation master file, created by
+.. CarbonAImpact documentation master file, created by
    sphinx-quickstart on Wed Oct 28 17:29:00 2020.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to PyPowerGadget's documentation!
+Welcome to CarbonAImpact's documentation!
 =========================================
 
 This project aims at creating a python package that allows you to monitor the power consumption and CO2 emissions of any python function.
@@ -18,7 +18,7 @@ Here is an example of usage :
 
 .. code-block:: python
 
-   from PyPowerGadget import PowerMeter
+   from CarbonAImpact import PowerMeter
    power_meter = PowerMeter(project_name="MNIST classifier")
 
    @power_meter.measure_power(

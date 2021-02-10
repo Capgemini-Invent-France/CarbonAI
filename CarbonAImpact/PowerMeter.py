@@ -47,6 +47,7 @@ class PowerMeter:
     LAPTOP_PUE = 1.3  # pue for my laptop
     SERVER_PUE = 1.58  # pue for a server
     DEFAULT_LOCATION = "FR"
+    DATETIME_FORMAT = "%m/%d/%Y %H:%M:%S"#"%c"
 
     @staticmethod
     def __load_energy_mix_db():
@@ -226,6 +227,7 @@ class PowerMeter:
         data_shape="",
         algorithm_params="",
         comments="",
+        step="other",
     ):
         """
         A decorator to measure the power consumption of a given function
@@ -244,6 +246,8 @@ class PowerMeter:
             A string describing the parameters used by the algorithm
         comments (optional) : str
             A string to provide any useful information
+        step (optional) : str
+            A string to provide useful information such as 'preprocessing', 'inference', 'run'
 
         Returns
         -------
@@ -262,6 +266,7 @@ class PowerMeter:
                     data_shape=data_shape,
                     algorithm_params=algorithm_params,
                     comments=comments,
+                    step=step,
                 )
                 try:
                     results = func(*args, **kwargs)
@@ -281,14 +286,15 @@ class PowerMeter:
         data_shape="",
         algorithm_params="",
         comments="",
+        step="other"
     ):
-        self.used_package = str(package) if package else ""
-        self.used_algorithm = str(algorithm) if algorithm else ""
-        self.used_data_type = str(data_type) if data_type else ""
-        self.used_data_shape = str(data_shape) if data_shape else ""
-        self.used_algorithm_params = str(
-            algorithm_params) if algorithm_params else ""
-        self.used_comments = str(comments) if comments else ""
+        self.used_package = normalize(package)
+        self.used_algorithm = normalize(algorithm)
+        self.used_data_type = normalize(data_type)
+        self.used_data_shape = normalize(data_shape)
+        self.used_algorithm_params = normalize(algorithm_params)
+        self.used_comments = normalize(comments)
+        self.used_step = normalize(match(step, AVAILABLE_STEPS))
 
     def __call__(
         self,
@@ -298,6 +304,7 @@ class PowerMeter:
         data_shape="",
         algorithm_params="",
         comments="",
+        step="other",
     ):
         """
         The function used by the with statement
@@ -325,6 +332,7 @@ class PowerMeter:
             data_shape=data_shape,
             algorithm_params=algorithm_params,
             comments=comments,
+            step=step,
         )
         return self
 
@@ -349,6 +357,7 @@ class PowerMeter:
         data_shape="",
         algorithm_params="",
         comments="",
+        step="other",
     ):
         """
         Starts mesuring the power consumption of a given sample of code
@@ -378,6 +387,7 @@ class PowerMeter:
             data_shape=data_shape,
             algorithm_params=algorithm_params,
             comments=comments,
+            step=step,
         )
 
     def stop_measure(self):
@@ -397,6 +407,7 @@ class PowerMeter:
             data_shape=self.used_data_shape,
             algorithm_params=self.used_algorithm_params,
             comments=self.used_comments,
+            step=self.used_step,
         )
 
     # def __init_logging_file(self):
@@ -421,8 +432,6 @@ class PowerMeter:
             response = requests.request(
                 "POST", self.api_endpoint, headers=headers, data=data, timeout=1
             )
-            print("reponse   ")
-            print(response.text)
             return response.status_code
         except requests.exceptions.Timeout:
             return 408
@@ -478,12 +487,13 @@ class PowerMeter:
         data_shape="",
         algorithm_params="",
         comments="",
+        step="other",
     ):
         co2_emitted = self.__aggregate_power(
             self.power_gadget.record, self.gpu_power.record
         )
         payload = {
-            "Datetime": str(datetime.datetime.now()),
+            "Datetime": datetime.datetime.now().strftime(self.DATETIME_FORMAT),
             "Country": self.location_name,
             "Platform": self.platform,
             "User ID": self.user,
@@ -505,6 +515,7 @@ class PowerMeter:
             "Data type": data_type,
             "Data shape": data_shape,
             "Comment": comments,
+            "Step": step,
         }
         written = self.__record_data_to_file(payload)
         LOGGER.info("* recorded into a file? {}*".format(written))

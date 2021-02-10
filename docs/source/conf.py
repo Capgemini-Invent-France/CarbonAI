@@ -12,13 +12,13 @@
 #
 import os
 import sys
-sys.path.insert(0, os.path.abspath('../../PyPowerGadget/'))
+sys.path.insert(0, os.path.abspath('../../CarbonAImpact/'))
 sys.path.insert(0, os.path.abspath('../../'))
 
 
 # -- Project information -----------------------------------------------------
 
-project = 'PyPowerGadget'
+project = 'CarbonAImpact'
 copyright = '2020, Capgemini Invent - Martin Chauvin, Francois Lemeille, Jordan Toh'
 author = 'Capgemini Invent - Martin Chauvin, Francois Lemeille, Jordan Toh'
 master_doc = "index"

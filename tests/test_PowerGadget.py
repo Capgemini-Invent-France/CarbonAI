@@ -4,8 +4,8 @@ tests for the Python class PowerGadget
 import pytest
 from pathlib import Path
 
-from PyPowerGadget.PowerGadget import PowerGadget
-from PyPowerGadget.utils import (TOTAL_CPU_TIME, TOTAL_ENERGY_ALL, TOTAL_ENERGY_CPU, TOTAL_ENERGY_MEMORY)
+from CarbonAImpact.PowerGadget import PowerGadget
+from CarbonAImpact.utils import (TOTAL_CPU_TIME, TOTAL_ENERGY_ALL, TOTAL_ENERGY_CPU, TOTAL_ENERGY_MEMORY)
 
 
 @pytest.fixture

@@ -8,9 +8,9 @@ dist/
 *power_logs*.csv
 emissions.csv
 .DS_STORE
-PyPowerGadget/requirements.txt
-PyPowerGadget/test*
-PyPowerGadget/mesure_power.py
+CarbonAImpact/requirements.txt
+CarbonAImpact/test*
+CarbonAImpact/mesure_power.py
 *.zip
 public
 ignore
