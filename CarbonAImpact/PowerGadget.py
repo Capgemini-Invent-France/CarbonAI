@@ -7,7 +7,10 @@ The software data can be logged from the command line (without running the GUI
 app) using PowerLog.
 cf. https://software.intel.com/content/www/us/en/develop/articles/intel-power-gadget.html
 """
+__all__ = ['PowerGadgetMac', 'PowerGadgetWin', 'PowerGadgetLinuxRAPL', 'PowerGadgetLinuxMSR']
+
 import os
+from pathlib import Path
 import logging
 import subprocess
 import re
@@ -19,10 +22,26 @@ import abc
 
 import pandas as pd
 
-from PyPowerGadget.settings import *
-
+from .utils import (TOTAL_CPU_TIME, TOTAL_ENERGY_ALL,
+TOTAL_ENERGY_CPU, TOTAL_ENERGY_MEMORY, PACKAGE_PATH, MAC_INTELPOWERLOG_FILENAME,
+HOME_DIR, WIN_INTELPOWERLOG_FILENAME, POWERLOG_PATH_LINUX)
 
 LOGGER = logging.getLogger(__name__)
+
+DMG_PATH = Path("/tmp/IntelPowerGadget.dmg")
+MSI_PATH = Path("C:\\tmp\\IntelPowerGadget.msi")
+
+POWERLOG_PATH_MAC = Path("/Applications/Intel Power Gadget/PowerLog")
+POWERLOG_PATH_WIN = Path("/Program Files/Intel/Power Gadget 3.5")
+POWERLOG_TOOL_WIN = "IntelPowerGadget.exe"
+
+
+CPU_IDS_DIR = "/sys/devices/system/cpu/cpu*/topology/physical_package_id"
+READ_MSR_PATH = "/dev/cpu/{}/msr"
+READ_RAPL_PATH = "/sys/class/powercap/intel-rapl/intel-rapl:{}/" #rapl_socket_id
+RAPL_DEVICENAME_FILE = "name"
+RAPL_ENERGY_FILE = "energy_uj"
+RAPL_DRAM_PATH = "intel-rapl:{}:{}/" #rapl_socket_id, rapl_device_id
 
 class PowerGadget(abc.ABC):
     """
@@ -37,9 +56,8 @@ class PowerGadget(abc.ABC):
 
         Parameters
         ----------
-        log_file
-            Pathlib.Path instance
-                
+        powerlog_file
+            Pathlib.Path instance                
         Returns
         -------
         results (dict)
@@ -205,7 +223,7 @@ class PowerGadgetWin(PowerGadget):
 
     def __get_powerlog_file(self):
         file_names = glob.glob(str(HOME_DIR / "Documents" / WIN_INTELPOWERLOG_FILENAME))
-        file_names.sort(key=lambda f: list(map(int, re.split("-|_|\.|/", f)[-7:-1])))
+        file_names.sort(key=lambda f: list(map(int, re.split(r"-|_|\.|/", f)[-7:-1])))
         return Path(file_names[-1])
 
     def start(self):
@@ -363,7 +381,7 @@ class PowerGadgetLinuxMSR(PowerGadgetLinux):
 
     def __get_used_units(self, cpu):
         """
-        TODO: add docstring        
+        TODO: add docstring
         """
         fd = os.open(READ_MSR_PATH.format(cpu), os.O_RDONLY)
         # Calculate the units used

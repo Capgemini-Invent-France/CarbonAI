@@ -1,10 +1,11 @@
 {
-    "project_name": "Project X",
+    "project_name": "Project Test",
     "program_name": "Program X",
     "client_name": "Client X",
     "cpu_power_log_path": "",
-    "get_country": true,
-    "user_name": "customUsername",
+    "get_country": false,
+    "is_online": false,
+    "user_name": "customUsernameTest",
     "filepath": "",
     "api_endpoint": "https://50esc1hzja.execute-api.eu-west-3.amazonaws.com/green-ai-db-handling"
 

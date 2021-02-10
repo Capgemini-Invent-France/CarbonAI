@@ -1,0 +1,20 @@
+"System Time","RDTSC","Elapsed Time (sec)","CPU Utilization(%)","CPU Frequency_0(MHz)","CPU Min Frequency_0(MHz)","CPU Max Frequency_0(MHz)","CPU Requsted Frequency_0(MHz)","Processor Power_0(Watt)","Cumulative Processor Energy_0(Joules)","Cumulative Processor Energy_0(mWh)","IA Power_0(Watt)","Cumulative IA Energy_0(Joules)","Cumulative IA Energy_0(mWh)","Package Temperature_0(C)","Package Hot_0","CPU Min Temperature_0(C)","CPU Max Temperature_0(C)","DRAM Power_0(Watt)","Cumulative DRAM Energy_0(Joules)","Cumulative DRAM Energy_0(mWh)","Package Power Limit_0(Watt)","GT Frequency(MHz)","GT Requsted Frequency(MHz)"
+"09:50:47:945","10438165409436","   0.501","  22.678"," 2994"," 1200"," 3600"," 3006","   5.675","   2.841","   0.789","   4.586","   2.296","   0.638"," 54","0"," 51"," 74","   0.992","   0.497","   0.138","  15.000","    0","    0"
+"09:50:48:462","10439356114856","   1.018","   9.709"," 2511"," 1000"," 3600"," 2543","   2.106","   3.930","   1.092","   1.631","   3.139","   0.872"," 53","0"," 51"," 70","   0.626","   0.820","   0.228","  15.000","    0","    0"
+"09:50:48:966","10440516201804","   1.521","   7.547"," 1912"," 1200"," 3600"," 1961","   1.071","   4.469","   1.241","   0.637","   3.460","   0.961"," 53","0"," 50"," 57","   0.567","   1.106","   0.307","  15.000","    0","    0"
+"09:50:49:469","10441676454134","   2.025","   5.510"," 2063"," 1200"," 3600"," 2084","   1.004","   4.975","   1.382","   0.620","   3.772","   1.048"," 54","0"," 50"," 61","   0.544","   1.380","   0.383","  15.000","    0","    0"
+
+"Total Elapsed Time (sec) = 2.024626"
+"Measured RDTSC Frequency (GHz) = 2.304"
+
+"Cumulative Package Energy_0 (Joules) = 4.974609"
+"Cumulative Package Energy_0 (mWh) = 1.381836"
+"Average Package Power_0 (Watt) = 2.457052"
+
+"Cumulative IA Energy_0 (Joules) = 3.771912"
+"Cumulative IA Energy_0 (mWh) = 1.047753"
+"Average Package IA_0 (Watt) = 1.863017"
+
+"Cumulative DRAM Energy_0 (Joules) = 1.379761"
+"Cumulative DRAM Energy_0 (mWh) = 0.383267"
+"Average Package DRAM_0 (Watt) = 0.681489"

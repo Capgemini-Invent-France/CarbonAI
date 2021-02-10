@@ -1,15 +1,22 @@
+"""
+Wrapper of the Python class PowerMeter for a notebook usage
+"""
 __all__ = ["MagicPowerMeter"]
 
 from IPython.core.magic import Magics, magics_class, cell_magic
 from IPython.core.magic_arguments import argument, magic_arguments, parse_argstring
 
-import PyPowerGadget.PowerMeter
+from . import PowerMeter
 
 
 @magics_class
 class MagicPowerMeter(Magics):
+    """
+    This class will be used to use a PowerMeter instance
+    in a notebook cell.
+    """
     def __init__(self, shell):
-        super(MagicPowerMeter, self).__init__(shell)
+        super().__init__(shell)
 
     @magic_arguments()
     @argument("--data_type", help="Type of data used")
@@ -25,7 +32,7 @@ class MagicPowerMeter(Magics):
         if options.power_meter not in self.shell.user_ns.keys():
             raise NameError("The PowerMeter variable passed is not referenced")
         self.power_meter = self.shell.user_ns[options.power_meter]
-        if not isinstance(self.power_meter, PyPowerGadget.PowerMeter):
+        if not isinstance(self.power_meter, PowerMeter):
             raise TypeError("The first argument is not a PowerMeter object")
         options = vars(options)
         del options["power_meter"]
