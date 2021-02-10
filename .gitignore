@@ -13,3 +13,4 @@ PyPowerGadget/test*
 PyPowerGadget/mesure_power.py
 *.zip
 public
+ignore
