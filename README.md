@@ -2,7 +2,7 @@
 
 This project aims at creating a python package that allows you to monitor the power consumption of any python function.
 
-**The complete documentation is available [here](https://the_insighters.gitlab.io/projects/green-ai/index.html)**
+**The complete documentation is available [here](https://the_insighters.gitlab.io/projects/carbonaimpact/)**
 
 ## Install
 
@@ -13,10 +13,7 @@ First of all you need to install the intel utility allowing you to monitor power
 
 To install this package :
 ```
-git clone https://gitlab.com/martinChauvin/green-ai.git
-cd green-ai
-python setup.py install
-pip install .
+pip install git+https://gitlab.com/the_insighters/projects/carbonaimpact.git
 ```
 
 ## Disclaimer
