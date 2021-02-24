@@ -124,8 +124,10 @@ class PowerMeter:
 
         self.cuda_available = self.__check_gpu()
         if self.cuda_available:
+            LOGGER.info("Found a GPU")
             self.gpu_power = NvidiaPower()
         else:
+            LOGGER.info("Found no GPU")
             self.gpu_power = NoGpuPower()
 
         if user_name:
@@ -161,19 +163,19 @@ class PowerMeter:
         self.location_name = self.__get_location_name()
 
         if not filepath:
-            LOGGER.info("No current filepath")
+            LOGGER.info("No current filepath, will use the default")
             self.filepath = Path.cwd() / "emissions.csv"
         else:
-            LOGGER.info("filepath ok then")
+            LOGGER.info("Filepath given, will save there")
             self.filepath = filepath
 
         self.output_format = output_format
 
         if api_endpoint:
-            LOGGER.info("api endpoint given")
+            LOGGER.info("Api endpoint given, will save data online")
             self.api_endpoint = api_endpoint
         else:
-            LOGGER.info("No current api endpoint")
+            LOGGER.info("No current api endpoint, will save data locally")
             self.api_endpoint = ""
 
         self.logging_filename = PACKAGE_PATH / LOGGING_FILE
