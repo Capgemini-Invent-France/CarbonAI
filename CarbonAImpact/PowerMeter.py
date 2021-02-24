@@ -68,17 +68,23 @@ class PowerMeter:
 
     @staticmethod
     def __check_gpu():
-        import ctypes
-
-        libnames = ("libcuda.so", "libcuda.dylib", "cuda.dll")
         cuda_available = False
-        for libname in libnames:
-            try:
-                _ = ctypes.CDLL(libname)
-                cuda_available = True
-                break
-            except OSError:
-                continue
+        try:
+            subprocess.check_output('nvidia-smi', stderr=subprocess.DEVNULL)
+            cuda_available = True
+        except subprocess.CalledProcessError:
+            pass
+
+        # import ctypes
+
+        # libnames = ("libcuda.so", "libcuda.dylib", "cuda.dll")
+        # for libname in libnames:
+        #     try:
+        #         _ = ctypes.CDLL(libname)
+        #         cuda_available = True
+        #         break
+        #     except OSError:
+        #         continue
         return cuda_available
 
     @staticmethod
