@@ -26,13 +26,13 @@ You can now head to the `All platforms`_ section
 
 Ubuntu
 ------
-If you're on Ubuntu, no need to perform any software installation, you're good to go. 
-Skip to the `All platforms`_ section
+If you're on Ubuntu, no need to perform any software installation. 
+Make sure, any of the following command works :
+``ls /sys/class/powercap/intel-rapl/intel-rapl:*/``
+``ls /dev/cpu/*/msr``
 
-AWS EC2
--------
-No need to perform any installation, but you will have to run the program as root
-Skip to the `All platforms`_ section
+You can now head to the `All platforms`_ section
+
 
 All platforms
 -------------
