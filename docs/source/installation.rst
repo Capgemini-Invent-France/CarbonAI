@@ -28,9 +28,8 @@ Ubuntu
 ------
 If you're on Ubuntu, no need to perform any software installation. 
 Make sure, any of the following command works :
-
-- ``ls /sys/class/powercap/intel-rapl/intel-rapl:*/``
-- ``ls /dev/cpu/*/msr`` (will require you to execute your code as root)
+Either this works : ``ls /sys/class/powercap/intel-rapl/intel-rapl:*/``
+or you need to enable the MSR using ``modprobe msr`` and you will need to execute your code as root
 
 You can now head to the `All platforms`_ section
 
