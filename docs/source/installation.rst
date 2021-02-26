@@ -26,16 +26,16 @@ You can now head to the `All platforms`_ section
 
 Ubuntu
 ------
-If you're on Ubuntu, no need to perform any software installation, you're good to go. 
-Skip to the `All platforms`_ section
+If you're on Ubuntu, no need to perform any software installation. 
+Make sure, any of the following command works :
+Either this works : ``ls /sys/class/powercap/intel-rapl/intel-rapl:*/``
+or you need to enable the MSR using ``modprobe msr`` and you will need to execute your code as root
 
-AWS EC2
--------
-No need to perform any installation, but you will have to run the program as root
-Skip to the `All platforms`_ section
+You can now head to the `All platforms`_ section
+
 
 All platforms
 -------------
 Once you've installed (if needed) the intel power gadget.
 Install the package using pip :
-``pip install git+https://gitlab.com/the_insighters/projects/green-ai.git``
+``pip install git+https://gitlab.com/the_insighters/projects/carbonaimpact.git``

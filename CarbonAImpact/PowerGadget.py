@@ -57,7 +57,7 @@ class PowerGadget(abc.ABC):
         Parameters
         ----------
         powerlog_file
-            Pathlib.Path instance                
+            Pathlib.Path instance
         Returns
         -------
         results (dict)
@@ -74,7 +74,7 @@ class PowerGadget(abc.ABC):
             TOTAL_ENERGY_ALL: 0,
             TOTAL_ENERGY_CPU: 0,
             TOTAL_ENERGY_MEMORY: 0,
-        }            
+        }
         results[TOTAL_CPU_TIME] = float(
             re.search(r"(?<=Total Elapsed Time \(sec\) = )(\d|\.)*", content).group(0)
         )
@@ -210,7 +210,7 @@ class PowerGadgetWin(PowerGadget):
 
     def __init__(self, powerlog_path=""):
         super().__init__()
-        if powerlog_path > 0:
+        if powerlog_path:
             self.powerlog_path = Path(powerlog_path)
         else:
             self.powerlog_path = POWERLOG_PATH_WIN / POWERLOG_TOOL_WIN
@@ -267,7 +267,7 @@ class PowerGadgetLinux(PowerGadget):
             if package_id not in cpu_ids:
                 cpu_ids.append(package_id)
         return cpu_ids
-    
+
     def __init__(self):
         super().__init__()
         self.cpu_ids = self.__get_cpu_ids()
