@@ -23,6 +23,7 @@ LOGGER = logging.getLogger(__name__)
 
 NVIDIAPOWERLOG_FILENAME = "nvidiaPowerLog.csv"
 
+
 class GpuPower(abc.ABC):
     """
     Class to monitor the power usage of a gpu
@@ -32,6 +33,7 @@ class GpuPower(abc.ABC):
     3. call stop
     4. collect the results with parse_log
     """
+
     def __init__(self):
         self.record = {TOTAL_GPU_TIME: 0, TOTAL_ENERGY_GPU: 0}
 
@@ -58,6 +60,7 @@ class NoGpuPower(GpuPower):
     """
     TODO: add docstring. A quoi sert cette classe ?
     """
+
     def __init__(self):
         super().__init__()
         pass
@@ -76,7 +79,8 @@ class NvidiaPower(GpuPower):
     def __init__(self, interval=1):
         super().__init__()
         self.log_file = (
-            Path(os.path.dirname(os.path.abspath(__file__))) / NVIDIAPOWERLOG_FILENAME
+            Path(os.path.dirname(os.path.abspath(__file__))) /
+            NVIDIAPOWERLOG_FILENAME
         )
         self.logging_process = None
         self.interval = interval
@@ -124,15 +128,15 @@ class NvidiaPower(GpuPower):
                 "Logging file not found, make sure you started to run a measure"
             )
         content = self.log_file.read_text()
-        regex_power = "(?<=Power Draw                  : )(.*)(?= W)"
-        regex_time = "(?<=Timestamp                           : )(.*)"
+        regex_power = r"(?<=Power Draw( +): )(.*)(?= W)"
+        regex_time = r"(?<=Timestamp( +): )(.*)"
         records = content.split("==============NVSMI LOG==============")
         prev_power = 0
         times = []
         powers = []
         for record in records[1:]:
-            regex_power = "(?<=Power Draw                  : )(.*)(?= W)"
-            regex_time = "(?<=Timestamp                           : )(.*)"
+            regex_power = r"(?<=Power Draw( +): )(.*)(?= W)"
+            regex_time = r"(?<=Timestamp( +): )(.*)"
             time = re.search(regex_time, record).group(0)
             power = re.search(regex_power, record)
             if power:
@@ -142,9 +146,11 @@ class NvidiaPower(GpuPower):
             prev_power = power
             times.append(time)
             powers.append(power)
-        results = pd.DataFrame(np.array([times, powers]).T, columns=["Time", "Power"])
+        results = pd.DataFrame(
+            np.array([times, powers]).T, columns=["Time", "Power"])
         results["Power"] = results["Power"].astype("float32")
-        results["Time"] = pd.to_datetime(results["Time"], infer_datetime_format=True)
+        results["Time"] = pd.to_datetime(
+            results["Time"], infer_datetime_format=True)
         results["Elapsed time"] = results["Time"] - results.loc[0, "Time"]
         results["Elapsed time"] = results["Elapsed time"].dt.total_seconds()
         self.record[TOTAL_GPU_TIME] = results["Elapsed time"].iloc[-1]
