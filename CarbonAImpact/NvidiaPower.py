@@ -128,24 +128,10 @@ class NvidiaPower(GpuPower):
                 "Logging file not found, make sure you started to run a measure"
             )
         content = self.log_file.read_text()
-        regex_power = r"(?<=Power Draw( +): )(.*)(?= W)"
-        regex_time = r"(?<=Timestamp( +): )(.*)"
-        records = content.split("==============NVSMI LOG==============")
-        prev_power = 0
-        times = []
-        powers = []
-        for record in records[1:]:
-            regex_power = r"(?<=Power Draw( +): )(.*)(?= W)"
-            regex_time = r"(?<=Timestamp( +): )(.*)"
-            time = re.search(regex_time, record).group(0)
-            power = re.search(regex_power, record)
-            if power:
-                power = power.group(0)
-            else:
-                power = prev_power
-            prev_power = power
-            times.append(time)
-            powers.append(power)
+        regex_power = r"Power Draw +: (.*) W"
+        regex_time = r"Timestamp +: (.*)"
+        times = re.findall(regex_time, content)
+        powers = re.findall(regex_power, content)
         results = pd.DataFrame(
             np.array([times, powers]).T, columns=["Time", "Power"])
         results["Power"] = results["Power"].astype("float32")
