@@ -32,7 +32,7 @@ DMG_PATH = Path("/tmp/IntelPowerGadget.dmg")
 MSI_PATH = Path("C:\\tmp\\IntelPowerGadget.msi")
 
 POWERLOG_PATH_MAC = Path("/Applications/Intel Power Gadget/PowerLog")
-POWERLOG_PATH_WIN = Path("/Program Files/Intel/Power Gadget 3.5")
+POWERLOG_PATH_WIN = [Path("/Program Files/Intel/Power Gadget 3.6"), Path("/Program Files/Intel/Power Gadget 3.5")]
 POWERLOG_TOOL_WIN = "IntelPowerGadget.exe"
 
 
@@ -213,7 +213,11 @@ class PowerGadgetWin(PowerGadget):
         if powerlog_path:
             self.powerlog_path = Path(powerlog_path)
         else:
-            self.powerlog_path = POWERLOG_PATH_WIN / POWERLOG_TOOL_WIN
+            # Try different version of the powerlog path on windows
+            for path_win in POWERLOG_PATH_WIN:
+                if path_win.exists():
+                    self.powerlog_path = path_win / POWERLOG_TOOL_WIN
+                    break
         if not self.powerlog_path.exists():
             raise ModuleNotFoundError(
                 "We didn't find the Intel Power Gadget tool. \nMake sure it is installed (download available here : https://software.intel.com/file/823776/download).\nIf it is installed, we looked for it here:"
