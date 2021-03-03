@@ -12,7 +12,7 @@ import traceback
 import json
 import datetime
 import getpass
-import subprocess
+import shutil
 import os
 import sys
 import requests
@@ -70,22 +70,9 @@ class PowerMeter:
     @staticmethod
     def __check_gpu():
         cuda_available = False
-        try:
-            subprocess.check_output('nvidia-smi', stderr=subprocess.DEVNULL)
-            cuda_available = True
-        except subprocess.CalledProcessError:
-            pass
+        if shutil.which('nvidia-smi'):
+            cuda_available=True
 
-        # import ctypes
-
-        # libnames = ("libcuda.so", "libcuda.dylib", "cuda.dll")
-        # for libname in libnames:
-        #     try:
-        #         _ = ctypes.CDLL(libname)
-        #         cuda_available = True
-        #         break
-        #     except OSError:
-        #         continue
         return cuda_available
 
     @staticmethod
