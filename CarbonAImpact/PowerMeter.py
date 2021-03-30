@@ -70,8 +70,8 @@ class PowerMeter:
     @staticmethod
     def __check_gpu():
         cuda_available = False
-        if shutil.which('nvidia-smi'):
-            cuda_available=True
+        if shutil.which("nvidia-smi"):
+            cuda_available = True
 
         return cuda_available
 
@@ -95,19 +95,25 @@ class PowerMeter:
         return cls(**args)
 
     def __init__(
-        self, project_name="", program_name="", client_name="", cpu_power_log_path="",
-        get_country=True, user_name="", filepath=None,
-        api_endpoint=None, location="", is_online=True,
-        output_format='csv'
+        self,
+        project_name="",
+        program_name="",
+        client_name="",
+        cpu_power_log_path="",
+        get_country=True,
+        user_name="",
+        filepath=None,
+        api_endpoint=None,
+        location="",
+        is_online=True,
+        output_format="csv",
     ):
         self.platform = sys.platform
         if self.platform == "darwin":
-            self.power_gadget = PowerGadgetMac(
-                powerlog_path=cpu_power_log_path)
+            self.power_gadget = PowerGadgetMac(powerlog_path=cpu_power_log_path)
             self.pue = self.LAPTOP_PUE  # pue for my laptop
         elif self.platform == "win32":
-            self.power_gadget = PowerGadgetWin(
-                powerlog_path=cpu_power_log_path)
+            self.power_gadget = PowerGadgetWin(powerlog_path=cpu_power_log_path)
             self.pue = self.LAPTOP_PUE  # pue for my laptop
         elif self.platform in ["linux", "linux2"]:
             if POWERLOG_PATH_LINUX.exists():
@@ -177,7 +183,9 @@ class PowerMeter:
     def __get_energy_mix(self):
         if not (self.energy_mix_db[COUNTRY_CODE_COLUMN] == self.location).any():
             raise NameError(
-                "The location inputed was not found, make sure you wrote the isocode of your country. You used "+self.location)
+                "The location inputed was not found, make sure you wrote the isocode of your country. You used "
+                + self.location
+            )
         return self.energy_mix_db.loc[
             self.energy_mix_db[COUNTRY_CODE_COLUMN] == self.location, ENERGY_MIX_COLUMN
         ].values[0]
@@ -202,8 +210,8 @@ class PowerMeter:
         co2_emitted (float)
         """
         used_energy = self.pue * (
-            cpu_record[TOTAL_ENERGY_CPU]
-            + cpu_record[TOTAL_ENERGY_MEMORY]
+            cpu_record[TOTAL_ENERGY_PROCESS_CPU]
+            + cpu_record[TOTAL_ENERGY_PROCESS_MEMORY]
             + gpu_record[TOTAL_ENERGY_GPU]
         )  # mWh
         co2_emitted = used_energy * self.energy_mix * 1e-3
@@ -281,7 +289,7 @@ class PowerMeter:
         data_shape="",
         algorithm_params="",
         comments="",
-        step="other"
+        step="other",
     ):
         self.used_package = normalize(package)
         self.used_algorithm = normalize(algorithm)
@@ -435,8 +443,7 @@ class PowerMeter:
         try:
             data = pd.DataFrame(info, index=[0])
             if Path(self.filepath).exists():
-                data.to_csv(self.filepath, mode="a",
-                            index=False, header=False)
+                data.to_csv(self.filepath, mode="a", index=False, header=False)
             else:
                 data.to_csv(self.filepath, index=False)
             return True
@@ -448,17 +455,14 @@ class PowerMeter:
         try:
 
             if Path(self.filepath).exists():
-                data = pd.read_excel(self.filepath).append(
-                    info, ignore_index=True)
-                data.to_excel(self.filepath,
-                              index=False)
+                data = pd.read_excel(self.filepath).append(info, ignore_index=True)
+                data.to_excel(self.filepath, index=False)
             else:
                 data = pd.DataFrame(info, index=[0])
                 data.to_excel(self.filepath, index=False)
             return True
         except:
-            LOGGER.error(
-                "* error during the writing process in an excel file *")
+            LOGGER.error("* error during the writing process in an excel file *")
             LOGGER.error(traceback.format_exc())
             return False
 
@@ -466,13 +470,12 @@ class PowerMeter:
         """
         Only two options so far: CSV or EXCEL
         """
-        if self.filepath.suffix == '.csv':
+        if self.filepath.suffix == ".csv":
             return self.__record_data_to_csv_file(info)
-        elif self.filepath.suffix == '.xls' or self.filepath.suffix == '.xlsx':
+        elif self.filepath.suffix == ".xls" or self.filepath.suffix == ".xlsx":
             return self.__record_data_to_excel_file(info)
         else:
-            LOGGER.info(
-                'unknown format: it should be either .csv, .xls or .xlsx')
+            LOGGER.info("unknown format: it should be either .csv, .xls or .xlsx")
             return self.__record_data_to_excel_file(info)
 
     def __log_records(
@@ -505,6 +508,12 @@ class PowerMeter:
             "Cumulative IA Energy (mWh)": cpu_recorded_power[TOTAL_ENERGY_CPU],
             "Cumulative GPU Energy (mWh)": gpu_recorded_power[TOTAL_ENERGY_GPU],
             "Cumulative DRAM Energy (mWh)": cpu_recorded_power[TOTAL_ENERGY_MEMORY],
+            "Cumulative process CPU Energy (mWh)": cpu_recorded_power[
+                TOTAL_ENERGY_PROCESS_CPU
+            ],
+            "Cumulative process DRAM Energy (mWh)": cpu_recorded_power[
+                TOTAL_ENERGY_PROCESS_MEMORY
+            ],
             "PUE": self.pue,
             "CO2 emitted (gCO2e)": co2_emitted,
             "Package": package,
@@ -527,8 +536,9 @@ class PowerMeter:
                 # can't upload we'll record the data
                 data = pd.DataFrame(payload, index=[0])
                 if self.logging_filename.exists():
-                    data.to_csv(self.logging_filename, mode="a",
-                                index=False, header=False)
+                    data.to_csv(
+                        self.logging_filename, mode="a", index=False, header=False
+                    )
                 else:
                     data.to_csv(self.logging_filename, index=False)
 
@@ -540,8 +550,7 @@ class PowerMeter:
                     for i, payload in enumerate(payloads):
                         res_status_code = self.__record_data_to_server(payload)
                         if res_status_code != 200:
-                            data.iloc[i:].to_csv(
-                                self.logging_filename, index=False)
+                            data.iloc[i:].to_csv(self.logging_filename, index=False)
                             break
                     else:
                         self.logging_filename.unlink()
