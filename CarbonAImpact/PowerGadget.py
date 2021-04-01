@@ -249,11 +249,16 @@ class PowerGadgetMac(PowerGadget):
         Tuple
             The recorded CPU percent usage and the memory usage
         """
-        # TODO: update this function (cf windows)
         process_usage = process.as_dict()
-        cpu_usage = process_usage["cpu_percent"] / 100 / psutil.cpu_count()
-        memory_usage = process_usage["memory_percent"] / 100
-        return cpu_usage, memory_usage
+        cpu_usage = psutil.cpu_percent()
+        process_cpu_usage = process_usage["cpu_percent"] / (
+            cpu_usage * psutil.cpu_count()
+        )
+        memory_global = psutil.virtual_memory()
+        memory_usage = process_usage["memory_full_info"].rss / (
+            memory_global.total - memory_global.available
+        )
+        return process_cpu_usage, memory_usage
 
     def __append_energy_usage(self, process, interval=1):
         energy_usage = self.__get_power_consumption(duration=interval)
@@ -485,6 +490,7 @@ class PowerGadgetLinuxRAPL(PowerGadgetLinux):
         self.record = {}
         self.cpu_powers = []
         self.dram_powers = []
+        # TODO : take into account the process usage
         for cpu_id in self.cpu_ids:
             self.cpu_powers.append(self.__get_cpu_energy(cpu_id))
         for cpu_id, dram_id in self.dram_ids:
@@ -628,6 +634,7 @@ class PowerGadgetLinuxMSR(PowerGadgetLinux):
         if self.thread and self.thread.is_alive():
             self.stop()
         self.power_draws = {}
+        # TODO : take into account the process usage
         self.thread = threading.Thread(target=self.get_computer_consumption, args=())
         self.thread.start()
 
