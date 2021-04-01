@@ -86,7 +86,9 @@ class PowerGadget(abc.ABC):
         """
         content = powerlog_file.read_text()
         if not "Total Elapsed Time" in content:
-            print("The log file does not seem to written yet, we'll wait 2 secs.")
+            LOGGER.debug(
+                "The log file does not seem to written yet, we'll wait 2 secs."
+            )
             time.sleep(2)
             content = powerlog_file.read_text()
         results = {
@@ -251,7 +253,6 @@ class PowerGadgetMac(PowerGadget):
         self.thread.do_run = False
         self.thread.join()
         self.record = pd.DataFrame.from_records(self.power_draws)
-        self.record
         self.record = self.record.sum(axis=0)
 
 
@@ -282,8 +283,32 @@ class PowerGadgetWin(PowerGadget):
         file_names.sort(key=lambda f: list(map(int, re.split(r"-|_|\.|/", f)[-7:-1])))
         return Path(file_names[-1])
 
+    def __stop_thread(self):
+        self.thread.do_run = False
+        self.thread.join()
+
+    def __get_computer_usage(self, process, interval):
+        with process.oneshot():
+            cpu_usage = process.cpu_percent(interval=interval) / 100
+            memory_usage = process.memory_percent() / 100
+        return cpu_usage, memory_usage
+
+    def get_process_usage(self, interval=1):
+        current_process = psutil.Process()
+        while getattr(self.thread, "do_run", True):
+            self.process_usage.append(
+                self.__get_computer_usage(current_process, interval=interval)
+            )
+        else:
+            self.process_usage.append(
+                self.__get_computer_usage(current_process, interval=interval)
+            )
+
     def start(self):
         LOGGER.info("starting CPU power monitoring ...")
+        if self.thread and self.thread.is_alive():
+            LOGGER.debug("another thread is alive, we are going to close it first")
+            self.__stop_thread()
         _ = subprocess.Popen(
             '"' + str(self.powerlog_path) + '" /min',
             stdin=None,
@@ -292,6 +317,8 @@ class PowerGadgetWin(PowerGadget):
             shell=True,
         )
         time.sleep(1)
+        self.thread = threading.Thread(target=self.get_process_usage, args=())
+        self.thread.start()
         _ = subprocess.run('"' + str(self.powerlog_path) + '" -start', shell=True)
 
     def stop(self):
@@ -302,6 +329,7 @@ class PowerGadgetWin(PowerGadget):
             stdout=open(os.devnull, "wb"),
             shell=True,
         )
+        self.__stop_thread()
         powerlog_file = self.__get_powerlog_file()
         self.record = self.parse_log(powerlog_file)
         os.remove(powerlog_file)
