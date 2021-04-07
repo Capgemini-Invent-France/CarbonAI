@@ -118,8 +118,10 @@ class PowerMeter:
         elif self.platform in ["linux", "linux2"]:
             if POWERLOG_PATH_LINUX.exists():
                 self.power_gadget = PowerGadgetLinuxRAPL()
-            else:
+            elif MSR_PATH_LINUX_TEST.exists():
                 self.power_gadget = PowerGadgetLinuxMSR()
+            else:
+                LOGGER.warning("No power reading interface was found")
             self.pue = self.SERVER_PUE  # pue for a server
 
         self.cuda_available = self.__check_gpu()
