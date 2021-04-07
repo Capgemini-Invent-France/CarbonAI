@@ -160,6 +160,7 @@ class PowerGadget(abc.ABC):
 
     def __init__(self):
         self.record = {}
+        self.thread = None
 
     def __get_powerlog_file(self):
         """
@@ -172,6 +173,35 @@ class PowerGadget(abc.ABC):
         Starts the recording processus with Intel Power Gadget
         """
         pass
+
+    def stop_thread(self):
+        self.thread.do_run = False
+        self.thread.join()
+
+    def get_computer_usage(self, process, interval=1):
+        """Compute the ratio of cpu and memory used by the current process 
+
+        Parameters
+        ----------
+        process : psutil.Process
+            the current process
+        interval : int
+            interval at which measure ratios
+
+        Returns
+        -------
+        Tuple
+            time of execution, ratio of cpu used, ration of memory used
+        """
+        with process.oneshot():
+            process_cpu_usage = process.cpu_percent(interval=interval)
+            cpu_usage = psutil.cpu_percent()
+            process_cpu_usage = process_cpu_usage / (cpu_usage * psutil.cpu_count())
+            memory_global = psutil.virtual_memory()
+            memory_usage = process.memory_full_info().rss / (
+                memory_global.total - memory_global.available
+            )
+        return datetime.datetime.now(), process_cpu_usage, memory_usage
 
     def stop(self):
         """
@@ -199,7 +229,7 @@ class PowerGadgetMac(PowerGadget):
                 + ", try passing the path to the powerLog tool to the powerMeter."
             )
         self.powerlog_file = self.__get_powerlog_file()
-        self.thread = None
+        # self.thread = None
         self.power_draws = []
 
     def __get_powerlog_file(self):
@@ -234,35 +264,9 @@ class PowerGadgetMac(PowerGadget):
         consumption = self.parse_log(self.powerlog_file)
         return consumption
 
-    def __get_computer_usage(self, process):
-        """
-        Records the cpu percent usage and memory usage since last call (will return 0 when first call is performed)
-        Note: The cpu usage is not split evenly between all available CPUs and must be divided by the number of cpu
-
-        Parameters
-        ----------
-        process : psutil.Process
-            The current running process as given by psutil
-
-        Returns
-        -------
-        Tuple
-            The recorded CPU percent usage and the memory usage
-        """
-        process_usage = process.as_dict()
-        cpu_usage = psutil.cpu_percent()
-        process_cpu_usage = process_usage["cpu_percent"] / (
-            cpu_usage * psutil.cpu_count()
-        )
-        memory_global = psutil.virtual_memory()
-        memory_usage = process_usage["memory_full_info"].rss / (
-            memory_global.total - memory_global.available
-        )
-        return process_cpu_usage, memory_usage
-
     def __append_energy_usage(self, process, interval=1):
         energy_usage = self.__get_power_consumption(duration=interval)
-        cpu_usage, memory_usage = self.__get_computer_usage(process)
+        _, cpu_usage, memory_usage = self.get_computer_usage(process, interval=0)
         energy_usage[TOTAL_ENERGY_PROCESS_CPU] = (
             energy_usage[TOTAL_ENERGY_CPU] * cpu_usage
         )
@@ -279,7 +283,9 @@ class PowerGadgetMac(PowerGadget):
         interval (int)
         """
         current_process = psutil.Process()
-        _, _ = self.__get_computer_usage(current_process)  # initialize the cpu usage
+        _, _, _ = self.get_computer_usage(
+            current_process, interval=0
+        )  # initialize the cpu usage
         self.__append_energy_usage(current_process, interval=interval)
         while getattr(self.thread, "do_run", True):
             self.__append_energy_usage(current_process, interval=interval)
@@ -288,15 +294,14 @@ class PowerGadgetMac(PowerGadget):
     def start(self):
         LOGGER.info("starting CPU power monitoring ...")
         if self.thread and self.thread.is_alive():
-            self.stop()
+            self.stop_thread()
         self.power_draws = []
         self.thread = threading.Thread(target=self.get_power_consumption, args=())
         self.thread.start()
 
     def stop(self):
         LOGGER.info("stoping CPU power monitoring ...")
-        self.thread.do_run = False
-        self.thread.join()
+        self.stop_thread()
         self.record = pd.DataFrame.from_records(self.power_draws)
         self.record = self.record.sum(axis=0)
 
@@ -330,53 +335,24 @@ class PowerGadgetWin(PowerGadget):
         file_names.sort(key=lambda f: list(map(int, re.split(r"-|_|\.|/", f)[-7:-1])))
         return Path(file_names[-1])
 
-    def __stop_thread(self):
-        self.thread.do_run = False
-        self.thread.join()
-
-    def __get_computer_usage(self, process, interval):
-        """Compute the ratio of cpu and memory used by the current process 
-
-        Parameters
-        ----------
-        process : psutil.Process
-            the current process
-        interval : int
-            interval at which measure ratios
-
-        Returns
-        -------
-        Tuple
-            time of execution, ratio of cpu used, ration of memory used
-        """
-        with process.oneshot():
-            process_cpu_usage = process.cpu_percent(interval=interval)
-            cpu_usage = psutil.cpu_percent()
-            process_cpu_usage = process_cpu_usage / (cpu_usage * psutil.cpu_count())
-            memory_global = psutil.virtual_memory()
-            memory_usage = process.memory_full_info().rss / (
-                memory_global.total - memory_global.available
-            )
-        return datetime.datetime.now(), process_cpu_usage, memory_usage
-
     def get_process_usage(self, interval=1):
         current_process = psutil.Process()
         # called once to initialize the cpu monitoring
         psutil.cpu_percent()
         while getattr(self.thread, "do_run", True):
             self.process_usage.append(
-                self.__get_computer_usage(current_process, interval=interval)
+                self.get_computer_usage(current_process, interval=interval)
             )
         else:
             self.process_usage.append(
-                self.__get_computer_usage(current_process, interval=interval)
+                self.get_computer_usage(current_process, interval=interval)
             )
 
     def start(self):
         LOGGER.info("starting CPU power monitoring ...")
         if self.thread and self.thread.is_alive():
             LOGGER.debug("another thread is alive, we are going to close it first")
-            self.__stop_thread()
+            self.stop_thread()
         _ = subprocess.Popen(
             '"' + str(self.powerlog_path) + '" /min',
             stdin=None,
@@ -397,7 +373,7 @@ class PowerGadgetWin(PowerGadget):
             stdout=open(os.devnull, "wb"),
             shell=True,
         )
-        self.__stop_thread()
+        self.stop_thread()
         powerlog_file = self.__get_powerlog_file()
         self.record = self.parse_log(powerlog_file, process_usage=self.process_usage)
         os.remove(powerlog_file)
