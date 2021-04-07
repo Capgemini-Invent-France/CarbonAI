@@ -167,7 +167,7 @@ class PowerMeter:
             self.filepath = Path.cwd() / "emissions.csv"
         else:
             LOGGER.info("Filepath given, will save there")
-            self.filepath = filepath
+            self.filepath = Path(filepath)
 
         self.output_format = output_format
 
