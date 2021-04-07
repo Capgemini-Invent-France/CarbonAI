@@ -43,19 +43,23 @@ You should get a new line (in the csv file) for every usage of the package.
       - Total energy, in milli Watt hour, used by the GPU while the algorithm was running
     * - Cumulative DRAM Energy (mWh) 
       - Total energy, in milli Watt hour, used by the memory while the algorithm was running
+    * - Cumulative process CPU Energy (mWh)
+      - Total energy, in milli Watt hour, used by the CPU for this **specific** task while the algorithm was running
+    * - Cumulative process DRAM Energy (mWh)
+      - Total energy, in milli Watt hour, used by the memory for this **specific** task while the algorithm was running
     * - PUE 
       - Also known as cooling factor, indicates the extra energy used to cool the system down while the algorithm is running
     * - CO2 emitted (gCO2e)
-      - Amount of CO2 (or equivalent) emitted, in gram. This value depends on the country and the energy mix used by the country to produce electricity
+      - Amount of CO2 emitted by the algorithm's usage, in gram. This value depends on the country and the energy mix used by the country to produce electricity
     * - Package 
-      - Declarative value, package used by the user in the project
+      - *Declarative value*, package used by the user in the project
     * - Algorithm 
-      - Declarative value, name of the algorithm(s) used
+      - *Declarative value*, name of the algorithm(s) used
     * - Algorithm's parameters 
-      - Declarative value, parameters used for the algorithm
+      - *Declarative value*, parameters used for the algorithm
     * - Data type 
-      - Declarative value, type of data used to train the algorithm
+      - *Declarative value*, type of data used to train the algorithm
     * - Data shape 
-      - Declarative value, size of the database used to train the algorithm
+      - *Declarative value*, size of the database used to train the algorithm
     * - Comment 
-      - Declarative value, comments made by the user
+      - *Declarative value*, comments made by the user
