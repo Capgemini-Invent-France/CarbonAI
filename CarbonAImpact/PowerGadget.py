@@ -12,6 +12,7 @@ __all__ = [
     "PowerGadgetWin",
     "PowerGadgetLinuxRAPL",
     "PowerGadgetLinuxMSR",
+    "NoPowerGadget",
 ]
 
 import os
