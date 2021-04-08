@@ -119,13 +119,19 @@ class PowerMeter:
             self.power_gadget = PowerGadgetWin(powerlog_path=cpu_power_log_path)
             self.pue = self.LAPTOP_PUE  # pue for my laptop
         elif self.platform in ["linux", "linux2"]:
+            self.pue = self.SERVER_PUE  # pue for a server
             if POWERLOG_PATH_LINUX.exists():
                 self.power_gadget = PowerGadgetLinuxRAPL()
-            elif MSR_PATH_LINUX_TEST.exists():
+            # The user needs to be root to use MSR interface
+            elif MSR_PATH_LINUX_TEST.exists() and os.getuid() == 0:
                 self.power_gadget = PowerGadgetLinuxMSR()
             else:
                 LOGGER.warning("No power reading interface was found")
+                self.power_gadget = NoPowerGadget()
+        else:
             self.pue = self.SERVER_PUE  # pue for a server
+            LOGGER.warning("No power reading interface was found for this platform")
+            self.power_gadget = NoPowerGadget()
 
         self.cuda_available = self.__check_gpu()
         if self.cuda_available:
