@@ -10,6 +10,7 @@ COUNTRY_CODE_COLUMN = "ISO"
 COUNTRY_NAME_COLUMN = "Country"
 
 POWERLOG_PATH_LINUX = Path("/sys/class/powercap/intel-rapl")
+MSR_PATH_LINUX_TEST = Path("/dev/cpu/0/msr")
 MAC_INTELPOWERLOG_FILENAME = "intelPowerLog.csv"
 WIN_INTELPOWERLOG_FILENAME = "PwrData_*.csv"
 

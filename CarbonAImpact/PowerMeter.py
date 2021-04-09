@@ -15,6 +15,7 @@ import getpass
 import shutil
 import os
 import sys
+import warnings
 import requests
 import pandas as pd
 
@@ -27,22 +28,24 @@ LOGGER = logging.getLogger(__name__)
 
 
 class PowerMeter:
-    """PowerMeter is a general tool to monitor and log the power consumption of any given function.
+    """
+    PowerMeter is a general tool to monitor and log the power consumption of any given function.
 
     Parameters
     ----------
-    - project_name (optional) : str
-        Name of the project you are working on (default is folder_name)
-    - cpu_power_log_path (optional) : str
+    project_name : str, default current_directory_name
+        Name of the project you are working on
+    cpu_power_log_path : str, optional
         The path to the tool "PowerLog"
-    - get_country (optional) : bool
-        Whether use user country location or not
-    - user_name (optional) : str
+    get_country : bool, optional
+        Whether retrieve user country location or not
+    user_name : str, optional
         The name of the user using the tool (for logging purpose)
-    - filepath (optional) : str
+    filepath : str, optional
         Path of the file where all the green ai logs are written
-    - api_endpoint (optional):
+    api_endpoint:, optional
         Endpoint of the API
+    
     """
 
     LAPTOP_PUE = 1.3  # pue for my laptop
@@ -116,11 +119,19 @@ class PowerMeter:
             self.power_gadget = PowerGadgetWin(powerlog_path=cpu_power_log_path)
             self.pue = self.LAPTOP_PUE  # pue for my laptop
         elif self.platform in ["linux", "linux2"]:
+            self.pue = self.SERVER_PUE  # pue for a server
             if POWERLOG_PATH_LINUX.exists():
                 self.power_gadget = PowerGadgetLinuxRAPL()
-            else:
+            # The user needs to be root to use MSR interface
+            elif MSR_PATH_LINUX_TEST.exists() and os.getuid() == 0:
                 self.power_gadget = PowerGadgetLinuxMSR()
+            else:
+                LOGGER.warning("No power reading interface was found")
+                self.power_gadget = NoPowerGadget()
+        else:
             self.pue = self.SERVER_PUE  # pue for a server
+            LOGGER.warning("No power reading interface was found for this platform")
+            self.power_gadget = NoPowerGadget()
 
         self.cuda_available = self.__check_gpu()
         if self.cuda_available:
@@ -150,11 +161,20 @@ class PowerMeter:
         else:
             self.client_name = "--"
 
-        if is_online:
-            self.location = self.__get_country()
-        elif location:
+        # Set the location used to convert energy usage to carbon emissions
+        # if the location is provided, we use it
+        # if it's not and we can use the internet and the user authorize us to do so then we retrieve it from the IP address
+        # otherwise set the location to default
+        if location:
             self.location = location
+        elif (is_online or api_endpoint) and get_country:
+            self.location = self.__get_country()
         else:
+            warnings.warn(
+                "No location was set, we will fallback to the default location: {}".format(
+                    self.DEFAULT_LOCATION
+                )
+            )
             self.location = self.DEFAULT_LOCATION
 
         self.is_online = is_online
@@ -167,7 +187,7 @@ class PowerMeter:
             self.filepath = Path.cwd() / "emissions.csv"
         else:
             LOGGER.info("Filepath given, will save there")
-            self.filepath = filepath
+            self.filepath = Path(filepath)
 
         self.output_format = output_format
 
@@ -241,15 +261,15 @@ class PowerMeter:
             A string describing the package used by this function (e.g. sklearn, Pytorch, ...)
         algorithm : str
             A string describing the algorithm used in the function monitored (e.g. RandomForestClassifier, ResNet121, ...)
-        data_type : str (among : tabular, image, text, time series, other)
+        data_type : str, {'tabular', 'image', 'text', 'time series', 'other'}
             A string describing the type of data used for training
         data_shape : str or tuple
             A string or tuple describing the quantity of data used
-        algorithm_params (optional) : str
+        algorithm_params : str, optional
             A string describing the parameters used by the algorithm
-        comments (optional) : str
+        comments : str, optional
             A string to provide any useful information
-        step (optional) : str
+        step : str, optional
             A string to provide useful information such as 'preprocessing', 'inference', 'run'
 
         Returns
@@ -318,13 +338,13 @@ class PowerMeter:
             A string describing the package used by this function (e.g. sklearn, Pytorch, ...)
         algorithm : str
             A string describing the algorithm used in the function monitored (e.g. RandomForestClassifier, ResNet121, ...)
-        data_type : str (among : tabular, image, text, time series, other)
+        data_type : str, {'tabular', 'image', 'text', 'time series', 'other'}
             A string describing the type of data used for training
         data_shape : str or tuple
             A string or tuple describing the quantity of data used
-        algorithm_params (optional) : str
+        algorithm_params : str, optional
             A string describing the parameters used by the algorithm
-        comments (optional) : str
+        comments : str, optional
             A string to provide any useful information
 
         """
@@ -371,13 +391,13 @@ class PowerMeter:
             A string describing the package used by this function (e.g. sklearn, Pytorch, ...)
         algorithm : str
             A string describing the algorithm used in the function monitored (e.g. RandomForestClassifier, ResNet121, ...)
-        data_type : str (among : tabular, image, text, time series, other)
+        data_type : str, {'tabular', 'image', 'text', 'time series', 'other'}
             A string describing the type of data used for training
         data_shape : str or tuple
             A string or tuple describing the quantity of data used
-        algorithm_params (optional) : str
+        algorithm_params : str, optional
             A string describing the parameters used by the algorithm
-        comments (optional) : str
+        comments : str, optional
             A string to provide any useful information
 
         """
@@ -527,10 +547,10 @@ class PowerMeter:
         written = self.__record_data_to_file(payload)
         LOGGER.info("* recorded into a file? {}*".format(written))
 
-        if self.is_online:
+        if self.is_online and self.api_endpoint:
             response_status_code = self.__record_data_to_server(payload)
             if response_status_code >= 400:
-                LOGGER.warn(
+                LOGGER.warning(
                     "We couldn't upload the recorded data to the server, we are going to record it for a later upload"
                 )
                 # can't upload we'll record the data

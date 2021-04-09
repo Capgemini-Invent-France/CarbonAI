@@ -12,6 +12,7 @@ __all__ = [
     "PowerGadgetWin",
     "PowerGadgetLinuxRAPL",
     "PowerGadgetLinuxMSR",
+    "NoPowerGadget",
 ]
 
 import os
@@ -208,6 +209,28 @@ class PowerGadget(abc.ABC):
         Stops the recording processus with Intel Power Gadget
         """
         pass
+
+
+class NoPowerGadget(PowerGadget):
+    """
+    Dummy class used when no power gadget (intel power gadget, rapl, msr) is available. It will return empty consumption
+    """
+
+    def __init__(self):
+        super().__init__()
+        self.start_time = 0
+
+    def start(self):
+        self.start_time = time.time()
+
+    def stop(self):
+        end_time = time.time()
+        self.record[TOTAL_ENERGY_CPU] = 0
+        self.record[TOTAL_ENERGY_PROCESS_CPU] = 0
+        self.record[TOTAL_ENERGY_PROCESS_MEMORY] = 0
+        self.record[TOTAL_ENERGY_MEMORY] = 0
+        self.record[TOTAL_CPU_TIME] = end_time - self.start_time
+        self.record[TOTAL_ENERGY_ALL] = 0
 
 
 class PowerGadgetMac(PowerGadget):
