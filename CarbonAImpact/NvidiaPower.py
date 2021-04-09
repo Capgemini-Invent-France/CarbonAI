@@ -4,7 +4,7 @@
 Python classes monitoring GPU's power usage
 during a time delimited between a start and a stop methods
 """
-__all__ = ['NoGpuPower', 'NvidiaPower']
+__all__ = ["NoGpuPower", "NvidiaPower"]
 
 import abc
 import os
@@ -79,8 +79,7 @@ class NvidiaPower(GpuPower):
     def __init__(self, interval=1):
         super().__init__()
         self.log_file = (
-            Path(os.path.dirname(os.path.abspath(__file__))) /
-            NVIDIAPOWERLOG_FILENAME
+            Path(os.path.dirname(os.path.abspath(__file__))) / NVIDIAPOWERLOG_FILENAME
         )
         self.logging_process = None
         self.interval = interval
@@ -132,11 +131,13 @@ class NvidiaPower(GpuPower):
         regex_time = r"Timestamp +: (.*)"
         times = re.findall(regex_time, content)
         powers = re.findall(regex_power, content)
-        results = pd.DataFrame(
-            np.array([times, powers]).T, columns=["Time", "Power"])
+        if len(times) != len(powers):
+            min_len = min(len(times), len(powers))
+            times = times[:min_len]
+            powers = powers[:min_len]
+        results = pd.DataFrame(np.array([times, powers]).T, columns=["Time", "Power"])
         results["Power"] = results["Power"].astype("float32")
-        results["Time"] = pd.to_datetime(
-            results["Time"], infer_datetime_format=True)
+        results["Time"] = pd.to_datetime(results["Time"], infer_datetime_format=True)
         results["Elapsed time"] = results["Time"] - results.loc[0, "Time"]
         results["Elapsed time"] = results["Elapsed time"].dt.total_seconds()
         self.record[TOTAL_GPU_TIME] = results["Elapsed time"].iloc[-1]

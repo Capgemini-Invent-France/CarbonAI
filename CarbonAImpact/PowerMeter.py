@@ -469,6 +469,7 @@ class PowerMeter:
             return True
         except:
             LOGGER.error("* error during the csv writing process *")
+            LOGGER.error(traceback.format_exc())
             return False
 
     def __record_data_to_excel_file(self, info):
