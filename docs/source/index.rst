@@ -8,7 +8,6 @@ Welcome to CarbonAImpact's documentation!
 
 This project aims at creating a python package that allows you to monitor the power consumption and CO2 emissions of any python function.
 
-
 Getting Started
 ===============
 
@@ -34,17 +33,15 @@ Here is an example of usage :
 
 For more examples, check the :ref:`examples` page
 
-For more information on how to use the package, check the :ref:`api-reference`.
+For more information on how to use the package, check the :ref:`api-refe`.
 For more information on the data collected, check the :ref:`data-information`.
 
 .. toctree::
    :maxdepth: 2
    :hidden:
 
-   installation
-   examples
-   api_reference
-   data_information
+   getting_started/index
+   api_reference/index
 
 
 Disclaimer
@@ -58,9 +55,3 @@ By using it, you agree to the collection of :
 - your computer's power consumption
 - the information you provided
 
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`search`

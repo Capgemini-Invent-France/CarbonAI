@@ -1,7 +1,4 @@
-.. _api-reference:
-
-API Reference
-=============
+.. _api-refe:
 
 PowerMeter
 ----------
