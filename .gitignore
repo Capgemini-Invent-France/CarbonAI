@@ -14,3 +14,5 @@ CarbonAImpact/mesure_power.py
 *.zip
 public
 ignore
+.vscode/
+ignore*

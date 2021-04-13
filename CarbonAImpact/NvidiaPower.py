@@ -4,7 +4,7 @@
 Python classes monitoring GPU's power usage
 during a time delimited between a start and a stop methods
 """
-__all__ = ['NoGpuPower', 'NvidiaPower']
+__all__ = ["NoGpuPower", "NvidiaPower"]
 
 import abc
 import os
@@ -23,6 +23,7 @@ LOGGER = logging.getLogger(__name__)
 
 NVIDIAPOWERLOG_FILENAME = "nvidiaPowerLog.csv"
 
+
 class GpuPower(abc.ABC):
     """
     Class to monitor the power usage of a gpu
@@ -32,6 +33,7 @@ class GpuPower(abc.ABC):
     3. call stop
     4. collect the results with parse_log
     """
+
     def __init__(self):
         self.record = {TOTAL_GPU_TIME: 0, TOTAL_ENERGY_GPU: 0}
 
@@ -58,6 +60,7 @@ class NoGpuPower(GpuPower):
     """
     TODO: add docstring. A quoi sert cette classe ?
     """
+
     def __init__(self):
         super().__init__()
         pass
@@ -124,24 +127,14 @@ class NvidiaPower(GpuPower):
                 "Logging file not found, make sure you started to run a measure"
             )
         content = self.log_file.read_text()
-        regex_power = "(?<=Power Draw                  : )(.*)(?= W)"
-        regex_time = "(?<=Timestamp                           : )(.*)"
-        records = content.split("==============NVSMI LOG==============")
-        prev_power = 0
-        times = []
-        powers = []
-        for record in records[1:]:
-            regex_power = "(?<=Power Draw                  : )(.*)(?= W)"
-            regex_time = "(?<=Timestamp                           : )(.*)"
-            time = re.search(regex_time, record).group(0)
-            power = re.search(regex_power, record)
-            if power:
-                power = power.group(0)
-            else:
-                power = prev_power
-            prev_power = power
-            times.append(time)
-            powers.append(power)
+        regex_power = r"Power Draw +: (.*) W"
+        regex_time = r"Timestamp +: (.*)"
+        times = re.findall(regex_time, content)
+        powers = re.findall(regex_power, content)
+        if len(times) != len(powers):
+            min_len = min(len(times), len(powers))
+            times = times[:min_len]
+            powers = powers[:min_len]
         results = pd.DataFrame(np.array([times, powers]).T, columns=["Time", "Power"])
         results["Power"] = results["Power"].astype("float32")
         results["Time"] = pd.to_datetime(results["Time"], infer_datetime_format=True)
