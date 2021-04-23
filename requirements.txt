@@ -4,3 +4,6 @@ requests==2.22.0
 ipython
 psutil
 fuzzywuzzy
+sphinx 
+sphinx-rtd-theme
+IPython
