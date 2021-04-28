@@ -1,3 +1,5 @@
+.. _reference:
+
 API Reference
 =============
 
@@ -8,4 +10,4 @@ All classes and functions exposed in CarbonAImpact.* namespace are public.
    :maxdepth: 2
    :hidden:
 
-   api_refe
+   power_meter

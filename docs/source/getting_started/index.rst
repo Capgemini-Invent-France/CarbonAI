@@ -23,7 +23,7 @@ Here is an example of usage :
 
 For more examples, check the :ref:`examples` page
 
-For more information on how to use the package, check the :ref:`api-reference`.
+For more information on how to use the package, check the :ref:`reference`.
 For more information on the data collected, check the :ref:`data-information`.
 
 .. toctree::

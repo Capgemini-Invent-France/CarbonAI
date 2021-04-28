@@ -1,6 +1,8 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """
+PowerMeter
+---------
 Main Python class or entrypoint to monitor the power consumption of an algorithm. 
 """
 
@@ -45,7 +47,22 @@ class PowerMeter:
         Path of the file where all the green ai logs are written
     api_endpoint:, optional
         Endpoint of the API
+
+    See Also
+    --------
+    PowerMeter.from_config : Create a power meter from a config file.
+
+    Examples
+    --------
+    Create a PowerMeter for the project "MNIST Classifier" while not being online.
+
+    >>> power_meter = PowerMeter(project_name="MNIST classifier", 
+    ...     is_online=False, location="FR")
+
+    Create a PowerMeter for the project "Test" and send the collected data to our database.
     
+    >>> power_meter = PowerMeter(project_name="MNIST classifier", 
+    ...     api_endpoint="https://ngji0jx9dc.execute-api.eu-west-3.amazonaws.com/post_new_item")
     """
 
     LAPTOP_PUE = 1.3  # pue for my laptop
@@ -97,6 +114,9 @@ class PowerMeter:
             args = json.load(file)
         return cls(**args)
 
+    # ----------------------------------------------------------------------
+    # Constructors
+    # TODO : ?? cf https://developer.lsst.io/python/numpydoc.html#attributes-set-in-init-methods
     def __init__(
         self,
         project_name="",
@@ -242,6 +262,7 @@ class PowerMeter:
 
         return co2_emitted
 
+    @property
     def measure_power(
         self,
         package,
@@ -319,6 +340,7 @@ class PowerMeter:
         self.used_comments = normalize(comments)
         self.used_step = normalize(match(step, AVAILABLE_STEPS))
 
+    @property
     def __call__(
         self,
         package,
@@ -372,6 +394,7 @@ class PowerMeter:
     def __exit__(self, type, value, traceback):
         self.stop_measure()
 
+    @property
     def start_measure(
         self,
         package,
@@ -413,6 +436,7 @@ class PowerMeter:
             step=step,
         )
 
+    @property
     def stop_measure(self):
         """
         Stops the measure started with start_measure

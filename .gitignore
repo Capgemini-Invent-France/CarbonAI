@@ -16,3 +16,4 @@ public
 ignore
 .vscode/
 ignore*
+docs/source/reference/api

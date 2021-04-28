@@ -33,7 +33,7 @@ Here is an example of usage :
 
 For more examples, check the :ref:`examples` page
 
-For more information on how to use the package, check the :ref:`api-refe`.
+For more information on how to use the package, check the :ref:`reference`.
 For more information on the data collected, check the :ref:`data-information`.
 
 .. toctree::
@@ -41,7 +41,7 @@ For more information on the data collected, check the :ref:`data-information`.
    :hidden:
 
    getting_started/index
-   api_reference/index
+   reference/index
 
 
 Disclaimer
