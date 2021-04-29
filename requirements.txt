@@ -6,4 +6,5 @@ psutil
 fuzzywuzzy
 sphinx 
 sphinx-rtd-theme
+numpydoc
 IPython

@@ -41,6 +41,7 @@ For more information on the data collected, check the :ref:`data-information`.
    :hidden:
 
    getting_started/index
+   about/index
    reference/index
 
 

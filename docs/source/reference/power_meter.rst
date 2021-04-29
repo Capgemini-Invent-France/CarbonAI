@@ -13,21 +13,21 @@ Constructor
 
    PowerMeter
 
-Attributes and underlying data
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-**Axes**
+IO / conversion
+~~~~~~~~~~~~~~~
 
 .. autosummary::
    :toctree: api/
    
    PowerMeter.from_config
 
-**Axes**
+Measures
+~~~~~~~~~~~~~~~
 
 .. autosummary::
    :toctree: api/
 
    PowerMeter.measure_power
+   PowerMeter.__call__
    PowerMeter.start_measure
    PowerMeter.stop_measure
-   PowerMeter.__call__

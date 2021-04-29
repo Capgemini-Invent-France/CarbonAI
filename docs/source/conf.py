@@ -36,16 +36,15 @@ master_doc = "index"
 extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.autosummary",
-    "sphinx.ext.napoleon",
-    "sphinx_rtd_theme",
     "numpydoc",
 ]
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ["_templates"]
+templates_path = ["../_templates"]
 
 # Allow shinx' autosummary to work as a toc tree
 autosummary_generate = True
+autoclass_content = "class"
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
@@ -179,7 +178,21 @@ class AccessorCallableDocumenter(AccessorLevelDocumenter, MethodDocumenter):
         return MethodDocumenter.format_name(self).rstrip(".__call__")
 
 
+def rstjinja(app, docname, source):
+    """
+    Render our pages as a jinja template for fancy templating goodness.
+    """
+    # https://www.ericholscher.com/blog/2016/jul/25/integrating-jinja-rst-sphinx/
+    # Make sure we're outputting HTML
+    if app.builder.format != "html":
+        return
+    src = source[0]
+    rendered = app.builder.templates.render_string(src, app.config.html_context)
+    source[0] = rendered
+
+
 def setup(app):
+    app.connect("source-read", rstjinja)
     app.add_autodocumenter(AccessorDocumenter)
     app.add_autodocumenter(AccessorAttributeDocumenter)
     app.add_autodocumenter(AccessorMethodDocumenter)

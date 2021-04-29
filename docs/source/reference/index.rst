@@ -8,6 +8,5 @@ All classes and functions exposed in CarbonAImpact.* namespace are public.
 
 .. toctree::
    :maxdepth: 2
-   :hidden:
 
    power_meter

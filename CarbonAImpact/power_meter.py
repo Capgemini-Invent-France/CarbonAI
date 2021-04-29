@@ -33,20 +33,41 @@ class PowerMeter:
     """
     PowerMeter is a general tool to monitor and log the power consumption of any given function.
 
+    Depending on the platform and hardware used, it allows to measure the power usage of the CPU,
+    the DRAM and the GPU. The measure is, then, converted to CO2 emissions depending on the country
+    set and the PUE of the machine (background on the PUE `here`_). You can chose to log the 
+    results locally or send it to an endpoint.
+
     Parameters
     ----------
     project_name : str, default current_directory_name
-        Name of the project you are working on
+        Name of the project you are working on.
+    program_name : str, optional
+        Name of the program you are working on.
+    client_name : str, optional
+        Name of the client you are working for.
+    user_name : str, default computer_user_name
+        The name of the user using the tool (for logging purpose).
     cpu_power_log_path : str, optional
-        The path to the tool "PowerLog"
-    get_country : bool, optional
-        Whether retrieve user country location or not
-    user_name : str, optional
-        The name of the user using the tool (for logging purpose)
-    filepath : str, optional
-        Path of the file where all the green ai logs are written
-    api_endpoint:, optional
-        Endpoint of the API
+        The path to the tool "PowerLog" or "powercap" or "IntelPowerGadget".
+    get_country : bool, default True
+        Whether to retrieve user country location or not (uses the user IP).
+    location : str, optional
+        Country ISO Code available `here
+        <https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2#Officially_assigned_code_elements>`_
+        
+        Must be set if get_country is False.
+    is_online : boolean, default True
+        Whether the machine is connected to the internet or not.
+    filepath : str, default .
+        Path of the file where all the carbon logs will be written.
+    output_format : {'csv', 'excel'}, default 'csv'
+        Format of the carbon logs file produced.
+    api_endpoint : str, optional
+        Endpoint of the API to upload the collected data to
+
+        Note: we provide an endpoint to collect data and contribute, with the community, towards greener algorithms.
+        Here is the url : https://ngji0jx9dc.execute-api.eu-west-3.amazonaws.com/post_new_item
 
     See Also
     --------
@@ -54,65 +75,32 @@ class PowerMeter:
 
     Examples
     --------
-    Create a PowerMeter for the project "MNIST Classifier" while not being online.
+    Create a PowerMeter for the project `MNIST Classifier` while not being online.
 
-    >>> power_meter = PowerMeter(project_name="MNIST classifier", 
+    >>> power_meter = PowerMeter(project_name="MNIST classifier",
     ...     is_online=False, location="FR")
 
-    Create a PowerMeter for the project "Test" and send the collected data to our database.
-    
-    >>> power_meter = PowerMeter(project_name="MNIST classifier", 
+    Create a PowerMeter for the project `Test` and send the collected data to our endpoint.
+
+    >>> power_meter = PowerMeter(project_name="Test",
     ...     api_endpoint="https://ngji0jx9dc.execute-api.eu-west-3.amazonaws.com/post_new_item")
+
+    Notes
+    -----
+    This package may log private data (username, country, project_name). If you do not provide
+    any api_endpoint, we will never have access to this data.
+
+    On the other hand, if you chose to share your data with us (by using our endpoint:
+    https://ngji0jx9dc.execute-api.eu-west-3.amazonaws.com/post_new_item ), we commit to anonymize
+    any data shared.
     """
+
+    # TODO : write a page on the PUE
 
     LAPTOP_PUE = 1.3  # pue for my laptop
     SERVER_PUE = 1.58  # pue for a server
     DEFAULT_LOCATION = "FR"
     DATETIME_FORMAT = "%m/%d/%Y %H:%M:%S"  # "%c"
-
-    @staticmethod
-    def __load_energy_mix_db():
-        return pd.read_csv(PACKAGE_PATH / ENERGY_MIX_DATABASE, encoding="utf-8")
-
-    @staticmethod
-    def __extract_env_name():
-        env = "unknown"
-        try:
-            env = os.environ["CONDA_DEFAULT_ENV"]
-        except:
-            pass
-        if hasattr(sys, "real_prefix"):
-            env = sys.real_prefix.split("/")[-1]
-        elif hasattr(sys, "base_prefix") and sys.base_prefix != sys.prefix:
-            env = sys.base_prefix.split("/")[-1]
-        return env
-
-    @staticmethod
-    def __check_gpu():
-        cuda_available = False
-        if shutil.which("nvidia-smi"):
-            cuda_available = True
-
-        return cuda_available
-
-    @staticmethod
-    def __get_country():
-        """
-        Retrieve the ISO code country
-        Beware of the encoding
-        cf. from https://stackoverflow.com/questions/40059654/python-convert-a-bytes-array-into-json-format
-        """
-        request = requests.get("http://ipinfo.io/json")
-        response = request.content.decode("utf8").replace("'", '"')
-        user_info = json.loads(response)
-        return user_info["country"]
-
-    @classmethod
-    def from_config(cls, path):
-        """ """
-        with open(path) as file:
-            args = json.load(file)
-        return cls(**args)
 
     # ----------------------------------------------------------------------
     # Constructors
@@ -122,15 +110,16 @@ class PowerMeter:
         project_name="",
         program_name="",
         client_name="",
+        user_name="",
         cpu_power_log_path="",
         get_country=True,
-        user_name="",
-        filepath=None,
-        api_endpoint=None,
         location="",
         is_online=True,
+        filepath=None,
         output_format="csv",
+        api_endpoint=None,
     ):
+
         self.platform = sys.platform
         if self.platform == "darwin":
             self.power_gadget = PowerGadgetMac(powerlog_path=cpu_power_log_path)
@@ -220,6 +209,85 @@ class PowerMeter:
 
         self.logging_filename = PACKAGE_PATH / LOGGING_FILE
 
+    @staticmethod
+    def __load_energy_mix_db():
+        return pd.read_csv(PACKAGE_PATH / ENERGY_MIX_DATABASE, encoding="utf-8")
+
+    @staticmethod
+    def __extract_env_name():
+        env = "unknown"
+        try:
+            env = os.environ["CONDA_DEFAULT_ENV"]
+        except:
+            pass
+        if hasattr(sys, "real_prefix"):
+            env = sys.real_prefix.split("/")[-1]
+        elif hasattr(sys, "base_prefix") and sys.base_prefix != sys.prefix:
+            env = sys.base_prefix.split("/")[-1]
+        return env
+
+    @staticmethod
+    def __check_gpu():
+        cuda_available = False
+        if shutil.which("nvidia-smi"):
+            cuda_available = True
+
+        return cuda_available
+
+    @staticmethod
+    def __get_country():
+        """
+        Retrieve the ISO code country
+        Beware of the encoding
+        cf. from https://stackoverflow.com/questions/40059654/python-convert-a-bytes-array-into-json-format
+        """
+        request = requests.get("http://ipinfo.io/json")
+        response = request.content.decode("utf8").replace("'", '"')
+        user_info = json.loads(response)
+        return user_info["country"]
+
+    @classmethod
+    def from_config(cls, path):
+        """
+        Create a PowerMeter from a json config file.
+
+        The json config file may contain any key named after the arguments of the :class:`CarbonAImpact.PowerMeter` constructor.
+
+        Parameters
+        ----------
+        path : str
+            Path to the json config file
+
+        Returns
+        -------
+        PowerMeter
+
+        Examples
+        --------
+        Example of config file used. This file is named `config.json`
+
+        .. code-block:: JSON
+
+            {
+                "project_name": "Project X",
+                "program_name": "Program X",
+                "client_name": "Client X",
+                "get_country": true,
+                "is_online": false,
+                "user_name": "customUsername",
+                "filepath": "",
+                "api_endpoint": "...",
+                "location":"FR"
+            }
+
+        To load this file as a power meter.
+
+        >>> power_meter = PowerMeter.from_config("config.json")
+        """
+        with open(path) as file:
+            args = json.load(file)
+        return cls(**args)
+
     def __get_energy_mix(self):
         if not (self.energy_mix_db[COUNTRY_CODE_COLUMN] == self.location).any():
             raise NameError(
@@ -262,16 +330,15 @@ class PowerMeter:
 
         return co2_emitted
 
-    @property
     def measure_power(
         self,
         package,
         algorithm,
+        step="other",
         data_type="",
         data_shape="",
         algorithm_params="",
         comments="",
-        step="other",
     ):
         """
         A decorator to measure the power consumption of a given function
@@ -282,19 +349,48 @@ class PowerMeter:
             A string describing the package used by this function (e.g. sklearn, Pytorch, ...)
         algorithm : str
             A string describing the algorithm used in the function monitored (e.g. RandomForestClassifier, ResNet121, ...)
-        data_type : str, {'tabular', 'image', 'text', 'time series', 'other'}
+        step : {'inference', 'training', 'other', 'test', 'run', 'preprocessing'}, optional
+            A string to provide useful information on the current stage of the alogrithm
+        data_type : {'tabular', 'image', 'text', 'time series', 'other'}, optional
             A string describing the type of data used for training
-        data_shape : str or tuple
+        data_shape : str or tuple, optional
             A string or tuple describing the quantity of data used
         algorithm_params : str, optional
             A string describing the parameters used by the algorithm
         comments : str, optional
             A string to provide any useful information
-        step : str, optional
-            A string to provide useful information such as 'preprocessing', 'inference', 'run'
 
         Returns
         -------
+
+        See also
+        --------
+        PowerMeter.from_config : Create a PowerMeter object from a config file
+        PowerMeter.__call__ : Measure the power usage using a with statement
+
+        Examples
+        --------
+        First, create a PowerMeter (you only do to this step once).
+
+        >>> power_meter = PowerMeter.from_config("config.json")
+
+        Decorate the function you wish to monitor.
+
+        >>> @power_meter.measure_power(
+        ...     package="pandas, numpy",
+        ...     algorithm="data cleaning",
+        ...     step="preprocessing",
+        ...     data_type="tabular",
+        ...     comments="Cleaning of csv files + train-test splitting"
+        ... )
+        ... def example_func():
+        ...     # do something
+
+        Each time this function will be called, the PowerMeter will monitor the power usage 
+        and log the function's carbon footprint.
+
+        >>> example_func()
+        result_of_your_function
         """
         if not algorithm or not package:
             raise SyntaxError(
@@ -340,19 +436,18 @@ class PowerMeter:
         self.used_comments = normalize(comments)
         self.used_step = normalize(match(step, AVAILABLE_STEPS))
 
-    @property
     def __call__(
         self,
         package,
         algorithm,
+        step="other",
         data_type="",
         data_shape="",
         algorithm_params="",
         comments="",
-        step="other",
     ):
         """
-        The function used by the with statement
+        Measure the power usage using a with statement.
 
         Parameters
         ----------
@@ -360,15 +455,42 @@ class PowerMeter:
             A string describing the package used by this function (e.g. sklearn, Pytorch, ...)
         algorithm : str
             A string describing the algorithm used in the function monitored (e.g. RandomForestClassifier, ResNet121, ...)
-        data_type : str, {'tabular', 'image', 'text', 'time series', 'other'}
+        step : {'inference', 'training', 'other', 'test', 'run', 'preprocessing'}, optional
+            A string to provide useful information on the current stage of the alogrithm
+        data_type : {'tabular', 'image', 'text', 'time series', 'other'}, optional
             A string describing the type of data used for training
-        data_shape : str or tuple
+        data_shape : str or tuple, optional
             A string or tuple describing the quantity of data used
         algorithm_params : str, optional
             A string describing the parameters used by the algorithm
         comments : str, optional
             A string to provide any useful information
 
+        Returns
+        -------
+
+        See also
+        --------
+        PowerMeter.from_config : Create a PowerMeter object from a config file
+        PowerMeter.measure_power : Measure the power usage using a function decorator
+
+        Examples
+        --------
+        First, create a PowerMeter (you only do to this step once).
+
+        >>> power_meter = PowerMeter.from_config("config.json")
+
+        Use a with statement to encapsulate the code you want to monitor
+
+        >>> with power_meter(
+        ...     package="pandas, numpy",
+        ...     algorithm="data cleaning",
+        ...     step="preprocessing",
+        ...     data_type="tabular",
+        ...     comments="Cleaning of csv files + train-test splitting"
+        ... ):
+        ...     # do something
+        result_of_your_code
         """
         self.__set_used_arguments(
             package,
@@ -394,16 +516,15 @@ class PowerMeter:
     def __exit__(self, type, value, traceback):
         self.stop_measure()
 
-    @property
     def start_measure(
         self,
         package,
         algorithm,
+        step="other",
         data_type="",
         data_shape="",
         algorithm_params="",
         comments="",
-        step="other",
     ):
         """
         Starts mesuring the power consumption of a given sample of code
@@ -414,14 +535,54 @@ class PowerMeter:
             A string describing the package used by this function (e.g. sklearn, Pytorch, ...)
         algorithm : str
             A string describing the algorithm used in the function monitored (e.g. RandomForestClassifier, ResNet121, ...)
-        data_type : str, {'tabular', 'image', 'text', 'time series', 'other'}
+        step : {'inference', 'training', 'other', 'test', 'run', 'preprocessing'}, optional
+            A string to provide useful information on the current stage of the alogrithm
+        data_type : {'tabular', 'image', 'text', 'time series', 'other'}, optional
             A string describing the type of data used for training
-        data_shape : str or tuple
+        data_shape : str or tuple, optional
             A string or tuple describing the quantity of data used
         algorithm_params : str, optional
             A string describing the parameters used by the algorithm
         comments : str, optional
             A string to provide any useful information
+
+        Returns
+        -------
+
+        See also
+        --------
+        PowerMeter.stop_measure : Stop the measure started with start_measure
+        PowerMeter.from_config : Create a PowerMeter object from a config file
+        PowerMeter.measure_power : Measure the power usage using a function decorator
+        PowerMeter.__call__ : Measure the power usage using a with statement
+
+        Notes
+        -----
+        We do not recomend using this method to monitor the energy usage of your code
+        because it won't automatically stop if an error is raised at some point while running.
+        You will then have to stop the measure manually with :func:`PowerMeter.stop_measure`.
+
+        Examples
+        --------
+        First, create a PowerMeter (you only do to this step once).
+
+        >>> power_meter = PowerMeter.from_config("config.json")
+
+        Start measuring the code you wish to monitor
+
+        >>> power_meter.start_measure(
+        ...     package="pandas, numpy",
+        ...     algorithm="data cleaning",
+        ...     step="preprocessing",
+        ...     data_type="tabular",
+        ...     comments="Cleaning of csv files + train-test splitting"
+        ... )
+        ... # do something
+        result_of_your_code
+
+        **Do not forget to stop measuring**
+
+        >>> power_meter.stop_measure()
 
         """
         self.gpu_power.start()
@@ -436,11 +597,47 @@ class PowerMeter:
             step=step,
         )
 
-    @property
     def stop_measure(self):
         """
-        Stops the measure started with start_measure
+        Stops the measure started with :func:`PowerMeter.start_measure`
 
+        Parameters
+        ----------
+
+        See also
+        --------
+        PowerMeter.start_measure : Stop the measure started with start_measure
+        PowerMeter.from_config : Create a PowerMeter object from a config file
+        PowerMeter.measure_power : Measure the power usage using a function decorator
+        PowerMeter.__call__ : Measure the power usage using a with statement
+
+        Notes
+        -----
+        We do not recomend using this method to monitor the energy usage of your code
+        because it won't automatically stop if an error is raised at some point while running.
+        You will then have to stop the measure manually with :func:`PowerMeter.stop_measure`.
+
+        Examples
+        --------
+        First, create a PowerMeter (you only do to this step once).
+
+        >>> power_meter = PowerMeter.from_config("config.json")
+
+        Start measuring the code you wish to monitor
+
+        >>> power_meter.start_measure(
+        ...     package="pandas, numpy",
+        ...     algorithm="data cleaning",
+        ...     step="preprocessing",
+        ...     data_type="tabular",
+        ...     comments="Cleaning of csv files + train-test splitting"
+        ... )
+        ... # do something
+        result_of_your_code
+
+        **Do not forget to stop measuring**
+
+        >>> power_meter.stop_measure()
         """
         self.power_gadget.stop()
         self.gpu_power.stop()
