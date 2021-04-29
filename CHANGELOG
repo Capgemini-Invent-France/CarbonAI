@@ -9,7 +9,21 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 - [Process consumption](https://gitlab.com/the_insighters/projects/carbonaimpact/-/issues/23)
   MAJOR Records current's process power usage instead of whole machine usage
+- [Output description](https://gitlab.com/the_insighters/projects/carbonaimpact/-/issues/17)
+  MINOR Add doc to describe the csv file outputed
  
 ### Changed
+- [Linux requirements](https://gitlab.com/the_insighters/projects/carbonaimpact/-/issues/16) 
+  Update doc
+- [Cloud compatibility](https://gitlab.com/the_insighters/projects/carbonaimpact/-/issues/22) 
+  The package will now throw a warning if no CPU power measurement tool is available
  
 ### Fixed
+- [Windows installation](https://gitlab.com/the_insighters/projects/carbonaimpact/-/issues/20) 
+  Support Intel Power Gadget 3.6 for Windows
+- [Output path](https://gitlab.com/the_insighters/projects/carbonaimpact/-/issues/24) 
+  The output path can either be a string or a pathlib.Path
+- [Linux requirements](https://gitlab.com/the_insighters/projects/carbonaimpact/-/issues/21) 
+  Argument checking
+- [Online/offline usage](https://gitlab.com/the_insighters/projects/carbonaimpact/-/issues/15) 
+  Argument checking
