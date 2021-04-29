@@ -5,6 +5,6 @@ ipython
 psutil
 fuzzywuzzy
 sphinx 
-sphinx-rtd-theme
+pydata-sphinx-theme
 numpydoc
 IPython

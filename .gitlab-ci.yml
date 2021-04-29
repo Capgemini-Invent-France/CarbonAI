@@ -3,11 +3,11 @@ image: python:3.7
 pages:
   stage: deploy
   script:
-  - pip install -U sphinx sphinx-rtd-theme pandas IPython psutil
-  - sphinx-build -b html docs/source public
+  - pip install -r requirements.txt
+  - python docs/make.py html
 
   artifacts:
     paths:
-    - public
+    - docs/build/html
   only:
   - master

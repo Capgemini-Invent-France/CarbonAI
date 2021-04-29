@@ -36,6 +36,7 @@ master_doc = "index"
 extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.autosummary",
+    # "pydata_sphinx_theme",
     "numpydoc",
 ]
 
