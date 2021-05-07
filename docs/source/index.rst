@@ -2,7 +2,8 @@
    sphinx-quickstart on Wed Oct 28 17:29:00 2020.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
-
+   
+=========================================
 Welcome to CarbonAImpact's documentation!
 =========================================
 
@@ -43,6 +44,7 @@ For more information on the data collected, check the :ref:`data-information`.
    getting_started/index
    about/index
    reference/index
+   contact
 
 
 Disclaimer
