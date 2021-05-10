@@ -18,6 +18,7 @@ for i in range(9):
     plt.imshow(X[i].reshape((8, 8)), cmap="gray")
     plt.title(f"label:{y[i]}")
     plt.axis("off")
+plt.show()
 
 
 # import the measure package

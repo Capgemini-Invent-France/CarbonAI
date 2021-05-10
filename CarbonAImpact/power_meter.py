@@ -21,8 +21,8 @@ import warnings
 import requests
 import pandas as pd
 
-from .PowerGadget import *
-from .NvidiaPower import *
+from .power_gadget import *
+from .nvidia_power import *
 from .utils import *
 
 
