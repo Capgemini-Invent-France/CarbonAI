@@ -1,7 +1,3 @@
-.. CarbonAImpact documentation master file, created by
-   sphinx-quickstart on Wed Oct 28 17:29:00 2020.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
    
 =========================================
 Welcome to CarbonAImpact's documentation!
@@ -12,7 +8,9 @@ This project aims at creating a python package that allows you to monitor the po
 Getting Started
 ===============
 
-See the :ref:`installation` page to learn more on how to install the package on your computer
+See the :ref:`installation` page to learn more details on how to install the package on your platform.
+In most cases, it's as simple as 
+``pip install git+https://gitlab.com/the_insighters/projects/carbonaimpact.git``
 
 Here is an example of usage :
 
@@ -35,7 +33,17 @@ Here is an example of usage :
 For more examples, check the :ref:`examples` page
 
 For more information on how to use the package, check the :ref:`reference`.
+
 For more information on the data collected, check the :ref:`data-information`.
+
+Green AI
+========
+
+With this package, we try to raise developers' awareness of the AI's carbon footprint. 
+
+To get more details on green AI, see :ref:`about`. 
+If you still have more questions or want to get in touch, :ref:`contact` us.
+
 
 .. toctree::
    :maxdepth: 2
@@ -46,15 +54,14 @@ For more information on the data collected, check the :ref:`data-information`.
    reference/index
    contact
 
+Notes
+=====
 
-Disclaimer
-==========
-This package collects personal data.
-By using it, you agree to the collection of :
+.. warning::
 
-- your username (it will then be anonymized)
-- your country
-- the name of your project (as provided by yourself)
-- your computer's power consumption
-- the information you provided
+   This package may log private data (username, country, project_name). If you do not provide
+   any api_endpoint, we will never have access to this data.
 
+   On the other hand, if you chose to share your data with us (by using our endpoint:
+   https://ngji0jx9dc.execute-api.eu-west-3.amazonaws.com/post_new_item ), we commit to anonymize
+   any data shared.

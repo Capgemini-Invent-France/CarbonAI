@@ -1,5 +1,6 @@
 .. _installation:
 
+============
 Installation
 ============
 This package is compatible with most platforms with varying installation processes
