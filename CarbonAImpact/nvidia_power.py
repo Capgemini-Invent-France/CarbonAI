@@ -58,7 +58,7 @@ class GpuPower(abc.ABC):
 
 class NoGpuPower(GpuPower):
     """
-    TODO: add docstring. A quoi sert cette classe ?
+    Class used when no GPU is available
     """
 
     def __init__(self):
