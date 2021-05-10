@@ -1,7 +1,8 @@
 .. _data-information:
 
+================
 Data information
-=================
+================
 The data collected thanks to the package usage is recorded in a csv file. 
 If you didn't set a specific filepath, the file will, by default, be stored in the same folder as your script, under the name `emissions.csv`.
 
@@ -12,6 +13,7 @@ You should get a new line (in the csv file) for every usage of the package.
 .. list-table:: data columns details
     :widths: 25 50
     :header-rows: 1
+    :class: table table-hover
 
     * - Column name
       - Description

@@ -4,8 +4,5 @@
 __all__ = ["PowerMeter", "MagicPowerMeter"]
 
 from .version import __version__
-from .PowerMeter import PowerMeter
-from .MagicPowerMeter import MagicPowerMeter
-
-
-
+from .power_meter import PowerMeter
+from .magic_power_meter import MagicPowerMeter

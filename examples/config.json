@@ -2,10 +2,6 @@
     "project_name": "example",
     "program_name": "CarbonAImpact",
     "client_name": "IDE",
-    "cpu_power_log_path": "",
     "get_country": true,
-    "is_online": false,
-    "user_name": "",
-    "filepath": "",
-    "location": "FR"
+    "user_name": "TBD"
 }
