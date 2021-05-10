@@ -11,3 +11,4 @@ All classes and functions exposed in CarbonAImpact.* namespace are public.
    :maxdepth: 2
 
    power_meter
+   magic_power_meter

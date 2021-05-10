@@ -95,8 +95,6 @@ class PowerMeter:
     any data shared.
     """
 
-    # TODO : write a page on the PUE
-
     LAPTOP_PUE = 1.3  # pue for my laptop
     SERVER_PUE = 1.58  # pue for a server
     DEFAULT_LOCATION = "FR"
@@ -104,7 +102,6 @@ class PowerMeter:
 
     # ----------------------------------------------------------------------
     # Constructors
-    # TODO : ?? cf https://developer.lsst.io/python/numpydoc.html#attributes-set-in-init-methods
     def __init__(
         self,
         project_name="",
@@ -261,6 +258,10 @@ class PowerMeter:
         Returns
         -------
         PowerMeter
+
+        See also
+        --------
+        PowerMeter : Instanciate a PowerMeter by declaring every argument
 
         Examples
         --------
