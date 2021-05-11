@@ -559,7 +559,8 @@ class PowerGadgetLinuxMSR(PowerGadgetLinux):
 
     MSR_RAPL_POWER_UNIT = 0x606
     MSR_PKG_RAPL_POWER_LIMIT = 0x610
-    MSR_PKG_ENERGY_STATUS = 0x611  #  reports measured actual energy usage
+    # MSR_PKG_ENERGY_STATUS reports measured actual energy usage
+    MSR_PKG_ENERGY_STATUS = 0x611
     MSR_DRAM_ENERGY_STATUS = 0x619
     MSR_PKG_PERF_STATUS = 0x613
     MSR_PKG_POWER_INFO = 0x614
@@ -568,7 +569,19 @@ class PowerGadgetLinuxMSR(PowerGadgetLinux):
     @staticmethod
     def __read_msr(fd, msr):
         """
-        TODO: add docstring
+        Read MSR file at a specific position
+
+        Parameters
+        ----------
+        fd : _io.TextIOWrapper
+            An opened MSR file
+        msr : int
+            Position at which read the MSR file
+
+        Returns
+        -------
+        int
+            The value of the given MSR
         """
         os.lseek(fd, msr, os.SEEK_SET)
         return struct.unpack("Q", os.read(fd, 8))[0]
@@ -583,7 +596,7 @@ class PowerGadgetLinuxMSR(PowerGadgetLinux):
 
     def __get_used_units(self, cpu):
         """
-        TODO: add docstring
+        Get the unit used by the MSR to encode the energy usage
         """
         fd = os.open(READ_MSR_PATH.format(cpu), os.O_RDONLY)
         # Calculate the units used
@@ -615,18 +628,21 @@ class PowerGadgetLinuxMSR(PowerGadgetLinux):
 
     def __get_computer_consumption(self, prev_cpu_energies, prev_dram_energies):
         """
-        TODO: add docs
-        Retrieve all the available power consumptions with PowerLog using the
-        following cli: PowerLog [-resolution ] -duration  [-verbose] [-file ]
+        Get the power consumption since the last measure
 
-        Parameters:
-        -----------
-        prev_cpu_energies, prev_dram_energies (list):
+        Parameters
+        ----------
+        prev_cpu_energies : List
+            List of the previous measure on the CPUs
+            (One element of the list for each CPU)
+        prev_dram_energies : [type]
+            List of the previous measure on the DRAMs
+            (One element of the list for each CPU)
 
-        Returns:
-        --------
-        cpu_power, dram_power (int)
-        prev_cpu_energies, prev_dram_energies (list)
+        Returns
+        -------
+        [type]
+            [description]
         """
         cpu_power = 0
         dram_power = 0
