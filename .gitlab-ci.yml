@@ -1,102 +1,44 @@
-# 1st step: install GitLab Runner & register (at least) one runner
-# 2nd step: commit changes executing gitlab-ci pipeline
-
-#image: python:latest # ?
-#
-#stages:
-#  - test
-#  - deploy
-#
-#before_script: # dependancies management
-#  stage: before_script
-#  script:
-#    - pip install -r requirements.txt # ?
-#    -  # __ ?
-#    -  # linting, flake8, black (format) # maybe in before_script ?
-#
-#build-job:
-#  stage: build
-#  script:
-#    - command build # ?
-#    - python setup.py
-#  only:
-#    - master # integration ?
-#
-#test-job1:
-#  stage: test
-#  script:
-#    -  # linting, flake8, black (format) # maybe in before_script ?
-#
-#test-job2:
-#  stage: test
-#  script:
-#    -  # test: mypy, pytest, unit test...
-#
-#deploy-job: # maybe 2 deploy job: insighters & pypi
-#  stage: deploy
-#  script:
-#    - command
-#  artifacts:
-#    -  #
-#  only:
-#    - master
-
-# POETRY : dev-dependencies
-
-# [tool.poetry.dev-dependencies]
-# pytest = "^6.0.2"
-# pylint = "^2.6.0"
-# flake8 = "^3.8.3"
-# pre-commit = "^2.7.1"
-# black = "^20.8b1"
-# coverage = "^5.3"
-# coveralls = "^2.1.2"
-# mypy = "^0.790"
-# sphinx-rtd-theme = "^0.5.0"
-# m2r = "^0.2.1"
-# sphinx = "1.8.5"
-
-#[tool.poetry.dev-dependencies]
-#pytest = "^3.4"
-#black = "^19.3b0"
-#mypy = "^0.740"
-
-# include pre-commit ?
-
-image: python:latest # ?
+image: python:latest
 
 stages:
   - test
-  - lint
-  - types
   - deploy
 
-before_script:
-  - pip install poetry
-  - poetry config virtualenvs.create false
-  - poetry install
+Dependencies:
+  stage: before_script
+  script:
+    - pip install poetry
+    - poetry install
 
-tests:
+Flake8:
+  stage: before_script
+  script:
+    - poetry run flake8 --count --select=E9,F63,F7,F82 --show-source --statistics --extend-exclude=node_modules
+    - poetry run flake8 --count --exit-zero --max-complexity=10 --max-line-length=79 --statistics --extend-exclude=node_modules
+
+Pylint:
+  stage: before_script
+  script:
+    - poetry run pylint CarbonAImpact
+
+Mypy:
+  stage: before_script
+  script:
+    - poetry run mypy -p CarbonAImpact
+
+Tests:
   stage: test
   script:
-    - echo Starting tests... # poetry run pytest
-    - echo Tests done.
+    - poetry run coverage run -m --source=CarbonAImpact pytest tests
+    - poetry run coverage report
 
-linting:
-  stage: lint
-  script:
-    - poetry run pylint CarbonAImpact # poetry run pylint .
-    - poetry run black CarbonAImpact # poetry run black .
-
-type check:
-  stage: types
-  script:
-    - poetry run mypy -p CarbonAImpact # poetry run mypy .
-
-deploy:
+Deploy:
   stage: deploy
   script:
-    - poetry publish
+    - poetry publish -u $PYPI_USERNAME -p $PYPI_PASSWORD --build
+  only:
+    - master
+    - integration
 # PYPI_USERNAME: ${{ secrets.PYPI_USERNAME }}
 # PYPI_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
 # run: poetry publish -u $PYPI_USERNAME -p $PYPI_PASSWORD --build
