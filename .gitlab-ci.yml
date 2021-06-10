@@ -1,34 +1,40 @@
 image: python:latest
 
 stages:
+  - .pre
   - test
   - build
   - deploy
 
-before_script:
-  - pip install poetry
-  - poetry install
-  - poetry run flake8 --count --select=E9,F63,F7,F82 --show-source --statistics # --extend-exclude=docs/
-  - poetry run flake8 --count --exit-zero --max-complexity=10 --max-line-length=79 --statistics # --extend-exclude=docs/
-  - poetry run pylint CarbonAImpact
-  - poetry run mypy -p CarbonAImpact
+dependencies:
+  stage: .pre
+  script:
+    - pip install poetry
+    - poetry install
 
 tests:
   stage: test
+  before_script:
+    - poetry run flake8 --count --select=E9,F63,F7,F82 --show-source --statistics --extend-exclude=docs/
+    - poetry run flake8 --count --exit-zero --max-complexity=10 --max-line-length=79 --statistics
+    - poetry run pylint CarbonAImpact
+    - poetry run mypy -p CarbonAImpact
   script:
     - poetry run coverage run -m --source=CarbonAImpact pytest tests
     - poetry run coverage report
+  needs: ["dependencies"]
 
 build-private:
   stage: build
   script:
     - poetry build
-  #artifacts:
-  #  paths:
-  #    - dist
+  artifacts:
+    paths:
+      - dist
   only:
     - integration
   when: manual
+  needs: ["tests"]
 
 deploy-public:
   stage: deploy
@@ -44,11 +50,10 @@ deploy-public:
 deploy-pages:
   stage: deploy
   script:
-    - pip install -U sphinx sphinx-rtd-theme pandas IPython psutil
-    - sphinx-build -b html docs/source public
+    - poetry run python docs/make.py html
   artifacts:
     paths:
-      - public
+      - docs/build/html
   only:
     - master
   when: manual
