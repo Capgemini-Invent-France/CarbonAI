@@ -1,6 +1,8 @@
 import os
 from pathlib import Path
 
+from fuzzywuzzy import fuzz
+
 PACKAGE_PATH = Path(os.path.dirname(os.path.abspath(__file__)))
 HOME_DIR = Path.home()
 
@@ -39,10 +41,6 @@ AVAILABLE_STEPS = [
 
 def match(s, options, threshold=80):
     """Fuzzy matching function."""
-    try:
-        from fuzzywuzzy import fuzz
-    except:
-        raise ImportError("fuzzywuzzy dependency is missing.")
 
     results = ((opt, fuzz.token_set_ratio(opt.lower(), s.lower())) for opt in options)
     results = sorted(
