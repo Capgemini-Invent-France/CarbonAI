@@ -2,43 +2,63 @@ image: python:latest
 
 stages:
   - test
+  - build
   - deploy
 
-Dependencies:
+dependencies:
   stage: before_script
   script:
     - pip install poetry
     - poetry install
 
-Flake8:
+format:
   stage: before_script
   script:
-    - poetry run flake8 --count --select=E9,F63,F7,F82 --show-source --statistics --extend-exclude=node_modules
-    - poetry run flake8 --count --exit-zero --max-complexity=10 --max-line-length=79 --statistics --extend-exclude=node_modules
-
-Pylint:
-  stage: before_script
-  script:
+    - poetry run flake8 --count --select=E9,F63,F7,F82 --show-source --statistics # --extend-exclude=docs/
+    - poetry run flake8 --count --exit-zero --max-complexity=10 --max-line-length=79 --statistics # --extend-exclude=docs/
     - poetry run pylint CarbonAImpact
 
-Mypy:
+types:
   stage: before_script
   script:
     - poetry run mypy -p CarbonAImpact
 
-Tests:
+tests:
   stage: test
   script:
     - poetry run coverage run -m --source=CarbonAImpact pytest tests
     - poetry run coverage report
 
-Deploy:
+build-private:
+  stage: build
+  script:
+    - poetry build
+  #artifacts:
+  #  paths:
+  #    - dist
+  only:
+    - integration
+  when: manual
+
+deploy-public:
   stage: deploy
+  variable:
+    PYPI_USERNAME: "capjohan"
+    ***REMOVED***
   script:
     - poetry publish -u $PYPI_USERNAME -p $PYPI_PASSWORD --build
   only:
     - master
-    - integration
-# PYPI_USERNAME: ${{ secrets.PYPI_USERNAME }}
-# PYPI_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
-# run: poetry publish -u $PYPI_USERNAME -p $PYPI_PASSWORD --build
+  when: manual
+
+deploy-pages:
+  stage: deploy
+  script:
+    - pip install -U sphinx sphinx-rtd-theme pandas IPython psutil
+    - sphinx-build -b html docs/source public
+  artifacts:
+    paths:
+      - public
+  only:
+    - master
+  when: manual
