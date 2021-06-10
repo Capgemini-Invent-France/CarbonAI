@@ -5,23 +5,13 @@ stages:
   - build
   - deploy
 
-dependencies:
-  stage: before_script
-  script:
-    - pip install poetry
-    - poetry install
-
-format:
-  stage: before_script
-  script:
-    - poetry run flake8 --count --select=E9,F63,F7,F82 --show-source --statistics # --extend-exclude=docs/
-    - poetry run flake8 --count --exit-zero --max-complexity=10 --max-line-length=79 --statistics # --extend-exclude=docs/
-    - poetry run pylint CarbonAImpact
-
-types:
-  stage: before_script
-  script:
-    - poetry run mypy -p CarbonAImpact
+before_script:
+  - pip install poetry
+  - poetry install
+  - poetry run flake8 --count --select=E9,F63,F7,F82 --show-source --statistics # --extend-exclude=docs/
+  - poetry run flake8 --count --exit-zero --max-complexity=10 --max-line-length=79 --statistics # --extend-exclude=docs/
+  - poetry run pylint CarbonAImpact
+  - poetry run mypy -p CarbonAImpact
 
 tests:
   stage: test
@@ -42,7 +32,7 @@ build-private:
 
 deploy-public:
   stage: deploy
-  variable:
+  variables:
     PYPI_USERNAME: "capjohan"
     ***REMOVED***
   script:
