@@ -44,9 +44,7 @@ def match(s, options, threshold=80):
     except:
         raise ImportError("fuzzywuzzy dependency is missing.")
 
-    results = (
-        (opt, fuzz.token_set_ratio(opt.lower(), s.lower())) for opt in options
-    )
+    results = ((opt, fuzz.token_set_ratio(opt.lower(), s.lower())) for opt in options)
     results = sorted(
         [(opt, v) for opt, v in results if v >= threshold],
         key=lambda tupl: tupl[1],
@@ -54,10 +52,18 @@ def match(s, options, threshold=80):
     )
     if results:
         return results[0][0]
-    else:
-        return s
+
+    return s
 
 
-def normalize(s, default_value=""):
-    """Normalization function."""
-    return str(s).lower() if s else default_value.lower()
+def normalize(normalize_s, default_value=""):
+    """Normalization function.
+
+    Args:
+        normalize_s (str): string to normalize.
+        default_value (str, optional): [description]. Defaults to "".
+
+    Returns:
+        [type]: [description]
+    """
+    return str(normalize_s).lower() if normalize_s else default_value.lower()

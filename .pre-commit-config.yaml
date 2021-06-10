@@ -6,12 +6,12 @@ repos:
       - id: debug-statements
       - id: end-of-file-fixer
       - id: trailing-whitespace
-  - repo: https://github.com/psf/black
-    rev: 20.8b1
-    hooks:
-      - id: black
-        args: [--line-length=79]
-        files: ^CarbonAImpact/
+  #- repo: https://github.com/psf/black
+  #  rev: 20.8b1
+  #  hooks:
+  #    - id: black
+  #      args: [--line-length=79]
+  #      files: ^CarbonAImpact/
   #- repo: https://gitlab.com/pycqa/flake8
   #  rev: 3.8.4
   #  hooks:
