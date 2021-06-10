@@ -1,28 +1,27 @@
 image: python:latest
 
 stages:
-  - .pre
   - test
   - build
   - deploy
 
-dependencies:
-  stage: .pre
-  script:
-    - pip install poetry
-    - poetry install
+before_script:
+  - pip install poetry
+  - poetry install
 
-tests:
+format-tests:
   stage: test
-  before_script:
-    - poetry run flake8 --count --select=E9,F63,F7,F82 --show-source --statistics --extend-exclude=docs/
-    - poetry run flake8 --count --exit-zero --max-complexity=10 --max-line-length=79 --statistics
+  script:
+    - poetry run flake8 --count --select=E9,F63,F7,F82 --show-source --statistics # --extend-exclude=docs/
+    - poetry run flake8 --count --exit-zero --max-complexity=10 --max-line-length=79 --statistics # --extend-exclude=docs/
     - poetry run pylint CarbonAImpact
     - poetry run mypy -p CarbonAImpact
+
+pytest-tests:
+  stage: test
   script:
     - poetry run coverage run -m --source=CarbonAImpact pytest tests
     - poetry run coverage report
-  needs: ["dependencies"]
 
 build-private:
   stage: build
@@ -34,7 +33,7 @@ build-private:
   only:
     - integration
   when: manual
-  needs: ["tests"]
+  needs: ["pytest-tests"]
 
 deploy-public:
   stage: deploy
@@ -46,6 +45,7 @@ deploy-public:
   only:
     - master
   when: manual
+  needs: ["pytest-tests"]
 
 deploy-pages:
   stage: deploy

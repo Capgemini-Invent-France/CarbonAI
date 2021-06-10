@@ -13,6 +13,9 @@ requests = "^2.25.1"
 fuzzywuzzy = "^0.18.0"
 psutil = "^5.8.0"
 ipython = "^7.24.1"
+Sphinx = "^4.0.2"
+pydata-sphinx-theme = "^0.6.3"
+numpydoc = "^1.1.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.4"
