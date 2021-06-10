@@ -3,28 +3,28 @@
 """
 PowerMeter
 ---------
-Main Python class or entrypoint to monitor the power consumption of an algorithm. 
+Main Python class or entrypoint to monitor the power consumption of an algorithm.
 """
 
 __all__ = ["PowerMeter"]
 
-from pathlib import Path
-import logging
-import traceback
-import json
 import datetime
 import getpass
-import shutil
+import json
+import logging
 import os
+import shutil
 import sys
+import traceback
 import warnings
-import requests
+from pathlib import Path
+
 import pandas as pd
+import requests
 
-from .power_gadget import *
 from .nvidia_power import *
+from .power_gadget import *
 from .utils import *
-
 
 LOGGER = logging.getLogger(__name__)
 
@@ -35,7 +35,7 @@ class PowerMeter:
 
     Depending on the platform and hardware used, it allows to measure the power usage of the CPU,
     the DRAM and the GPU. The measure is, then, converted to CO2 emissions depending on the country
-    set and the PUE of the machine (background on the PUE `here`_). You can chose to log the 
+    set and the PUE of the machine (background on the PUE `here`_). You can chose to log the
     results locally or send it to an endpoint.
 
     Parameters
@@ -55,7 +55,7 @@ class PowerMeter:
     location : str, optional
         Country ISO Code available `here
         <https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2#Officially_assigned_code_elements>`_
-        
+
         Must be set if get_country is False.
     is_online : boolean, default True
         Whether the machine is connected to the internet or not.
@@ -119,10 +119,14 @@ class PowerMeter:
 
         self.platform = sys.platform
         if self.platform == "darwin":
-            self.power_gadget = PowerGadgetMac(powerlog_path=cpu_power_log_path)
+            self.power_gadget = PowerGadgetMac(
+                powerlog_path=cpu_power_log_path
+            )
             self.pue = self.LAPTOP_PUE  # pue for my laptop
         elif self.platform == "win32":
-            self.power_gadget = PowerGadgetWin(powerlog_path=cpu_power_log_path)
+            self.power_gadget = PowerGadgetWin(
+                powerlog_path=cpu_power_log_path
+            )
             self.pue = self.LAPTOP_PUE  # pue for my laptop
         elif self.platform in ["linux", "linux2"]:
             self.pue = self.SERVER_PUE  # pue for a server
@@ -136,7 +140,9 @@ class PowerMeter:
                 self.power_gadget = NoPowerGadget()
         else:
             self.pue = self.SERVER_PUE  # pue for a server
-            LOGGER.warning("No power reading interface was found for this platform")
+            LOGGER.warning(
+                "No power reading interface was found for this platform"
+            )
             self.power_gadget = NoPowerGadget()
 
         self.cuda_available = self.__check_gpu()
@@ -208,7 +214,9 @@ class PowerMeter:
 
     @staticmethod
     def __load_energy_mix_db():
-        return pd.read_csv(PACKAGE_PATH / ENERGY_MIX_DATABASE, encoding="utf-8")
+        return pd.read_csv(
+            PACKAGE_PATH / ENERGY_MIX_DATABASE, encoding="utf-8"
+        )
 
     @staticmethod
     def __extract_env_name():
@@ -290,13 +298,16 @@ class PowerMeter:
         return cls(**args)
 
     def __get_energy_mix(self):
-        if not (self.energy_mix_db[COUNTRY_CODE_COLUMN] == self.location).any():
+        if not (
+            self.energy_mix_db[COUNTRY_CODE_COLUMN] == self.location
+        ).any():
             raise NameError(
                 "The location inputed was not found, make sure you wrote the isocode of your country. You used "
                 + self.location
             )
         return self.energy_mix_db.loc[
-            self.energy_mix_db[COUNTRY_CODE_COLUMN] == self.location, ENERGY_MIX_COLUMN
+            self.energy_mix_db[COUNTRY_CODE_COLUMN] == self.location,
+            ENERGY_MIX_COLUMN,
         ].values[0]
 
     def __get_location_name(self):
@@ -387,7 +398,7 @@ class PowerMeter:
         ... def example_func():
         ...     # do something
 
-        Each time this function will be called, the PowerMeter will monitor the power usage 
+        Each time this function will be called, the PowerMeter will monitor the power usage
         and log the function's carbon footprint.
 
         >>> example_func()
@@ -504,7 +515,9 @@ class PowerMeter:
         )
         return self
 
-    def __enter__(self,):
+    def __enter__(
+        self,
+    ):
         self.start_measure(
             self.used_package,
             self.used_algorithm,
@@ -675,7 +688,11 @@ class PowerMeter:
         data = json.dumps(info)
         try:
             response = requests.request(
-                "POST", self.api_endpoint, headers=headers, data=data, timeout=1
+                "POST",
+                self.api_endpoint,
+                headers=headers,
+                data=data,
+                timeout=1,
             )
             return response.status_code
         except requests.exceptions.Timeout:
@@ -698,14 +715,18 @@ class PowerMeter:
         try:
 
             if Path(self.filepath).exists():
-                data = pd.read_excel(self.filepath).append(info, ignore_index=True)
+                data = pd.read_excel(self.filepath).append(
+                    info, ignore_index=True
+                )
                 data.to_excel(self.filepath, index=False)
             else:
                 data = pd.DataFrame(info, index=[0])
                 data.to_excel(self.filepath, index=False)
             return True
         except:
-            LOGGER.error("* error during the writing process in an excel file *")
+            LOGGER.error(
+                "* error during the writing process in an excel file *"
+            )
             LOGGER.error(traceback.format_exc())
             return False
 
@@ -718,7 +739,9 @@ class PowerMeter:
         elif self.filepath.suffix == ".xls" or self.filepath.suffix == ".xlsx":
             return self.__record_data_to_excel_file(info)
         else:
-            LOGGER.info("unknown format: it should be either .csv, .xls or .xlsx")
+            LOGGER.info(
+                "unknown format: it should be either .csv, .xls or .xlsx"
+            )
             return self.__record_data_to_excel_file(info)
 
     def __log_records(
@@ -747,10 +770,16 @@ class PowerMeter:
             "Client name": self.client_name,
             "Total Elapsed CPU Time (sec)": cpu_recorded_power[TOTAL_CPU_TIME],
             "Total Elapsed GPU Time (sec)": gpu_recorded_power[TOTAL_GPU_TIME],
-            "Cumulative Package Energy (mWh)": cpu_recorded_power[TOTAL_ENERGY_ALL],
+            "Cumulative Package Energy (mWh)": cpu_recorded_power[
+                TOTAL_ENERGY_ALL
+            ],
             "Cumulative IA Energy (mWh)": cpu_recorded_power[TOTAL_ENERGY_CPU],
-            "Cumulative GPU Energy (mWh)": gpu_recorded_power[TOTAL_ENERGY_GPU],
-            "Cumulative DRAM Energy (mWh)": cpu_recorded_power[TOTAL_ENERGY_MEMORY],
+            "Cumulative GPU Energy (mWh)": gpu_recorded_power[
+                TOTAL_ENERGY_GPU
+            ],
+            "Cumulative DRAM Energy (mWh)": cpu_recorded_power[
+                TOTAL_ENERGY_MEMORY
+            ],
             "Cumulative process CPU Energy (mWh)": cpu_recorded_power[
                 TOTAL_ENERGY_PROCESS_CPU
             ],
@@ -780,7 +809,10 @@ class PowerMeter:
                 data = pd.DataFrame(payload, index=[0])
                 if self.logging_filename.exists():
                     data.to_csv(
-                        self.logging_filename, mode="a", index=False, header=False
+                        self.logging_filename,
+                        mode="a",
+                        index=False,
+                        header=False,
                     )
                 else:
                     data.to_csv(self.logging_filename, index=False)
@@ -793,7 +825,9 @@ class PowerMeter:
                     for i, payload in enumerate(payloads):
                         res_status_code = self.__record_data_to_server(payload)
                         if res_status_code != 200:
-                            data.iloc[i:].to_csv(self.logging_filename, index=False)
+                            data.iloc[i:].to_csv(
+                                self.logging_filename, index=False
+                            )
                             break
                     else:
                         self.logging_filename.unlink()

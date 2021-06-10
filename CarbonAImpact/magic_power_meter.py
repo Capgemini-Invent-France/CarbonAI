@@ -3,8 +3,12 @@ Wrapper of the Python class PowerMeter for a notebook usage
 """
 __all__ = ["MagicPowerMeter"]
 
-from IPython.core.magic import Magics, magics_class, cell_magic
-from IPython.core.magic_arguments import argument, magic_arguments, parse_argstring
+from IPython.core.magic import Magics, cell_magic, magics_class
+from IPython.core.magic_arguments import (
+    argument,
+    magic_arguments,
+    parse_argstring,
+)
 
 from . import PowerMeter
 
@@ -14,7 +18,7 @@ class MagicPowerMeter(Magics):
     """
     This class will be used to use a PowerMeter instance in a notebook cell.
 
-    This class aims at allowing the usage of ipython magic functions. 
+    This class aims at allowing the usage of ipython magic functions.
     It is not made to be used alone
 
     Parameters
@@ -26,14 +30,14 @@ class MagicPowerMeter(Magics):
     --------
     MagicPowerMeter.measure_power : Measure the power consumption using a ipython magic function
     PowerMeter : Instanciate a PowerMeter
-    
+
     Examples
     --------
-    
+
     Load the ``MagicPowerMeter`` extension then declare a PowerMeter as usual
-    
+
     .. code-block:: python
-        
+
         %load_ext CarbonAImpact.MagicPowerMeter
         from CarbonAImpact import PowerMeter
         power_meter = PowerMeter(project_name="MNIST classifier", is_online=False, location="FR")
@@ -52,7 +56,8 @@ class MagicPowerMeter(Magics):
     @argument("--data_type", help="Type of data used")
     @argument("--data_shape", help="Shape of the data used")
     @argument(
-        "--algorithm_params", help="Some informative parameters used in your algorithm"
+        "--algorithm_params",
+        help="Some informative parameters used in your algorithm",
     )
     @argument("--comments", type=str, help="Comments to describe what is done")
     @cell_magic

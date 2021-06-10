@@ -1,5 +1,5 @@
-from pathlib import Path
 import os
+from pathlib import Path
 
 PACKAGE_PATH = Path(os.path.dirname(os.path.abspath(__file__)))
 HOME_DIR = Path.home()
@@ -27,14 +27,26 @@ TOTAL_ENERGY_PROCESS_MEMORY = "Cumulative process DRAM Energy (mWh)"
 CPU_PERCENT_USAGE = "CPU_percent_usage"
 MEMORY_PERCENT_USAGE = "memory_percent_usage"
 
-AVAILABLE_STEPS = ["inference", "training", "other", "test", "run", "preprocessing"]
+AVAILABLE_STEPS = [
+    "inference",
+    "training",
+    "other",
+    "test",
+    "run",
+    "preprocessing",
+]
 
 
 def match(s, options, threshold=80):
-    """ """
-    from fuzzywuzzy import fuzz
+    """Fuzzy matching function."""
+    try:
+        from fuzzywuzzy import fuzz
+    except:
+        raise ImportError("fuzzywuzzy dependency is missing.")
 
-    results = ((opt, fuzz.token_set_ratio(opt.lower(), s.lower())) for opt in options)
+    results = (
+        (opt, fuzz.token_set_ratio(opt.lower(), s.lower())) for opt in options
+    )
     results = sorted(
         [(opt, v) for opt, v in results if v >= threshold],
         key=lambda tupl: tupl[1],
@@ -47,5 +59,5 @@ def match(s, options, threshold=80):
 
 
 def normalize(s, default_value=""):
-    """ """
+    """Normalization function."""
     return str(s).lower() if s else default_value.lower()
