@@ -28,7 +28,8 @@ class MagicPowerMeter(Magics):
 
     See Also
     --------
-    MagicPowerMeter.measure_power : Measure the power consumption using a ipython magic function
+    MagicPowerMeter.measure_power : Measure the power consumption using a \
+        ipython magic function
     PowerMeter : Instanciate a PowerMeter
 
     Examples
@@ -40,7 +41,8 @@ class MagicPowerMeter(Magics):
 
         %load_ext CarbonAImpact.MagicPowerMeter
         from CarbonAImpact import PowerMeter
-        power_meter = PowerMeter(project_name="MNIST classifier", is_online=False, location="FR")
+        power_meter = PowerMeter(project_name="MNIST classifier", is_online=False,\
+            location="FR")
 
     """
 
@@ -56,8 +58,7 @@ class MagicPowerMeter(Magics):
     @argument("--data_type", help="Type of data used")
     @argument("--data_shape", help="Shape of the data used")
     @argument(
-        "--algorithm_params",
-        help="Some informative parameters used in your algorithm",
+        "--algorithm_params", help="Some informative parameters used in your algorithm",
     )
     @argument("--comments", type=str, help="Comments to describe what is done")
     @cell_magic
@@ -70,10 +71,13 @@ class MagicPowerMeter(Magics):
         power_meter : CarbonAImpact.PowerMeter
             A PowerMeter object used to collect the carbon logs
         package : str
-            A string describing the package used by this function (e.g. sklearn, Pytorch, ...)
+            A string describing the package used by this function \
+                (e.g. sklearn, Pytorch, ...)
         algorithm : str
-            A string describing the algorithm used in the function monitored (e.g. RandomForestClassifier, ResNet121, ...)
-        step : {'inference', 'training', 'other', 'test', 'run', 'preprocessing'}, optional
+            A string describing the algorithm used in the function \
+                monitored (e.g. RandomForestClassifier, ResNet121, ...)
+        step : {'inference', 'training', 'other', 'test', \
+            'run', 'preprocessing'}, optional
             A string to provide useful information on the current stage of the alogrithm
         data_type : {'tabular', 'image', 'text', 'time series', 'other'}, optional
             A string describing the type of data used for training
@@ -101,13 +105,19 @@ class MagicPowerMeter(Magics):
 
             %load_ext CarbonAImpact.MagicPowerMeter
             from CarbonAImpact import PowerMeter
-            power_meter = PowerMeter(project_name="MNIST classifier", is_online=False, location="FR")
+            power_meter = PowerMeter(project_name="MNIST classifier", is_online=False, \
+                location="FR")
 
-        In each cell you want to measure, you can then use the ``measure_power`` cell magic
+        In each cell you want to measure, you can then use the \
+            ``measure_power`` cell magic
 
         .. code-block:: python
 
-            %%measure_power power_meter "package_name_used" "algorithm" --step "training" --data_type "tabular" --data_shape "your_data_shape" --algorithm_params "n_estimators=300, max_depth=15" --comments "Classifier trained on the MNIST dataset, 3rd test"
+            %%measure_power power_meter "package_name_used" \
+                "algorithm" --step "training" --data_type "tabular" \
+                --data_shape "your_data_shape" \
+                --algorithm_params "n_estimators=300, max_depth=15" \
+                --comments "Classifier trained on the MNIST dataset, 3rd test"
             # Do something
 
         """

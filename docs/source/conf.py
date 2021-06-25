@@ -130,8 +130,8 @@ class AccessorLevelDocumenter(Documenter):
             # HACK: this is added in comparison to ClassLevelDocumenter
             # mod_cls still exists of class.accessor, so an extra
             # rpartition is needed
-            modname, accessor = rpartition(mod_cls, ".")
-            modname, cls = rpartition(modname, ".")
+            modname, accessor = mod_cls.rpartition(".")
+            modname, cls = modname.rpartition(".")
             parents = [cls, accessor]
             # if the module name is still missing, get it like above
             if not modname:

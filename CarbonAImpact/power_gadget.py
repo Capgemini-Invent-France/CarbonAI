@@ -34,7 +34,6 @@ from .utils import (
     HOME_DIR,
     MAC_INTELPOWERLOG_FILENAME,
     PACKAGE_PATH,
-    POWERLOG_PATH_LINUX,
     TOTAL_CPU_TIME,
     TOTAL_ENERGY_ALL,
     TOTAL_ENERGY_CPU,
@@ -59,9 +58,7 @@ POWERLOG_TOOL_WIN = "IntelPowerGadget.exe"
 
 CPU_IDS_DIR = "/sys/devices/system/cpu/cpu*/topology/physical_package_id"
 READ_MSR_PATH = "/dev/cpu/{}/msr"
-READ_RAPL_PATH = (
-    "/sys/class/powercap/intel-rapl/intel-rapl:{}/"  # rapl_socket_id
-)
+READ_RAPL_PATH = "/sys/class/powercap/intel-rapl/intel-rapl:{}/"  # rapl_socket_id
 RAPL_DEVICENAME_FILE = "name"
 RAPL_ENERGY_FILE = "energy_uj"
 RAPL_DRAM_PATH = "intel-rapl:{}:{}/"  # rapl_socket_id, rapl_device_id
@@ -88,7 +85,7 @@ class PowerGadget(abc.ABC):
             "Cumulative IA Energy (mWh)" or "Cumulative GPU Energy (mWh)"
         """
         content = powerlog_file.read_text()
-        if not "Total Elapsed Time" in content:
+        if "Total Elapsed Time" not in content:
             LOGGER.debug(
                 "The log file does not seem to be written yet, we'll wait 2 secs."
             )
@@ -101,9 +98,7 @@ class PowerGadget(abc.ABC):
             TOTAL_ENERGY_MEMORY: 0,
         }
         results[TOTAL_CPU_TIME] = float(
-            re.search(
-                r"(?<=Total Elapsed Time \(sec\) = )(\d|\.)*", content
-            ).group(0)
+            re.search(r"(?<=Total Elapsed Time \(sec\) = )(\d|\.)*", content).group(0)
         )
         results[TOTAL_ENERGY_ALL] = float(
             re.search(
@@ -112,9 +107,9 @@ class PowerGadget(abc.ABC):
             ).group(0)
         )
         results[TOTAL_ENERGY_CPU] = float(
-            re.search(
-                r"(?<=Cumulative IA Energy_0 \(mWh\) = )(\d|\.)*", content
-            ).group(0)
+            re.search(r"(?<=Cumulative IA Energy_0 \(mWh\) = )(\d|\.)*", content).group(
+                0
+            )
         )
         results[TOTAL_ENERGY_MEMORY] = float(
             re.search(
@@ -129,23 +124,17 @@ class PowerGadget(abc.ABC):
                 columns=["time", "process_cpu_usage", "process_memory_usage"],
             )
             powers = pd.read_csv(powerlog_file)
-            powers = powers.dropna(
-                subset=["Cumulative Processor Energy_0(mWh)"]
-            )
+            powers = powers.dropna(subset=["Cumulative Processor Energy_0(mWh)"])
             powers["System Time"] = pd.to_datetime(
                 powers["System Time"], format="%H:%M:%S:%f"
             )
-            powers_sec = powers.groupby(
-                pd.Grouper(key="System Time", freq="S")
-            )[
+            powers_sec = powers.groupby(pd.Grouper(key="System Time", freq="S"))[
                 [
                     "Cumulative Processor Energy_0(mWh)",
                     "Cumulative IA Energy_0(mWh)",
                     "Cumulative DRAM Energy_0(mWh)",
                 ]
-            ].apply(
-                lambda x: x.iloc[-1] - x.iloc[0]
-            )
+            ].apply(lambda x: x.iloc[-1] - x.iloc[0])
             process_usage["time"] = process_usage["time"].dt.floor("S").dt.time
             process_usage.set_index("time", inplace=True)
             powers_sec.index = powers_sec.index.time
@@ -160,9 +149,7 @@ class PowerGadget(abc.ABC):
             # so when merging on the timestamp there may be some empty values that we fill with the previous one
             power_process[
                 ["process_cpu_usage", "process_memory_usage"]
-            ] = power_process[
-                ["process_cpu_usage", "process_memory_usage"]
-            ].fillna(
+            ] = power_process[["process_cpu_usage", "process_memory_usage"]].fillna(
                 method="ffill", limit=1
             )
             results[TOTAL_ENERGY_PROCESS_CPU] = (
@@ -213,9 +200,7 @@ class PowerGadget(abc.ABC):
         with process.oneshot():
             process_cpu_usage = process.cpu_percent(interval=interval)
             cpu_usage = psutil.cpu_percent()
-            process_cpu_usage = process_cpu_usage / (
-                cpu_usage * psutil.cpu_count()
-            )
+            process_cpu_usage = process_cpu_usage / (cpu_usage * psutil.cpu_count())
             memory_global = psutil.virtual_memory()
             memory_usage = process.memory_full_info().rss / (
                 memory_global.total - memory_global.available
@@ -307,9 +292,7 @@ class PowerGadgetMac(PowerGadget):
 
     def __append_energy_usage(self, process, interval=1):
         energy_usage = self.__get_power_consumption(duration=interval)
-        _, cpu_usage, memory_usage = self.get_computer_usage(
-            process, interval=0
-        )
+        _, cpu_usage, memory_usage = self.get_computer_usage(process, interval=0)
         energy_usage[TOTAL_ENERGY_PROCESS_CPU] = (
             energy_usage[TOTAL_ENERGY_CPU] * cpu_usage
         )
@@ -339,9 +322,7 @@ class PowerGadgetMac(PowerGadget):
         if self.thread and self.thread.is_alive():
             self.stop_thread()
         self.power_draws = []
-        self.thread = threading.Thread(
-            target=self.get_power_consumption, args=()
-        )
+        self.thread = threading.Thread(target=self.get_power_consumption, args=())
         self.thread.start()
 
     def stop(self):
@@ -376,12 +357,8 @@ class PowerGadgetWin(PowerGadget):
         self.process_usage = []
 
     def __get_powerlog_file(self):
-        file_names = glob.glob(
-            str(HOME_DIR / "Documents" / WIN_INTELPOWERLOG_FILENAME)
-        )
-        file_names.sort(
-            key=lambda f: list(map(int, re.split(r"-|_|\.|/", f)[-7:-1]))
-        )
+        file_names = glob.glob(str(HOME_DIR / "Documents" / WIN_INTELPOWERLOG_FILENAME))
+        file_names.sort(key=lambda f: list(map(int, re.split(r"-|_|\.|/", f)[-7:-1])))
         return Path(file_names[-1])
 
     def get_process_usage(self, interval=1):
@@ -400,9 +377,7 @@ class PowerGadgetWin(PowerGadget):
     def start(self):
         LOGGER.info("starting CPU power monitoring ...")
         if self.thread and self.thread.is_alive():
-            LOGGER.debug(
-                "another thread is alive, we are going to close it first"
-            )
+            LOGGER.debug("another thread is alive, we are going to close it first")
             self.stop_thread()
         _ = subprocess.Popen(
             '"' + str(self.powerlog_path) + '" /min',
@@ -414,15 +389,11 @@ class PowerGadgetWin(PowerGadget):
         time.sleep(1)
         self.thread = threading.Thread(target=self.get_process_usage, args=())
         self.thread.start()
-        _ = subprocess.run(
-            '"' + str(self.powerlog_path) + '" -start', shell=True
-        )
+        _ = subprocess.run('"' + str(self.powerlog_path) + '" -start', shell=True)
 
     def stop(self):
         LOGGER.info("stoping CPU power monitoring ...")
-        _ = subprocess.run(
-            '"' + str(self.powerlog_path) + '" -stop', shell=True
-        )
+        _ = subprocess.run('"' + str(self.powerlog_path) + '" -stop', shell=True)
         _ = subprocess.run(
             'taskkill /IM "' + POWERLOG_TOOL_WIN + '"',
             stdout=open(os.devnull, "wb"),
@@ -430,9 +401,7 @@ class PowerGadgetWin(PowerGadget):
         )
         self.stop_thread()
         powerlog_file = self.__get_powerlog_file()
-        self.record = self.parse_log(
-            powerlog_file, process_usage=self.process_usage
-        )
+        self.record = self.parse_log(powerlog_file, process_usage=self.process_usage)
         os.remove(powerlog_file)
 
 
@@ -539,9 +508,7 @@ class PowerGadgetLinuxRAPL(PowerGadgetLinux):
                 for cpu_id, dram_id in self.dram_ids
             ]
         )
-        _, cpu_usage, memory_usage = self.get_computer_usage(
-            process, interval=interval
-        )
+        _, cpu_usage, memory_usage = self.get_computer_usage(process, interval=interval)
         energy_usage["cpu_usage"] = cpu_usage
         energy_usage["memory_usage"] = memory_usage
         self.power_draws.append(energy_usage)
@@ -567,18 +534,14 @@ class PowerGadgetLinuxRAPL(PowerGadgetLinux):
         self.record = {}
         if self.thread and self.thread.is_alive():
             self.stop_thread()
-        self.thread = threading.Thread(
-            target=self.get_power_consumption, args=()
-        )
+        self.thread = threading.Thread(target=self.get_power_consumption, args=())
         self.thread.start()
 
     def stop(self):
         LOGGER.info("stoping CPU power monitoring ...")
         usages = self.collect_power_usage()
         end_time = time.time()
-        self.record[TOTAL_ENERGY_CPU] = (
-            usages[TOTAL_ENERGY_CPU].sum() / 3600 / 1000
-        )
+        self.record[TOTAL_ENERGY_CPU] = usages[TOTAL_ENERGY_CPU].sum() / 3600 / 1000
         self.record[TOTAL_ENERGY_PROCESS_CPU] = (
             usages[TOTAL_ENERGY_PROCESS_CPU].sum() / 3600 / 1000
         )
@@ -666,9 +629,7 @@ class PowerGadgetLinuxMSR(PowerGadgetLinux):
         os.close(fd)
         return result * unit / 3.6
 
-    def __get_computer_consumption(
-        self, prev_cpu_energies, prev_dram_energies
-    ):
+    def __get_computer_consumption(self, prev_cpu_energies, prev_dram_energies):
         """
         Get the power consumption since the last measure
 
@@ -689,12 +650,8 @@ class PowerGadgetLinuxMSR(PowerGadgetLinux):
         cpu_power = 0
         dram_power = 0
         for i, cpu in enumerate(self.cpu_ids):
-            _, cpu_energy_units, dram_energy_units, _ = self.__get_used_units(
-                cpu
-            )
-            current_dram_energy = self.__get_dram_energy(
-                cpu, dram_energy_units
-            )
+            _, cpu_energy_units, dram_energy_units, _ = self.__get_used_units(cpu)
+            current_dram_energy = self.__get_dram_energy(cpu, dram_energy_units)
             current_cpu_energy = self.__get_cpu_energy(cpu, cpu_energy_units)
             if prev_cpu_energies[i] > cpu_energy_units:
                 cpu_energy_units *= 2
@@ -721,15 +678,9 @@ class PowerGadgetLinuxMSR(PowerGadgetLinux):
         prev_dram_energies = []
         prev_cpu_energies = []
         for cpu in self.cpu_ids:
-            _, cpu_energy_units, dram_energy_units, _ = self.__get_used_units(
-                cpu
-            )
-            prev_dram_energies.append(
-                self.__get_dram_energy(cpu, dram_energy_units)
-            )
-            prev_cpu_energies.append(
-                self.__get_cpu_energy(cpu, cpu_energy_units)
-            )
+            _, cpu_energy_units, dram_energy_units, _ = self.__get_used_units(cpu)
+            prev_dram_energies.append(self.__get_dram_energy(cpu, dram_energy_units))
+            prev_cpu_energies.append(self.__get_cpu_energy(cpu, cpu_energy_units))
         t0 = time.time()
         while getattr(self.thread, "do_run", True):
             # time.sleep(interval)
@@ -741,15 +692,11 @@ class PowerGadgetLinuxMSR(PowerGadgetLinux):
                 dram_power,
                 prev_cpu_energies,
                 prev_dram_energies,
-            ) = self.__get_computer_consumption(
-                prev_cpu_energies, prev_dram_energies
-            )
+            ) = self.__get_computer_consumption(prev_cpu_energies, prev_dram_energies)
             self.power_draws[TOTAL_ENERGY_CPU] += cpu_power
             self.power_draws[TOTAL_ENERGY_MEMORY] += dram_power
             self.power_draws[TOTAL_ENERGY_PROCESS_CPU] += cpu_power * cpu_usage
-            self.power_draws[TOTAL_ENERGY_PROCESS_MEMORY] += (
-                dram_power * memory_usage
-            )
+            self.power_draws[TOTAL_ENERGY_PROCESS_MEMORY] += dram_power * memory_usage
             t1 = time.time()
             self.power_draws[TOTAL_CPU_TIME] += t1 - t0
             t0 = t1
@@ -759,9 +706,7 @@ class PowerGadgetLinuxMSR(PowerGadgetLinux):
         if self.thread and self.thread.is_alive():
             self.stop()
         self.power_draws = {}
-        self.thread = threading.Thread(
-            target=self.get_computer_consumption, args=()
-        )
+        self.thread = threading.Thread(target=self.get_computer_consumption, args=())
         self.thread.start()
 
     def stop(self):
