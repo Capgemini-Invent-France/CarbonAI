@@ -14,7 +14,7 @@ format-tests:
   script:
     - poetry run flake8 --count --select=E9,F63,F7,F82 --show-source --statistics --extend-exclude=docs/
     - poetry run flake8 --count --exit-zero --max-complexity=10 --max-line-length=79 --statistics
-    - poetry run pylint CarbonAImpact --fail-under 9
+    - poetry run pylint CarbonAImpact --fail-under 8.5
     - poetry run mypy -p CarbonAImpact
 
 pytest-tests:
