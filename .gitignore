@@ -17,3 +17,4 @@ ignore
 .vscode/
 ignore*
 docs/source/reference/api
+.mypy_cache

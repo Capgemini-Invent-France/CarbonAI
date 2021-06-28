@@ -3,8 +3,8 @@ Wrapper of the Python class PowerMeter for a notebook usage
 """
 __all__ = ["MagicPowerMeter"]
 
-from IPython.core.magic import Magics, cell_magic, magics_class
-from IPython.core.magic_arguments import (
+from IPython.core.magic import Magics, cell_magic, magics_class  # type: ignore
+from IPython.core.magic_arguments import (  # type: ignore
     argument,
     magic_arguments,
     parse_argstring,

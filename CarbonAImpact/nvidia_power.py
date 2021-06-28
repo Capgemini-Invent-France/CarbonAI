@@ -13,8 +13,8 @@ import logging
 import re
 import subprocess
 import signal
-import pandas as pd
-import numpy as np
+import pandas as pd  # type: ignore
+import numpy as np  # type: ignore
 
 from .utils import TOTAL_GPU_TIME, TOTAL_ENERGY_GPU
 

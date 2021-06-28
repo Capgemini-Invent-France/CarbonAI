@@ -19,7 +19,7 @@ import traceback
 import warnings
 from pathlib import Path
 
-import pandas as pd
+import pandas as pd  # type: ignore
 import requests
 
 from .nvidia_power import NoGpuPower, NvidiaPower
@@ -241,7 +241,7 @@ class PowerMeter:
         env = "unknown"
         try:
             env = os.environ["CONDA_DEFAULT_ENV"]
-        except:
+        except KeyError:
             pass
         if hasattr(sys, "real_prefix"):
             env = sys.real_prefix.split("/")[-1]
@@ -715,7 +715,7 @@ class PowerMeter:
             else:
                 data.to_csv(self.filepath, index=False)
             return True
-        except:
+        except Exception:
             LOGGER.error("* error during the csv writing process *")
             LOGGER.error(traceback.format_exc())
             return False
@@ -730,7 +730,7 @@ class PowerMeter:
                 data = pd.DataFrame(info, index=[0])
                 data.to_excel(self.filepath, index=False)
             return True
-        except:
+        except Exception:
             LOGGER.error("* error during the writing process in an excel file *")
             LOGGER.error(traceback.format_exc())
             return False

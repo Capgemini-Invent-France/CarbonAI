@@ -5,7 +5,6 @@ Python wrapper of Intel(R) Power Gadget, a software-based power estimation tool
 enabled for 2nd Generation Intel(R) Core(TM) processors or later.
 The software data can be logged from the command line (without running the GUI
 app) using PowerLog.
-cf. https://software.intel.com/content/www/us/en/develop/articles/intel-power-gadget.html
 """
 __all__ = [
     "PowerGadgetMac",
@@ -27,8 +26,8 @@ import threading
 import time
 from pathlib import Path
 
-import pandas as pd
-import psutil
+import pandas as pd  # type: ignore
+import psutil  # type: ignore
 
 from .utils import (
     HOME_DIR,
@@ -66,7 +65,8 @@ RAPL_DRAM_PATH = "intel-rapl:{}:{}/"  # rapl_socket_id, rapl_device_id
 
 class PowerGadget(abc.ABC):
     """
-    Abstract wrapper to an Intel Power Gadget object instanciated by a command line interface
+    Abstract wrapper to an Intel Power Gadget object instanciated \
+        by a command line interface
     """
 
     @staticmethod
@@ -102,7 +102,8 @@ class PowerGadget(abc.ABC):
         )
         results[TOTAL_ENERGY_ALL] = float(
             re.search(
-                r"((?<=Cumulative Package Energy_0 \(mWh\) = )|(?<=Cumulative Processor Energy_0 \(mWh\) = ))(\d|\.)*",
+                r"((?<=Cumulative Package Energy_0 \(mWh\) = )|"
+                r"(?<=Cumulative Processor Energy_0 \(mWh\) = ))(\d|\.)*",
                 content,
             ).group(0)
         )
@@ -118,7 +119,8 @@ class PowerGadget(abc.ABC):
         )
         if process_usage:
             # to account for the actual algorithm energy consumption we need to
-            # combine the overall mesure of the machine power usage with the actual algorithm CPU and memory usage
+            # combine the overall mesure of the machine power usage with the actual
+            # algorithm CPU and memory usage
             process_usage = pd.DataFrame(
                 process_usage,
                 columns=["time", "process_cpu_usage", "process_memory_usage"],
@@ -145,8 +147,10 @@ class PowerGadget(abc.ABC):
                 left_index=True,
                 right_index=True,
             )
-            # a measure is performed each second but it actually takes a little more than 1s
-            # so when merging on the timestamp there may be some empty values that we fill with the previous one
+            # a measure is performed each second but
+            # it actually takes a little more than 1s
+            # so when merging on the timestamp there may be some empty values that
+            # we fill with the previous one
             power_process[
                 ["process_cpu_usage", "process_memory_usage"]
             ] = power_process[["process_cpu_usage", "process_memory_usage"]].fillna(
@@ -216,7 +220,8 @@ class PowerGadget(abc.ABC):
 
 class NoPowerGadget(PowerGadget):
     """
-    Dummy class used when no power gadget (intel power gadget, rapl, msr) is available. It will return empty consumption
+    Dummy class used when no power gadget (intel power gadget, rapl, msr) 
+    is available. It will return empty consumption
     """
 
     def __init__(self):
@@ -250,9 +255,15 @@ class PowerGadgetMac(PowerGadget):
 
         if not self.powerlog_path.exists():
             raise ModuleNotFoundError(
-                "We didn't find the Intel Power Gadget tool. \nMake sure it is installed (download available here : https://software.intel.com/sites/default/files/managed/91/6b/Intel%20Power%20Gadget.dmg).\nIf it is installed, we looked for it here:"
-                + str(self.powerlog_path)
-                + ", try passing the path to the powerLog tool to the powerMeter."
+                f"""
+                    We didn't find the Intel Power Gadget tool.\n
+                    Make sure it is installed (download available here : 
+                    https://software.intel.com/sites/default/files/managed/91/6b/
+                    Intel%20Power%20Gadget.dmg).\n
+                    If it is installed, we looked for it here:
+                    {self.powerlog_path}
+                    , try passing the path to the powerLog tool to the powerMeter.
+                """
             )
         self.powerlog_file = self.__get_powerlog_file()
         # self.thread = None

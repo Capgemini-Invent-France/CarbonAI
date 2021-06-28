@@ -78,4 +78,3 @@ with power_meter(
     cv_results = cross_validate(clf, X, y, cv=cv)
     print(cv_results["test_score"].mean(), cv_results["test_score"].std())
     time.sleep(5)
-
