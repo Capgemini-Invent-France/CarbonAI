@@ -232,6 +232,14 @@ class PowerMeter:
         self.energy_mix = self.__get_energy_mix()  # kgCO2e/kWh
         self.location_name = self.__get_location_name()
 
+        self.used_package = ""
+        self.used_algorithm = ""
+        self.used_data_type = ""
+        self.used_data_shape = ""
+        self.used_algorithm_params = ""
+        self.used_comments = ""
+        self.used_step = ""
+
         if not filepath:
             LOGGER.info("No current filepath, will use the default")
             self.filepath = Path.cwd() / "emissions.csv"
@@ -307,7 +315,7 @@ class PowerMeter:
 
         See also
         --------
-        PowerMeter : Instanciate a PowerMeter by declaring every argument
+        PowerMeter : Instantiate a PowerMeter by declaring every argument
 
         Examples
         --------
@@ -340,7 +348,7 @@ class PowerMeter:
             self.energy_mix_db[COUNTRY_CODE_COLUMN] == self.location
         ).any():
             raise NameError(
-                "The location inputed was not found, make sure you wrote "
+                "The location input was not found, make sure you wrote "
                 "the isocode of your country. You used " + self.location
             )
         return self.energy_mix_db.loc[
@@ -405,7 +413,7 @@ class PowerMeter:
         step : {'inference', 'training', 'other', 'test', 'run', \
             'preprocessing'}, optional
             A string to provide useful information on the current stage
-            of the alogrithm
+            of the algorithm
         data_type : {'tabular', 'image', 'text', 'time series', 'other'},\
              optional
             A string describing the type of data used for training
@@ -579,7 +587,7 @@ class PowerMeter:
             comments=self.used_comments,
         )
 
-    def __exit__(self, type, value, traceback):
+    def __exit__(self, exit_type, value, traceback):
         self.stop_measure()
 
     def start_measure(
@@ -630,7 +638,7 @@ class PowerMeter:
 
         Notes
         -----
-        We do not recomend using this method to monitor the energy usage of
+        We do not recommend using this method to monitor the energy usage of
         your code because it won't automatically stop if an error is raised
         at some point while running. You will then have to stop the measure
         manually with :func:`PowerMeter.stop_measure`.
