@@ -27,7 +27,7 @@ repos:
         name: pylint
         entry: pylint
         exclude: ^(tests/)|^(docs/)|^(examples/)
-        args: [--fail-under=8.5]
+        args: [--fail-under=9.5]
         language: system
         types: [python]
   - repo: https://github.com/pre-commit/mirrors-mypy
