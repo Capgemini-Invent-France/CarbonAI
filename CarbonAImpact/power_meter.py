@@ -154,32 +154,48 @@ class PowerMeter:
     ):
 
         self.platform = sys.platform
-        if self.platform == "darwin":
-            self.power_gadget = PowerGadgetMac(
-                powerlog_path=cpu_power_log_path
-            )
+        powergadget_platform = {
+            "darwin": PowerGadgetMac,
+            "win32": PowerGadgetWin,
+            "linux": self.__set_powergadget_linux,
+            "linux2": self.__set_powergadget_linux,
+            "": NoPowerGadget,
+        }
+        self.power_gadget = powergadget_platform[self.platform](
+            powerlog_path=cpu_power_log_path
+        )
+
+        if self.platform in ["darwin", "win32"]:
             self.pue = self.LAPTOP_PUE  # pue for my laptop
-        elif self.platform == "win32":
-            self.power_gadget = PowerGadgetWin(
-                powerlog_path=cpu_power_log_path
-            )
-            self.pue = self.LAPTOP_PUE  # pue for my laptop
-        elif self.platform in ["linux", "linux2"]:
-            self.pue = self.SERVER_PUE  # pue for a server
-            if POWERLOG_PATH_LINUX.exists():
-                self.power_gadget = PowerGadgetLinuxRAPL()
-            # The user needs to be root to use MSR interface
-            elif MSR_PATH_LINUX_TEST.exists() and os.getuid() == 0:
-                self.power_gadget = PowerGadgetLinuxMSR()
-            else:
-                LOGGER.warning("No power reading interface was found")
-                self.power_gadget = NoPowerGadget()
         else:
             self.pue = self.SERVER_PUE  # pue for a server
-            LOGGER.warning(
-                "No power reading interface was found for this platform"
-            )
-            self.power_gadget = NoPowerGadget()
+
+        # if self.platform == "darwin":
+        #     self.power_gadget = PowerGadgetMac(
+        #         powerlog_path=cpu_power_log_path
+        #     )
+        #     self.pue = self.LAPTOP_PUE  # pue for my laptop
+        # elif self.platform == "win32":
+        #     self.power_gadget = PowerGadgetWin(
+        #         powerlog_path=cpu_power_log_path
+        #     )
+        #     self.pue = self.LAPTOP_PUE  # pue for my laptop
+        # elif self.platform in ["linux", "linux2"]:
+        #     self.pue = self.SERVER_PUE  # pue for a server
+        #     if POWERLOG_PATH_LINUX.exists():
+        #         self.power_gadget = PowerGadgetLinuxRAPL()
+        #     # The user needs to be root to use MSR interface
+        #     elif MSR_PATH_LINUX_TEST.exists() and os.getuid() == 0:
+        #         self.power_gadget = PowerGadgetLinuxMSR()
+        #     else:
+        #         LOGGER.warning("No power reading interface was found")
+        #         self.power_gadget = NoPowerGadget()
+        # else:
+        #     self.pue = self.SERVER_PUE  # pue for a server
+        #     LOGGER.warning(
+        #         "No power reading interface was found for this platform"
+        #     )
+        #     self.power_gadget = NoPowerGadget()
 
         self.cuda_available = self.__check_gpu()
         if self.cuda_available:
@@ -342,6 +358,17 @@ class PowerMeter:
         with open(path) as file:
             args = json.load(file)
         return cls(**args)
+
+    def __set_powergadget_linux(self, powerlog_path=None):
+        if POWERLOG_PATH_LINUX.exists():
+            power_gadget = PowerGadgetLinuxRAPL()
+        # The user needs to be root to use MSR interface
+        elif MSR_PATH_LINUX_TEST.exists() and os.getuid() == 0:
+            power_gadget = PowerGadgetLinuxMSR()
+        else:
+            LOGGER.warning("No power reading interface was found")
+            power_gadget = NoPowerGadget()
+        return power_gadget
 
     def __get_energy_mix(self):
         if not (
