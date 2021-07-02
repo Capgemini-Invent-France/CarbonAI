@@ -198,12 +198,7 @@ class PowerMeter:
         #     self.power_gadget = NoPowerGadget()
 
         self.cuda_available = self.__check_gpu()
-        if self.cuda_available:
-            LOGGER.info("Found a GPU")
-            self.gpu_power = NvidiaPower()
-        else:
-            LOGGER.info("Found no GPU")
-            self.gpu_power = NoGpuPower()
+        self.gpu_power = self.__set_gpu_power()
 
         if user_name:
             self.user = user_name
@@ -225,6 +220,15 @@ class PowerMeter:
         else:
             self.client_name = "--"
 
+        self.is_online = is_online
+        if api_endpoint:
+            LOGGER.info("Api endpoint given, will save data online")
+            self.api_endpoint = api_endpoint
+        else:
+            LOGGER.info("No current api endpoint, will save data locally")
+            self.api_endpoint = ""
+
+        self.location = self.__set_location(location, get_country)
         # Set the location used to convert energy usage to carbon emissions
         # if the location is provided, we use it
         # if it's not and we can use the internet and the user authorize us to
@@ -243,7 +247,6 @@ class PowerMeter:
             )
             self.location = self.DEFAULT_LOCATION
 
-        self.is_online = is_online
         self.energy_mix_db = self.__load_energy_mix_db()
         self.energy_mix = self.__get_energy_mix()  # kgCO2e/kWh
         self.location_name = self.__get_location_name()
@@ -264,13 +267,6 @@ class PowerMeter:
             self.filepath = Path(filepath)
 
         self.output_format = output_format
-
-        if api_endpoint:
-            LOGGER.info("Api endpoint given, will save data online")
-            self.api_endpoint = api_endpoint
-        else:
-            LOGGER.info("No current api endpoint, will save data locally")
-            self.api_endpoint = ""
 
         self.logging_filename = PACKAGE_PATH / LOGGING_FILE
 
@@ -369,6 +365,35 @@ class PowerMeter:
             LOGGER.warning("No power reading interface was found")
             power_gadget = NoPowerGadget()
         return power_gadget
+
+    def __set_gpu_power(self):
+        if self.cuda_available:
+            LOGGER.info("Found a GPU")
+            gpu_power = NvidiaPower()
+        else:
+            LOGGER.info("Found no GPU")
+            gpu_power = NoGpuPower()
+        return gpu_power
+
+    def __set_location(self, provided_location, get_country):
+        # Set the location used to convert energy usage to carbon emissions
+        # if the location is provided, we use it
+        # if it's not and we can use the internet and the user authorize us to
+        # #do so then we retrieve it from the IP address
+        # otherwise set the location to default
+        if provided_location:
+            location = provided_location
+        elif (self.is_online or self.api_endpoint) and get_country:
+            location = self.__get_country()
+        else:
+            warnings.warn(
+                "No location was set, we will fallback to \
+                the default location: {}".format(
+                    self.DEFAULT_LOCATION
+                )
+            )
+            location = self.DEFAULT_LOCATION
+        return location
 
     def __get_energy_mix(self):
         if not (
