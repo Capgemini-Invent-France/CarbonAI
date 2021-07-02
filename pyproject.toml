@@ -26,7 +26,14 @@ black = "^21.5b2"
 mypy = "^0.812"
 coverage = "^5.5"
 coveralls = "^3.1.0"
-
+isort = ">=5.8"
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 79 # override black's default line-length
+
+[tool.isort]
+# make it compatible with black
+profile = "black"
