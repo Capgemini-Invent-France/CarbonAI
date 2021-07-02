@@ -220,7 +220,7 @@ class PowerGadget(abc.ABC):
 
 class NoPowerGadget(PowerGadget):
     """
-    Dummy class used when no power gadget (intel power gadget, rapl, msr) 
+    Dummy class used when no power gadget (intel power gadget, rapl, msr)
     is available. It will return empty consumption
     """
 
