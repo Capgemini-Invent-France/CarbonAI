@@ -1,3 +1,4 @@
+# type: ignore
 # Configuration file for the Sphinx documentation builder.
 #
 # This file only contains a selection of the most common options. For a full
@@ -12,7 +13,16 @@
 #
 import os
 import sys
+from typing import List
+
 import sphinx
+
+from sphinx.ext.autodoc import (  # isort:skip
+    AttributeDocumenter,
+    Documenter,
+    MethodDocumenter,
+)
+
 
 sys.path.insert(0, os.path.abspath("../../CarbonAImpact/"))
 sys.path.insert(0, os.path.abspath("../CarbonAImpact/"))
@@ -23,7 +33,9 @@ sys.path.insert(0, os.path.abspath("../"))
 # -- Project information -----------------------------------------------------
 
 project = "CarbonAImpact"
-copyright = "2020, Capgemini Invent - Martin Chauvin, Francois Lemeille, Jordan Toh"
+copyright = (
+    "2020, Capgemini Invent - Martin Chauvin, Francois Lemeille, Jordan Toh"
+)
 author = "Capgemini Invent - Martin Chauvin, Francois Lemeille, Jordan Toh"
 master_doc = "index"
 
@@ -48,7 +60,7 @@ autoclass_content = "class"
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = []
+exclude_patterns: List[str] = []
 
 # -- Options for HTML output -------------------------------------------------
 
@@ -68,15 +80,9 @@ html_css_files = [
 html_logo = "_static/logo.png"
 html_favicon = "_static/favicon.ico"
 
-# -- Specific code to generate the API -------------------------------------------------
+# -- Specific code to generate the API --------------------------------------
 # numpydoc_show_class_members = False
 # numpydoc_attributes_as_param_list = False
-
-from sphinx.ext.autodoc import (  # isort:skip
-    AttributeDocumenter,
-    Documenter,
-    MethodDocumenter,
-)
 
 
 class AccessorDocumenter(MethodDocumenter):
@@ -145,7 +151,9 @@ class AccessorLevelDocumenter(Documenter):
         return modname, parents + [base]
 
 
-class AccessorAttributeDocumenter(AccessorLevelDocumenter, AttributeDocumenter):
+class AccessorAttributeDocumenter(
+    AccessorLevelDocumenter, AttributeDocumenter
+):
     objtype = "accessorattribute"
     directivetype = "attribute"
 
@@ -187,7 +195,9 @@ def rstjinja(app, docname, source):
     if app.builder.format != "html":
         return
     src = source[0]
-    rendered = app.builder.templates.render_string(src, app.config.html_context)
+    rendered = app.builder.templates.render_string(
+        src, app.config.html_context
+    )
     source[0] = rendered
 
 

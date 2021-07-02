@@ -30,10 +30,8 @@
    .. autosummary::
       :toctree:
       {% for item in attributes %}
-      {%- if item not in inherited_attributes %}
       {%- if not item.startswith('_') %}
       {{ name }}.{{ item }}
-      {%- endif -%}
       {%- endif -%}
       {%- endfor %}
 

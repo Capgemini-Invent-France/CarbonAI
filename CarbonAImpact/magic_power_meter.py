@@ -41,8 +41,8 @@ class MagicPowerMeter(Magics):
 
         %load_ext CarbonAImpact.MagicPowerMeter
         from CarbonAImpact import PowerMeter
-        power_meter = PowerMeter(project_name="MNIST classifier", is_online=False,\
-            location="FR")
+        power_meter = PowerMeter(project_name="MNIST classifier", \
+            is_online=False, location="FR")
 
     """
 
@@ -58,13 +58,16 @@ class MagicPowerMeter(Magics):
     @argument("--data_type", help="Type of data used")
     @argument("--data_shape", help="Shape of the data used")
     @argument(
-        "--algorithm_params", help="Some informative parameters used in your algorithm",
+        "--algorithm_params",
+        help="Some informative parameters \
+            used in your algorithm",
     )
     @argument("--comments", type=str, help="Comments to describe what is done")
     @cell_magic
     def measure_power(self, line, cell):
         """
-        An IPython magic function to measure the power consumption of a given cell
+        An IPython magic function to measure the power consumption of \
+        a given cell
 
         Parameters
         ----------
@@ -75,11 +78,14 @@ class MagicPowerMeter(Magics):
                 (e.g. sklearn, Pytorch, ...)
         algorithm : str
             A string describing the algorithm used in the function \
-                monitored (e.g. RandomForestClassifier, ResNet121, ...)
+                monitored (e.g. RandomForestClassifier, \
+                ResNet121, ...)
         step : {'inference', 'training', 'other', 'test', \
             'run', 'preprocessing'}, optional
-            A string to provide useful information on the current stage of the alogrithm
-        data_type : {'tabular', 'image', 'text', 'time series', 'other'}, optional
+            A string to provide useful information on the current stage of \
+                the alogrithm
+        data_type : \
+            {'tabular', 'image', 'text', 'time series', 'other'}, optional
             A string describing the type of data used for training
         data_shape : str or tuple, optional
             A string or tuple describing the quantity of data used
@@ -94,19 +100,21 @@ class MagicPowerMeter(Magics):
         See also
         --------
         MagicPowerMeter : Loads the jupyter CarbonAImpact extension
-        PowerMeter : Instanciate a PowerMeter
-        PowerMeter.measure_power : Another way to measure the power usage of some code
+        PowerMeter : Instantiate a PowerMeter
+        PowerMeter.measure_power : Another way to measure the power \
+            usage of some code
 
         Examples
         --------
-        Load the ``MagicPowerMeter`` extension then declare a PowerMeter as usual
+        Load the ``MagicPowerMeter`` extension then declare a PowerMeter \
+            as usual
 
         .. code-block:: python
 
             %load_ext CarbonAImpact.MagicPowerMeter
             from CarbonAImpact import PowerMeter
-            power_meter = PowerMeter(project_name="MNIST classifier", is_online=False, \
-                location="FR")
+            power_meter = PowerMeter(project_name="MNIST classifier", \
+                is_online=False, location="FR")
 
         In each cell you want to measure, you can then use the \
             ``measure_power`` cell magic

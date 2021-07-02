@@ -270,15 +270,13 @@ class PowerGadgetMac(PowerGadget):
 
         if not self.powerlog_path.exists():
             raise ModuleNotFoundError(
-                f"""
-                We didn't find the Intel Power Gadget tool.\n
-                Make sure it is installed (download available here :
-                https://software.intel.com/sites/default/files/managed/91/6b/
-                Intel%20Power%20Gadget.dmg).\n
-                If it is installed, we looked for it here:
-                {self.powerlog_path}
-                , try passing the path to the powerLog tool to the powerMeter.
-                """
+                "We didn't find the Intel Power Gadget tool.\n"
+                "Make sure it is installed (download available here : "
+                "https://software.intel.com/sites/default/files/managed/91/6b/"
+                "Intel%20Power%20Gadget.dmg).\n"
+                "If it is installed, we looked for it here: "
+                f"{powerlog_path}, try passing the path to "
+                "the powerLog tool to the powerMeter."
             )
         self.powerlog_file = self.__get_powerlog_file()
         # self.thread = None
@@ -379,15 +377,13 @@ class PowerGadgetWin(PowerGadget):
                     break
         if not self.powerlog_path.exists():
             raise ModuleNotFoundError(
-                f"""
-                We didn't find the Intel Power Gadget tool.\n
-                Make sure it is installed (download available here :
-                https://software.intel.com/sites/default/files/managed/91/6b/
-                Intel%20Power%20Gadget.dmg).\n
-                If it is installed, we looked for it here:
-                {self.powerlog_path}
-                , try passing the path to the powerLog tool to the powerMeter.
-                """
+                "We didn't find the Intel Power Gadget tool.\n"
+                "Make sure it is installed (download available here :"
+                "https://software.intel.com/sites/default/files/managed/91/6b/"
+                "Intel%20Power%20Gadget.dmg).\n"
+                "If it is installed, we looked for it here:"
+                f"{self.powerlog_path}, try passing the path to the "
+                "powerLog tool to the powerMeter."
             )
         self.thread = None
         self.process_usage = []

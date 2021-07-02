@@ -42,7 +42,9 @@ AVAILABLE_STEPS = [
 def match(s, options, threshold=80):
     """Fuzzy matching function."""
 
-    results = ((opt, fuzz.token_set_ratio(opt.lower(), s.lower())) for opt in options)
+    results = (
+        (opt, fuzz.token_set_ratio(opt.lower(), s.lower())) for opt in options
+    )
     results = sorted(
         [(opt, v) for opt, v in results if v >= threshold],
         key=lambda tupl: tupl[1],
