@@ -165,60 +165,16 @@ class PowerMeter:
             powerlog_path=cpu_power_log_path
         )
 
-        if self.platform in ["darwin", "win32"]:
-            self.pue = self.LAPTOP_PUE  # pue for my laptop
-        else:
-            self.pue = self.SERVER_PUE  # pue for a server
-
-        # if self.platform == "darwin":
-        #     self.power_gadget = PowerGadgetMac(
-        #         powerlog_path=cpu_power_log_path
-        #     )
-        #     self.pue = self.LAPTOP_PUE  # pue for my laptop
-        # elif self.platform == "win32":
-        #     self.power_gadget = PowerGadgetWin(
-        #         powerlog_path=cpu_power_log_path
-        #     )
-        #     self.pue = self.LAPTOP_PUE  # pue for my laptop
-        # elif self.platform in ["linux", "linux2"]:
-        #     self.pue = self.SERVER_PUE  # pue for a server
-        #     if POWERLOG_PATH_LINUX.exists():
-        #         self.power_gadget = PowerGadgetLinuxRAPL()
-        #     # The user needs to be root to use MSR interface
-        #     elif MSR_PATH_LINUX_TEST.exists() and os.getuid() == 0:
-        #         self.power_gadget = PowerGadgetLinuxMSR()
-        #     else:
-        #         LOGGER.warning("No power reading interface was found")
-        #         self.power_gadget = NoPowerGadget()
-        # else:
-        #     self.pue = self.SERVER_PUE  # pue for a server
-        #     LOGGER.warning(
-        #         "No power reading interface was found for this platform"
-        #     )
-        #     self.power_gadget = NoPowerGadget()
+        self.pue = self.__set_pue()
 
         self.cuda_available = self.__check_gpu()
         self.gpu_power = self.__set_gpu_power()
 
-        if user_name:
-            self.user = user_name
-        else:
-            self.user = getpass.getuser()
+        self.user = self.__set_username(user_name)
 
-        if project_name:
-            self.project = project_name
-        else:
-            self.project = self.__extract_env_name()
-
-        if program_name:
-            self.program_name = program_name
-        else:
-            self.program_name = "--"
-
-        if client_name:
-            self.client_name = client_name
-        else:
-            self.client_name = "--"
+        self.project_name = self.__set_project_name(project_name)
+        self.program_name = self.__set_project_entity(program_name)
+        self.client_name = self.__set_project_entity(client_name)
 
         self.is_online = is_online
         if api_endpoint:
@@ -338,6 +294,11 @@ class PowerMeter:
             args = json.load(file)
         return cls(**args)
 
+    def __set_pue(self):
+        if self.platform in ["darwin", "win32"]:
+            return self.LAPTOP_PUE  # pue for my laptop
+        return self.SERVER_PUE  # pue for a server
+
     def __set_powergadget_linux(self, powerlog_path=None):
         if POWERLOG_PATH_LINUX.exists():
             power_gadget = PowerGadgetLinuxRAPL()
@@ -357,6 +318,21 @@ class PowerMeter:
             LOGGER.info("Found no GPU")
             gpu_power = NoGpuPower()
         return gpu_power
+
+    def __set_username(self, user_name):
+        if user_name:
+            return user_name
+        return getpass.getuser()
+
+    def __set_project_name(self, project_name):
+        if project_name:
+            return project_name
+        return self.__extract_env_name()
+
+    def __set_project_entity(self, entity_name):
+        if entity_name:
+            return entity_name
+        return "--"
 
     def __set_location(self, provided_location, get_country):
         # Set the location used to convert energy usage to carbon emissions
@@ -827,11 +803,8 @@ class PowerMeter:
             return self.__record_data_to_csv_file(info)
         elif self.filepath.suffix == ".xls" or self.filepath.suffix == ".xlsx":
             return self.__record_data_to_excel_file(info)
-        else:
-            LOGGER.info(
-                "unknown format: it should be either .csv, .xls or .xlsx"
-            )
-            return self.__record_data_to_excel_file(info)
+        LOGGER.info("unknown format: it should be either .csv, .xls or .xlsx")
+        return self.__record_data_to_excel_file(info)
 
     def __log_records(
         self,
@@ -886,7 +859,7 @@ class PowerMeter:
             "Step": step,
         }
         written = self.__record_data_to_file(payload)
-        LOGGER.info(f"* recorded into a file? {written}*")
+        LOGGER.info("* recorded into a file? %s*", written)
 
         if self.is_online and self.api_endpoint:
             response_status_code = self.__record_data_to_server(payload)
