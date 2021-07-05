@@ -187,13 +187,11 @@ class PowerGadget(abc.ABC):
         """
         Retrieve the log file where is written the PowerLog logs
         """
-        pass
 
     def start(self):
         """
         Starts the recording processus with Intel Power Gadget
         """
-        pass
 
     def stop_thread(self):
         self.thread.do_run = False
@@ -230,7 +228,6 @@ class PowerGadget(abc.ABC):
         """
         Stops the recording processus with Intel Power Gadget
         """
-        pass
 
 
 class NoPowerGadget(PowerGadget):
@@ -310,6 +307,7 @@ class PowerGadgetMac(PowerGadget):
                 self.powerlog_file,
             ],
             stdout=open(os.devnull, "wb"),
+            check=True,
         )
         consumption = self.parse_log(self.powerlog_file)
         return consumption
@@ -428,18 +426,19 @@ class PowerGadgetWin(PowerGadget):
         self.thread = threading.Thread(target=self.get_process_usage, args=())
         self.thread.start()
         _ = subprocess.run(
-            '"' + str(self.powerlog_path) + '" -start', shell=True
+            '"' + str(self.powerlog_path) + '" -start', shell=True, check=True
         )
 
     def stop(self):
         LOGGER.info("stoping CPU power monitoring ...")
         _ = subprocess.run(
-            '"' + str(self.powerlog_path) + '" -stop', shell=True
+            '"' + str(self.powerlog_path) + '" -stop', shell=True, check=True
         )
         _ = subprocess.run(
             'taskkill /IM "' + POWERLOG_TOOL_WIN + '"',
             stdout=open(os.devnull, "wb"),
             shell=True,
+            check=True,
         )
         self.stop_thread()
         powerlog_file = self.__get_powerlog_file()

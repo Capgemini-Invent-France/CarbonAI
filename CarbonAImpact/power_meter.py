@@ -172,7 +172,7 @@ class PowerMeter:
 
         self.user = self.__set_username(user_name)
 
-        self.project_name = self.__set_project_name(project_name)
+        self.project = self.__set_project_name(project_name)
         self.program_name = self.__set_project_entity(program_name)
         self.client_name = self.__set_project_entity(client_name)
 

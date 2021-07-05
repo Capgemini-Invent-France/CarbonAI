@@ -41,19 +41,16 @@ class GpuPower(abc.ABC):
         """
         Starts the recording processus
         """
-        pass
 
     def stop(self):
         """
         Stops the recording processus
         """
-        pass
 
     def parse_log(self):
         """
         Extract relevant information from the logs.
         """
-        pass
 
 
 class NoGpuPower(GpuPower):
@@ -63,7 +60,6 @@ class NoGpuPower(GpuPower):
 
     def __init__(self):
         super().__init__()
-        pass
 
 
 class NvidiaPower(GpuPower):
