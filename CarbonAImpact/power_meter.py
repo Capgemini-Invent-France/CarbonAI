@@ -229,23 +229,6 @@ class PowerMeter:
             self.api_endpoint = ""
 
         self.location = self.__set_location(location, get_country)
-        # Set the location used to convert energy usage to carbon emissions
-        # if the location is provided, we use it
-        # if it's not and we can use the internet and the user authorize us to
-        # #do so then we retrieve it from the IP address
-        # otherwise set the location to default
-        if location:
-            self.location = location
-        elif (is_online or api_endpoint) and get_country:
-            self.location = self.__get_country()
-        else:
-            warnings.warn(
-                "No location was set, we will fallback to \
-                the default location: {}".format(
-                    self.DEFAULT_LOCATION
-                )
-            )
-            self.location = self.DEFAULT_LOCATION
 
         self.energy_mix_db = self.__load_energy_mix_db()
         self.energy_mix = self.__get_energy_mix()  # kgCO2e/kWh
