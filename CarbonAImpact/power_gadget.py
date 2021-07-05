@@ -619,15 +619,15 @@ class PowerGadgetLinuxMSR(PowerGadgetLinux):
     MSR_PP0_ENERGY_STATUS = 0x639
 
     @staticmethod
-    def __read_msr(fd, msr):
+    def __read_msr(msr_file, msr_position):
         """
         Read MSR file at a specific position
 
         Parameters
         ----------
-        fd : _io.TextIOWrapper
+        msr_file : _io.TextIOWrapper
             An opened MSR file
-        msr : int
+        msr_position : int
             Position at which read the MSR file
 
         Returns
@@ -635,8 +635,8 @@ class PowerGadgetLinuxMSR(PowerGadgetLinux):
         int
             The value of the given MSR
         """
-        os.lseek(fd, msr, os.SEEK_SET)
-        return struct.unpack("Q", os.read(fd, 8))[0]
+        os.lseek(msr_file, msr_position, os.SEEK_SET)
+        return struct.unpack("Q", os.read(msr_file, 8))[0]
 
     def __init__(self):
         super().__init__()
@@ -650,32 +650,32 @@ class PowerGadgetLinuxMSR(PowerGadgetLinux):
         """
         Get the unit used by the MSR to encode the energy usage
         """
-        fd = os.open(READ_MSR_PATH.format(cpu), os.O_RDONLY)
+        msr_file = os.open(READ_MSR_PATH.format(cpu), os.O_RDONLY)
         # Calculate the units used
-        result = self.__read_msr(fd, self.MSR_RAPL_POWER_UNIT)
+        result = self.__read_msr(msr_file, self.MSR_RAPL_POWER_UNIT)
         power_units = 0.5 ** (result & 0xF)
         cpu_energy_units = 0.5 ** ((result >> 8) & 0x1F)
         dram_energy_units = cpu_energy_units
         time_units = 0.5 ** ((result >> 16) & 0xF)
-        os.close(fd)
+        os.close(msr_file)
         return power_units, cpu_energy_units, dram_energy_units, time_units
 
     def __get_cpu_energy(self, cpu, unit):
         """
         Returns the CPU Energy figure
         """
-        fd = os.open(READ_MSR_PATH.format(cpu), os.O_RDONLY)
-        result = self.__read_msr(fd, self.MSR_PKG_ENERGY_STATUS)
-        os.close(fd)
+        msr_file = os.open(READ_MSR_PATH.format(cpu), os.O_RDONLY)
+        result = self.__read_msr(msr_file, self.MSR_PKG_ENERGY_STATUS)
+        os.close(msr_file)
         return result * unit / 3.6
 
     def __get_dram_energy(self, cpu, unit):
         """
         Returns the dram energy figure
         """
-        fd = os.open(READ_MSR_PATH.format(cpu), os.O_RDONLY)
-        result = self.__read_msr(fd, self.MSR_DRAM_ENERGY_STATUS)
-        os.close(fd)
+        msr_file = os.open(READ_MSR_PATH.format(cpu), os.O_RDONLY)
+        result = self.__read_msr(msr_file, self.MSR_DRAM_ENERGY_STATUS)
+        os.close(msr_file)
         return result * unit / 3.6
 
     def __get_computer_consumption(
@@ -742,7 +742,7 @@ class PowerGadgetLinuxMSR(PowerGadgetLinux):
             prev_cpu_energies.append(
                 self.__get_cpu_energy(cpu, cpu_energy_units)
             )
-        t0 = time.time()
+        start_time = time.time()
         while getattr(self.thread, "do_run", True):
             # time.sleep(interval)
             _, cpu_usage, memory_usage = self.get_computer_usage(
@@ -762,9 +762,9 @@ class PowerGadgetLinuxMSR(PowerGadgetLinux):
             self.power_draws[TOTAL_ENERGY_PROCESS_MEMORY] += (
                 dram_power * memory_usage
             )
-            t1 = time.time()
-            self.power_draws[TOTAL_CPU_TIME] += t1 - t0
-            t0 = t1
+            end_time = time.time()
+            self.power_draws[TOTAL_CPU_TIME] += end_time - start_time
+            start_time = end_time
 
     def start(self):
         LOGGER.info("starting CPU power monitoring ...")
