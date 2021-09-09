@@ -7,17 +7,17 @@ during a time delimited between a start and a stop methods
 __all__ = ["NoGpuPower", "NvidiaPower"]
 
 import abc
-import os
-from pathlib import Path
 import logging
+import os
 import re
-import subprocess
 import signal
-import pandas as pd
-import numpy as np
+import subprocess
+from pathlib import Path
 
-from .utils import TOTAL_GPU_TIME, TOTAL_ENERGY_GPU
+import numpy as np  # type: ignore
+import pandas as pd  # type: ignore
 
+from .utils import TOTAL_ENERGY_GPU, TOTAL_GPU_TIME
 
 LOGGER = logging.getLogger(__name__)
 
@@ -41,19 +41,16 @@ class GpuPower(abc.ABC):
         """
         Starts the recording processus
         """
-        pass
 
     def stop(self):
         """
         Stops the recording processus
         """
-        pass
 
     def parse_log(self):
         """
         Extract relevant information from the logs.
         """
-        pass
 
 
 class NoGpuPower(GpuPower):
@@ -63,7 +60,6 @@ class NoGpuPower(GpuPower):
 
     def __init__(self):
         super().__init__()
-        pass
 
 
 class NvidiaPower(GpuPower):
@@ -79,7 +75,8 @@ class NvidiaPower(GpuPower):
     def __init__(self, interval=1):
         super().__init__()
         self.log_file = (
-            Path(os.path.dirname(os.path.abspath(__file__))) / NVIDIAPOWERLOG_FILENAME
+            Path(os.path.dirname(os.path.abspath(__file__)))
+            / NVIDIAPOWERLOG_FILENAME
         )
         self.logging_process = None
         self.interval = interval
@@ -124,7 +121,8 @@ class NvidiaPower(GpuPower):
         """
         if not self.log_file.exists():
             raise FileNotFoundError(
-                "Logging file not found, make sure you started to run a measure"
+                "Logging file not found, make sure you started to \
+                    run a measure"
             )
         content = self.log_file.read_text()
         regex_power = r"Power Draw +: (.*) W"
@@ -135,9 +133,13 @@ class NvidiaPower(GpuPower):
             min_len = min(len(times), len(powers))
             times = times[:min_len]
             powers = powers[:min_len]
-        results = pd.DataFrame(np.array([times, powers]).T, columns=["Time", "Power"])
+        results = pd.DataFrame(
+            np.array([times, powers]).T, columns=["Time", "Power"]
+        )
         results["Power"] = results["Power"].astype("float32")
-        results["Time"] = pd.to_datetime(results["Time"], infer_datetime_format=True)
+        results["Time"] = pd.to_datetime(
+            results["Time"], infer_datetime_format=True
+        )
         results["Elapsed time"] = results["Time"] - results.loc[0, "Time"]
         results["Elapsed time"] = results["Elapsed time"].dt.total_seconds()
         self.record[TOTAL_GPU_TIME] = results["Elapsed time"].iloc[-1]

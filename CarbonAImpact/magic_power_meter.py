@@ -3,8 +3,12 @@ Wrapper of the Python class PowerMeter for a notebook usage
 """
 __all__ = ["MagicPowerMeter"]
 
-from IPython.core.magic import Magics, magics_class, cell_magic
-from IPython.core.magic_arguments import argument, magic_arguments, parse_argstring
+from IPython.core.magic import Magics, cell_magic, magics_class  # type: ignore
+from IPython.core.magic_arguments import (  # type: ignore
+    argument,
+    magic_arguments,
+    parse_argstring,
+)
 
 from . import PowerMeter
 
@@ -14,7 +18,7 @@ class MagicPowerMeter(Magics):
     """
     This class will be used to use a PowerMeter instance in a notebook cell.
 
-    This class aims at allowing the usage of ipython magic functions. 
+    This class aims at allowing the usage of ipython magic functions.
     It is not made to be used alone
 
     Parameters
@@ -24,19 +28,21 @@ class MagicPowerMeter(Magics):
 
     See Also
     --------
-    MagicPowerMeter.measure_power : Measure the power consumption using a ipython magic function
+    MagicPowerMeter.measure_power : Measure the power consumption using a \
+        ipython magic function
     PowerMeter : Instanciate a PowerMeter
-    
+
     Examples
     --------
-    
+
     Load the ``MagicPowerMeter`` extension then declare a PowerMeter as usual
-    
+
     .. code-block:: python
-        
+
         %load_ext CarbonAImpact.MagicPowerMeter
         from CarbonAImpact import PowerMeter
-        power_meter = PowerMeter(project_name="MNIST classifier", is_online=False, location="FR")
+        power_meter = PowerMeter(project_name="MNIST classifier", \
+            is_online=False, location="FR")
 
     """
 
@@ -52,25 +58,34 @@ class MagicPowerMeter(Magics):
     @argument("--data_type", help="Type of data used")
     @argument("--data_shape", help="Shape of the data used")
     @argument(
-        "--algorithm_params", help="Some informative parameters used in your algorithm"
+        "--algorithm_params",
+        help="Some informative parameters \
+            used in your algorithm",
     )
     @argument("--comments", type=str, help="Comments to describe what is done")
     @cell_magic
     def measure_power(self, line, cell):
         """
-        An IPython magic function to measure the power consumption of a given cell
+        An IPython magic function to measure the power consumption of \
+        a given cell
 
         Parameters
         ----------
         power_meter : CarbonAImpact.PowerMeter
             A PowerMeter object used to collect the carbon logs
         package : str
-            A string describing the package used by this function (e.g. sklearn, Pytorch, ...)
+            A string describing the package used by this function \
+                (e.g. sklearn, Pytorch, ...)
         algorithm : str
-            A string describing the algorithm used in the function monitored (e.g. RandomForestClassifier, ResNet121, ...)
-        step : {'inference', 'training', 'other', 'test', 'run', 'preprocessing'}, optional
-            A string to provide useful information on the current stage of the alogrithm
-        data_type : {'tabular', 'image', 'text', 'time series', 'other'}, optional
+            A string describing the algorithm used in the function \
+                monitored (e.g. RandomForestClassifier, \
+                ResNet121, ...)
+        step : {'inference', 'training', 'other', 'test', \
+            'run', 'preprocessing'}, optional
+            A string to provide useful information on the current stage of \
+                the alogrithm
+        data_type : \
+            {'tabular', 'image', 'text', 'time series', 'other'}, optional
             A string describing the type of data used for training
         data_shape : str or tuple, optional
             A string or tuple describing the quantity of data used
@@ -85,24 +100,32 @@ class MagicPowerMeter(Magics):
         See also
         --------
         MagicPowerMeter : Loads the jupyter CarbonAImpact extension
-        PowerMeter : Instanciate a PowerMeter
-        PowerMeter.measure_power : Another way to measure the power usage of some code
+        PowerMeter : Instantiate a PowerMeter
+        PowerMeter.measure_power : Another way to measure the power \
+            usage of some code
 
         Examples
         --------
-        Load the ``MagicPowerMeter`` extension then declare a PowerMeter as usual
+        Load the ``MagicPowerMeter`` extension then declare a PowerMeter \
+            as usual
 
         .. code-block:: python
 
             %load_ext CarbonAImpact.MagicPowerMeter
             from CarbonAImpact import PowerMeter
-            power_meter = PowerMeter(project_name="MNIST classifier", is_online=False, location="FR")
+            power_meter = PowerMeter(project_name="MNIST classifier", \
+                is_online=False, location="FR")
 
-        In each cell you want to measure, you can then use the ``measure_power`` cell magic
+        In each cell you want to measure, you can then use the \
+            ``measure_power`` cell magic
 
         .. code-block:: python
 
-            %%measure_power power_meter "package_name_used" "algorithm" --step "training" --data_type "tabular" --data_shape "your_data_shape" --algorithm_params "n_estimators=300, max_depth=15" --comments "Classifier trained on the MNIST dataset, 3rd test"
+            %%measure_power power_meter "package_name_used" \
+                "algorithm" --step "training" --data_type "tabular" \
+                --data_shape "your_data_shape" \
+                --algorithm_params "n_estimators=300, max_depth=15" \
+                --comments "Classifier trained on the MNIST dataset, 3rd test"
             # Do something
 
         """

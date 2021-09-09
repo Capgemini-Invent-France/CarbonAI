@@ -52,52 +52,12 @@ class DocBuilder:
         self.verbosity = verbosity
         self.warnings_are_errors = warnings_are_errors
 
-        if single_doc:
-            single_doc = self._process_single_doc(single_doc)
-            os.environ["SPHINX_PATTERN"] = single_doc
-        elif not include_api:
+        if not include_api:
             os.environ["SPHINX_PATTERN"] = "-api"
         elif whatsnew:
             os.environ["SPHINX_PATTERN"] = "whatsnew"
 
         self.single_doc_html = None
-        if single_doc and single_doc.endswith(".rst"):
-            self.single_doc_html = os.path.splitext(single_doc)[0] + ".html"
-        elif single_doc:
-            self.single_doc_html = f"reference/api/pandas.{single_doc}.html"
-
-    def _process_single_doc(self, single_doc):
-        """
-        Make sure the provided value for --single is a path to an existing
-        .rst/.ipynb file, or a pandas object that can be imported.
-
-        For example, categorial.rst or pandas.DataFrame.head. For the latter,
-        return the corresponding file path
-        (e.g. reference/api/pandas.DataFrame.head.rst).
-        """
-        base_name, extension = os.path.splitext(single_doc)
-        if extension in (".rst", ".ipynb"):
-            if os.path.exists(os.path.join(SOURCE_PATH, single_doc)):
-                return single_doc
-            else:
-                raise FileNotFoundError(f"File {single_doc} not found")
-
-        elif single_doc.startswith("pandas."):
-            try:
-                obj = pandas  # noqa: F821
-                for name in single_doc.split("."):
-                    obj = getattr(obj, name)
-            except AttributeError as err:
-                raise ImportError(f"Could not import {single_doc}") from err
-            else:
-                return single_doc[len("pandas.") :]
-        else:
-            raise ValueError(
-                f"--single={single_doc} not understood. "
-                "Value should be a valid path to a .rst or .ipynb file, "
-                "or a valid pandas object "
-                "(e.g. categorical.rst or pandas.DataFrame.head)"
-            )
 
     @staticmethod
     def _run_os(*args):
@@ -151,7 +111,9 @@ class DocBuilder:
         """
         Open a browser tab showing single
         """
-        url = os.path.join("file://", DOC_PATH, "build", "html", single_doc_html)
+        url = os.path.join(
+            "file://", DOC_PATH, "build", "html", single_doc_html
+        )
         webbrowser.open(url, new=2)
 
     def _get_page_title(self, page):
@@ -162,7 +124,9 @@ class DocBuilder:
         option_parser = docutils.frontend.OptionParser(
             components=(docutils.parsers.rst.Parser,)
         )
-        doc = docutils.utils.new_document("<doc>", option_parser.get_default_values())
+        doc = docutils.utils.new_document(
+            "<doc>", option_parser.get_default_values()
+        )
         with open(fname) as f:
             data = f.read()
 
@@ -173,10 +137,14 @@ class DocBuilder:
             parser.parse(data, doc)
 
         section = next(
-            node for node in doc.children if isinstance(node, docutils.nodes.section)
+            node
+            for node in doc.children
+            if isinstance(node, docutils.nodes.section)
         )
         title = next(
-            node for node in section.children if isinstance(node, docutils.nodes.title)
+            node
+            for node in section.children
+            if isinstance(node, docutils.nodes.title)
         )
 
         return title.astext()
@@ -254,7 +222,9 @@ class DocBuilder:
             os.chdir(os.path.join(BUILD_PATH, "latex"))
             if force:
                 for i in range(3):
-                    self._run_os("pdflatex", "-interaction=nonstopmode", "pandas.tex")
+                    self._run_os(
+                        "pdflatex", "-interaction=nonstopmode", "pandas.tex"
+                    )
                 raise SystemExit(
                     "You should check the file "
                     '"build/latex/pandas.pdf" for problems.'
@@ -275,7 +245,9 @@ class DocBuilder:
         Clean documentation generated files.
         """
         shutil.rmtree(BUILD_PATH, ignore_errors=True)
-        shutil.rmtree(os.path.join(SOURCE_PATH, "reference", "api"), ignore_errors=True)
+        shutil.rmtree(
+            os.path.join(SOURCE_PATH, "reference", "api"), ignore_errors=True
+        )
 
     def zip_html(self):
         """
@@ -295,7 +267,8 @@ def main():
 
     joined = ",".join(cmds)
     argparser = argparse.ArgumentParser(
-        description="pandas documentation builder", epilog=f"Commands: {joined}"
+        description="pandas documentation builder",
+        epilog=f"Commands: {joined}",
     )
 
     joined = ", ".join(cmds)
@@ -303,10 +276,15 @@ def main():
         "command", nargs="?", default="html", help=f"command to run: {joined}"
     )
     argparser.add_argument(
-        "--num-jobs", default="auto", help="number of jobs used by sphinx-build"
+        "--num-jobs",
+        default="auto",
+        help="number of jobs used by sphinx-build",
     )
     argparser.add_argument(
-        "--no-api", default=False, help="omit api and autosummary", action="store_true"
+        "--no-api",
+        default=False,
+        help="omit api and autosummary",
+        action="store_true",
     )
     argparser.add_argument(
         "--whatsnew",
@@ -320,13 +298,16 @@ def main():
         type=str,
         default=None,
         help=(
-            "filename (relative to the 'source' folder) of section or method name to "
-            "compile, e.g. 'development/contributing.rst', "
+            "filename (relative to the 'source' folder) of section or "
+            "method name to compile, e.g. 'development/contributing.rst', "
             "'ecosystem.rst', 'pandas.DataFrame.join'"
         ),
     )
     argparser.add_argument(
-        "--python-path", type=str, default=os.path.dirname(DOC_PATH), help="path"
+        "--python-path",
+        type=str,
+        default=os.path.dirname(DOC_PATH),
+        help="path",
     )
     argparser.add_argument(
         "-v",
@@ -348,7 +329,9 @@ def main():
 
     if args.command not in cmds:
         joined = ", ".join(cmds)
-        raise ValueError(f"Unknown command {args.command}. Available options: {joined}")
+        raise ValueError(
+            f"Unknown command {args.command}. Available options: {joined}"
+        )
 
     # Below we update both os.environ and sys.path. The former is used by
     # external libraries (namely Sphinx) to compile this module and resolve
