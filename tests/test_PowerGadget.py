@@ -5,10 +5,14 @@ from pathlib import Path
 
 import pytest
 
-# from CarbonAImpact import PowerGadget
-from CarbonAImpact.power_gadget import PowerGadget
-from CarbonAImpact.utils import (TOTAL_CPU_TIME, TOTAL_ENERGY_ALL,
-                                 TOTAL_ENERGY_CPU, TOTAL_ENERGY_MEMORY)
+# from carbonai import PowerGadget
+from carbonai.power_gadget import PowerGadget
+from carbonai.utils import (
+    TOTAL_CPU_TIME,
+    TOTAL_ENERGY_ALL,
+    TOTAL_ENERGY_CPU,
+    TOTAL_ENERGY_MEMORY,
+)
 
 
 @pytest.fixture

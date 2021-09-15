@@ -4,5 +4,5 @@
 """
 __all__ = ["PowerMeter", "MagicPowerMeter"]
 
-from .power_meter import PowerMeter
 from .magic_power_meter import MagicPowerMeter
+from .power_meter import PowerMeter

@@ -1,4 +1,4 @@
-.. currentmodule:: CarbonAImpact
+.. currentmodule:: carbonai
 
 .. _power_meter:
 
@@ -18,7 +18,7 @@ IO / conversion
 
 .. autosummary::
    :toctree: api/
-   
+
    PowerMeter.from_config
 
 Measures

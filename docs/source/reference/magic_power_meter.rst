@@ -1,4 +1,4 @@
-.. currentmodule:: CarbonAImpact
+.. currentmodule:: carbonai
 
 .. _magic_power_meter:
 

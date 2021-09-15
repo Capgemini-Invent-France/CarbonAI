@@ -6,7 +6,7 @@ from sklearn.linear_model import SGDClassifier
 from sklearn.model_selection import StratifiedKFold, cross_validate
 
 # import the measure package
-from CarbonAImpact import PowerMeter
+from carbonai import PowerMeter
 
 # In all this script we'll try to measure how much CO2 does the training
 # of a toy algorithm on the mnist database emit
@@ -30,7 +30,7 @@ plt.show()
 # You can either declare the variable by hand or use a config file
 # power_meter = PowerMeter(
 #   project_name="example",
-#   program_name="CarbonAImpact",
+#   program_name="CarbonAI",
 #   client_name="IDE",
 #   is_online=False,
 #   location="FR"

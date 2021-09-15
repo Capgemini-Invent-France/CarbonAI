@@ -8,9 +8,9 @@ dist/
 *power_logs*.csv
 emissions.csv
 .DS_STORE
-CarbonAImpact/requirements.txt
-CarbonAImpact/test*
-CarbonAImpact/mesure_power.py
+CarbonAI/requirements.txt
+CarbonAI/test*
+CarbonAI/mesure_power.py
 *.zip
 public
 ignore
