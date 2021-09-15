@@ -14,13 +14,13 @@ format-tests:
   script:
     - poetry run flake8 --count --select=E9,F63,F7,F82 --show-source --statistics --extend-exclude=docs/
     - poetry run flake8 --count --max-complexity=10 --max-line-length=79 --statistics
-    - poetry run pylint CarbonAI --fail-under 9.5
-    - poetry run mypy -p CarbonAI
+    - poetry run pylint carbonai --fail-under 9.5
+    - poetry run mypy -p carbonai
 
 pytest-tests:
   stage: test
   script:
-    - poetry run coverage run -m --source=CarbonAI pytest tests
+    - poetry run coverage run -m --source=carbonai pytest tests
     - poetry run coverage report
 
 build-private:
