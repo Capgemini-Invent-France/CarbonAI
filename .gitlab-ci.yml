@@ -37,9 +37,6 @@ build-private:
 
 deploy-public:
   stage: deploy
-  variables:
-    PYPI_USERNAME: "capjohan"
-    ***REMOVED***
   script:
     - poetry publish -u $PYPI_USERNAME -p $PYPI_PASSWORD --build
   only:
