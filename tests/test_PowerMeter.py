@@ -5,8 +5,7 @@ from pathlib import Path
 
 import pytest
 
-# from CarbonAImpact.power_meter import PowerMeter
-from CarbonAImpact import PowerMeter
+from carbonai.power_meter import PowerMeter
 
 
 @pytest.fixture

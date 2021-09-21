@@ -10,7 +10,7 @@ from IPython.core.magic_arguments import (  # type: ignore
     parse_argstring,
 )
 
-from . import PowerMeter
+from .power_meter import PowerMeter
 
 
 @magics_class
@@ -39,8 +39,8 @@ class MagicPowerMeter(Magics):
 
     .. code-block:: python
 
-        %load_ext CarbonAImpact.MagicPowerMeter
-        from CarbonAImpact import PowerMeter
+        %load_ext carbonai.MagicPowerMeter
+        from carbonai import PowerMeter
         power_meter = PowerMeter(project_name="MNIST classifier", \
             is_online=False, location="FR")
 
@@ -71,7 +71,7 @@ class MagicPowerMeter(Magics):
 
         Parameters
         ----------
-        power_meter : CarbonAImpact.PowerMeter
+        power_meter : carbonai.PowerMeter
             A PowerMeter object used to collect the carbon logs
         package : str
             A string describing the package used by this function \
@@ -99,7 +99,7 @@ class MagicPowerMeter(Magics):
 
         See also
         --------
-        MagicPowerMeter : Loads the jupyter CarbonAImpact extension
+        MagicPowerMeter : Loads the jupyter carbonai extension
         PowerMeter : Instantiate a PowerMeter
         PowerMeter.measure_power : Another way to measure the power \
             usage of some code
@@ -111,8 +111,8 @@ class MagicPowerMeter(Magics):
 
         .. code-block:: python
 
-            %load_ext CarbonAImpact.MagicPowerMeter
-            from CarbonAImpact import PowerMeter
+            %load_ext carbonai.MagicPowerMeter
+            from carbonai import PowerMeter
             power_meter = PowerMeter(project_name="MNIST classifier", \
                 is_online=False, location="FR")
 

@@ -24,15 +24,15 @@ from sphinx.ext.autodoc import (  # isort:skip
 )
 
 
-sys.path.insert(0, os.path.abspath("../../CarbonAImpact/"))
-sys.path.insert(0, os.path.abspath("../CarbonAImpact/"))
+sys.path.insert(0, os.path.abspath("../../carbonai/"))
+sys.path.insert(0, os.path.abspath("../carbonai/"))
 sys.path.insert(0, os.path.abspath("../../"))
 sys.path.insert(0, os.path.abspath("../"))
 
 
 # -- Project information -----------------------------------------------------
 
-project = "CarbonAImpact"
+project = "CarbonAI"
 copyright = (
     "2020, Capgemini Invent - Martin Chauvin, Francois Lemeille, Jordan Toh"
 )

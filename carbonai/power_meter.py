@@ -253,7 +253,7 @@ class PowerMeter:
         Create a PowerMeter from a json config file.
 
         The json config file may contain any key named after the arguments of
-        the :class:`CarbonAImpact.PowerMeter` constructor.
+        the :class:`carbonai.PowerMeter` constructor.
 
         Parameters
         ----------

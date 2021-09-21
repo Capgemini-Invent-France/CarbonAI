@@ -11,7 +11,7 @@ repos:
     hooks:
       - id: black
         args: [--line-length=79]
-        files: ^CarbonAImpact/
+        files: ^CarbonAI/
   - repo: https://gitlab.com/pycqa/flake8
     rev: 3.8.4
     hooks:

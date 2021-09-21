@@ -4,8 +4,8 @@
 API Reference
 =============
 
-This page gives an overview of all public CarbonAImpact objects, functions and methods. 
-All classes and functions exposed in CarbonAImpact.* namespace are public.
+This page gives an overview of all public `carbonai` objects, functions and methods.
+All classes and functions exposed in carbonai.* namespace are public.
 
 .. note::
 

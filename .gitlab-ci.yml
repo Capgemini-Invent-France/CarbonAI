@@ -14,13 +14,13 @@ format-tests:
   script:
     - poetry run flake8 --count --select=E9,F63,F7,F82 --show-source --statistics --extend-exclude=docs/
     - poetry run flake8 --count --max-complexity=10 --max-line-length=79 --statistics
-    - poetry run pylint CarbonAImpact --fail-under 9.5
-    - poetry run mypy -p CarbonAImpact
+    - poetry run pylint carbonai --fail-under 9.5
+    - poetry run mypy -p carbonai
 
 pytest-tests:
   stage: test
   script:
-    - poetry run coverage run -m --source=CarbonAImpact pytest tests
+    - poetry run coverage run -m --source=carbonai pytest tests
     - poetry run coverage report
 
 build-private:
@@ -37,9 +37,6 @@ build-private:
 
 deploy-public:
   stage: deploy
-  variables:
-    PYPI_USERNAME: "capjohan"
-    ***REMOVED***
   script:
     - poetry publish -u $PYPI_USERNAME -p $PYPI_PASSWORD --build
   only:

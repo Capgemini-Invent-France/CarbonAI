@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "CarbonAImpact"
+name = "CarbonAI"
 version = "1.2"
 description = "Monitor the power consumption of a function"
 authors = ["Capgemini Invent - Martin Chauvin, Francois Lemeille, Jordan Toh"]

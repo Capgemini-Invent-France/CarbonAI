@@ -1,4 +1,4 @@
-# CarbonAImpact
+# CarbonAI
 
 This project aims at creating a python package that allows you to monitor the power consumption of any python function.
 
@@ -28,7 +28,7 @@ Please insert a description of the running function, the dataset, the model, any
 #### Function decorator
 To monitor the power consumption of a function, follow this example:
 ```python
-from CarbonAImpact import PowerMeter
+from carbonai import PowerMeter
 power_meter = PowerMeter(project_name="MNIST classifier")
 
 @power_meter.measure_power(
@@ -47,7 +47,7 @@ def my_func(arg1, arg2, ...):
 To monitor the power consumption of some specific inline code, you can use with statements
 
 ```python
-from CarbonAImpact import PowerMeter
+from carbonai import PowerMeter
 power_meter = PowerMeter(project_name="MNIST classifier")
 
 with power_meter(

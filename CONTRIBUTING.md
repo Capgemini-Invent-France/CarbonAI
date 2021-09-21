@@ -1,14 +1,14 @@
 # Introduction
 
-First and foremost, thank you for considering contributing to CarbonAImpact's project !
+First and foremost, thank you for considering contributing to CarbonAI's project !
 
 We welcome contributions in the form of pull requests (PRs), issues or code reviews. You can add to code, documentation, or simply send us spelling and grammar fixes or extra tests. Contribute anything that you think improves the community for us all!
 
-## Code of conduct 
+## Code of conduct
 
-As contributors and maintainers to this project, you are expected to abide by CarbonAImpact's code of conduct. More information can be found at [Contributor Code of Conduct](CODE_OF_CONDUCT.md)
+As contributors and maintainers to this project, you are expected to abide by CarbonAI's code of conduct. More information can be found at [Contributor Code of Conduct](CODE_OF_CONDUCT.md)
 
-# How to contribute to CarbonAImpact
+# How to contribute to CarbonAI
 
 #### Did you find a bug?
 
@@ -29,4 +29,4 @@ As contributors and maintainers to this project, you are expected to abide by Ca
 
 Thanks! :heart: :heart: :heart:
 
-CarbonAImpact Team
+CarbonAI Team

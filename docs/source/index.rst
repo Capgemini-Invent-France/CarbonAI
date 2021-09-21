@@ -1,6 +1,6 @@
-   
+
 =========================================
-Welcome to CarbonAImpact's documentation!
+Welcome to CarbonAI's documentation!
 =========================================
 
 This project aims at creating a python package that allows you to monitor the power consumption and CO2 emissions of any python function.
@@ -9,14 +9,14 @@ Getting Started
 ===============
 
 See the :ref:`installation` page to learn more details on how to install the package on your platform.
-In most cases, it's as simple as 
+In most cases, it's as simple as
 ``pip install git+https://gitlab.com/the_insighters/projects/carbonaimpact.git``
 
 Here is an example of usage :
 
 .. code-block:: python
 
-   from CarbonAImpact import PowerMeter
+   from carbonai import PowerMeter
    power_meter = PowerMeter(project_name="MNIST classifier")
 
    @power_meter.measure_power(
@@ -39,9 +39,9 @@ For more information on the data collected, check the :ref:`data-information`.
 Green AI
 ========
 
-With this package, we try to raise developers' awareness of the AI's carbon footprint. 
+With this package, we try to raise developers' awareness of the AI's carbon footprint.
 
-To get more details on green AI, see :ref:`about`. 
+To get more details on green AI, see :ref:`about`.
 If you still have more questions or want to get in touch, :ref:`contact` us.
 
 

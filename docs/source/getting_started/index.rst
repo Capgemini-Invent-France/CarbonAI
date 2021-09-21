@@ -8,7 +8,7 @@ Here is an example of usage :
 
 .. code-block:: python
 
-   from CarbonAImpact import PowerMeter
+   from carbonai import PowerMeter
    power_meter = PowerMeter(project_name="MNIST classifier")
 
    @power_meter.measure_power(
