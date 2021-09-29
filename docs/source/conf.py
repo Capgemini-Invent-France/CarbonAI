@@ -78,7 +78,7 @@ html_css_files = [
     "css/stylesheet.css",
 ]
 html_logo = "_static/logo.png"
-html_favicon = "_static/favicon.ico"
+html_favicon = "_static/favicon.png"
 
 # -- Specific code to generate the API --------------------------------------
 # numpydoc_show_class_members = False
