@@ -4,7 +4,7 @@ This project aims at creating a python package that allows you to monitor the po
 
 ## Documentation
 
-The complete documentation is available [here](https://the_insighters.gitlab.io/projects/carbonaimpact/).
+The complete documentation is available [here](TBD).
 
 ## Getting started
 ### Install
@@ -16,7 +16,7 @@ First of all you need to install the intel utility allowing you to monitor power
 
 To install this package :
 ```sh
-pip install git+https://gitlab.com/the_insighters/projects/carbonaimpact.git
+pip install carbonai
 ```
 
 ### Example

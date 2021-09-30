@@ -10,7 +10,7 @@ Getting Started
 
 See the :ref:`installation` page to learn more details on how to install the package on your platform.
 In most cases, it's as simple as
-``pip install git+https://gitlab.com/the_insighters/projects/carbonaimpact.git``
+``pip install carbonai``
 
 Here is an example of usage :
 

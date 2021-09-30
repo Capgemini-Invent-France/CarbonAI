@@ -12,19 +12,19 @@ As contributors and maintainers to this project, you are expected to abide by Ca
 
 #### Did you find a bug?
 
-* **Ensure the bug was not already reported** by searching on GitLab under [Issues](https://gitlab.com/the_insighters/projects/carbonaimpact/-/issues).
+* **Ensure the bug was not already reported** by searching on GitHub under [Issues](https://github.com/Capgemini-Invent-France/CarbonAI/issues).
 
-* If you're unable to find an open issue addressing the problem, [open a new one](https://gitlab.com/the_insighters/projects/carbonaimpact/-/issues/new). Be sure to include a **title and clear description**, as much relevant information as possible, and a **code sample** or an **executable test case** demonstrating the expected behavior that is not occurring.
+* If you're unable to find an open issue addressing the problem, [open a new one](https://github.com/Capgemini-Invent-France/CarbonAI/issues/new). Be sure to include a **title and clear description**, as much relevant information as possible, and a **code sample** or an **executable test case** demonstrating the expected behavior that is not occurring.
 
 #### **Did you write a patch that fixes a bug?**
 
-* Open a new GitLab pull request with the patch.
+* Open a new GitHub pull request with the patch.
 
 * Ensure the PR description clearly describes the problem and solution. Include the relevant issue number if applicable.
 
 #### **Do you intend to add a new feature or change an existing one?**
 
-* Suggest your change in an issue on GitLab.
+* Suggest your change in an issue on GitHub.
 
 
 Thanks! :heart: :heart: :heart:
