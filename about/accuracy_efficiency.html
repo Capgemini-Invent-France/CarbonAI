@@ -1,0 +1,284 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>The accuracy/efficiency trade-off &#8212; CarbonAI  documentation</title>
+    
+  <link href="../_static/css/theme.css" rel="stylesheet" />
+  <link href="../_static/css/index.c5995385ac14fb8791e8eb36b4908be2.css" rel="stylesheet" />
+
+    
+  <link rel="stylesheet"
+    href="../_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+
+    
+      
+
+    
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/basic.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/stylesheet.css" />
+    
+  <link rel="preload" as="script" href="../_static/js/index.1c5a1a01449ed65a7b51.js">
+
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <link rel="shortcut icon" href="../_static/favicon.png"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="API Reference" href="../reference/index.html" />
+    <link rel="prev" title="Selecting hardware" href="server_power.html" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="docsearch:language" content="en" />
+    
+  </head>
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="80">
+    
+    <div class="container-fluid" id="banner"></div>
+
+    
+    <nav class="navbar navbar-light navbar-expand-lg bg-light fixed-top bd-navbar" id="navbar-main"><div class="container-xl">
+
+  <div id="navbar-start">
+    
+    
+
+<a class="navbar-brand" href="../index.html">
+  <img src="../_static/logo.png" class="logo" alt="logo">
+</a>
+
+
+    
+  </div>
+
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-collapsible" aria-controls="navbar-collapsible" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+
+  
+  <div id="navbar-collapsible" class="col-lg-9 collapse navbar-collapse">
+    <div id="navbar-center" class="mr-auto">
+      
+      <div class="navbar-center-item">
+        <ul id="navbar-main-elements" class="navbar-nav">
+    <li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../getting_started/index.html">
+  Getting Started
+ </a>
+</li>
+
+<li class="toctree-l1 current active nav-item">
+ <a class="reference internal nav-link" href="index.html">
+  Context
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../reference/index.html">
+  API Reference
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../contact.html">
+  Contact
+ </a>
+</li>
+
+    
+</ul>
+      </div>
+      
+    </div>
+
+    <div id="navbar-end">
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+      </ul>
+      </div>
+      
+    </div>
+  </div>
+</div>
+    </nav>
+    
+
+    <div class="container-xl">
+      <div class="row">
+          
+            
+            <!-- Only show if we have sidebars configured, else just a small margin  -->
+            <div class="col-12 col-md-3 bd-sidebar"><form class="bd-search d-flex align-items-center" action="../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
+</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
+  <div class="bd-toc-item active">
+    
+    <ul class="current nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="carbon_scale.html">
+   Some ideas of scale
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="carbon_footprint.html">
+   AI’s carbon footprint
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="server_power.html">
+   Selecting hardware
+  </a>
+ </li>
+ <li class="toctree-l1 current active">
+  <a class="current reference internal" href="#">
+   The accuracy/efficiency trade-off
+  </a>
+ </li>
+</ul>
+
+    
+  </div>
+</nav>
+            </div>
+            
+          
+
+          
+          <div class="d-none d-xl-block col-xl-2 bd-toc">
+            
+              
+              <div class="toc-item">
+                
+<div class="tocsection onthispage pt-5 pb-3">
+    <i class="fas fa-list"></i> On this page
+</div>
+
+<nav id="bd-toc-nav">
+    <ul class="visible nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#red-ai-vs-green-ai">
+   Red AI vs Green AI
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#accurracy-efficiency-trade-off">
+   Accurracy - efficiency trade-off
+  </a>
+ </li>
+</ul>
+
+</nav>
+              </div>
+              
+              <div class="toc-item">
+                
+              </div>
+              
+            
+          </div>
+          
+
+          
+          
+            
+          
+          <main class="col-12 col-md-9 col-xl-7 py-md-5 pl-md-5 pr-md-4 bd-content" role="main">
+              
+              <div>
+                
+  <div class="section" id="the-accuracy-efficiency-trade-off">
+<span id="accuracy-efficiency"></span><h1>The accuracy/efficiency trade-off<a class="headerlink" href="#the-accuracy-efficiency-trade-off" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="red-ai-vs-green-ai">
+<h2>Red AI vs Green AI<a class="headerlink" href="#red-ai-vs-green-ai" title="Permalink to this headline">¶</a></h2>
+<p>In the recent years we’ve seen great improvements in AI’s performance especially in NLP tasks.
+While those were great breakthroughs, there were often achieved using excessive amount of data and
+computing power thus emiting a lot of CO2.
+As Schwartz et al. <a class="footnote-reference brackets" href="#id3" id="id1">1</a> pointed out, nowadays, most of the AI and machine learning research is focused on
+improving models accuracy.
+Not only does this paradigm leads to a race to computing power but
+it also exludes small contributors to take part in the community because of the cost necessary.</p>
+<p>Schwartz et al. advocates for a shift from, what they call, Red AI towards Green AI.
+This especially means a shift in reviews methodology to consider papers improving algorithms efficiency.</p>
+<p>With this package, researchers can now monitor their energy consumption and we encourage them to report it in their publication.</p>
+</div>
+<div class="section" id="accurracy-efficiency-trade-off">
+<h2>Accurracy - efficiency trade-off<a class="headerlink" href="#accurracy-efficiency-trade-off" title="Permalink to this headline">¶</a></h2>
+<p>Moving towards a greener AI means using more efficient algorithms.
+In order to be more efficient, those algorithms allow to have smaller accuracy.</p>
+<p>We find that in many use cases great efficiency improvements can be achieved
+at the small cost of losing a few percent in accuracy.</p>
+<p>From our experience and as pointed by Patterson et al. <a class="footnote-reference brackets" href="#id4" id="id2">2</a>, the following methods greatly compromise accuracy and efficiency:</p>
+<ul class="simple">
+<li><p>Model distillation, a method that transfers the knowledge from large models into smaller,
+more computationally efficient models.
+More details and an example: <a class="reference external" href="https://medium.com/huggingface/distilbert-8cf3380435b5">huggingface - DistilBERT</a></p></li>
+<li><p>Quantization is the action of using a less precise weights storage encoding.
+<a class="reference external" href="https://huggingface.co/kssteven/ibert-roberta-large">I-BERT</a> stores ROBERTA’s weights as <code class="docutils literal notranslate"><span class="pre">int8</span></code> allowing 4x inference speed up.
+Quantization is now available on pytorch, see <a class="reference external" href="https://pytorch.org/docs/stable/quantization.html#introduction-to-quantization">pytorch quantization</a></p></li>
+<li><p>Pruning. In a neural network, some part of the network are totally unused because of weights close to 0.
+Pruning a network consists in removing those weights thus reducing the computing necessary to get a result.
+Pytorch offers an API to prune your network: <a class="reference external" href="https://pytorch.org/tutorials/intermediate/pruning_tutorial.html">pytorch pruning</a></p></li>
+</ul>
+<hr class="docutils" />
+<dl class="footnote brackets">
+<dt class="label" id="id3"><span class="brackets"><a class="fn-backref" href="#id1">1</a></span></dt>
+<dd><p>Schwartz, R., Dodge, J., Smith, N. A., &amp; Etzioni, O. (2019). Green ai. arXiv preprint
+<a class="reference external" href="https://arxiv.org/pdf/1907.10597.pdf">arXiv:1907.10597</a></p>
+</dd>
+<dt class="label" id="id4"><span class="brackets"><a class="fn-backref" href="#id2">2</a></span></dt>
+<dd><p>Patterson, D., Gonzalez, J., Le, Q., Liang, C., Munguia, L. M., Rothchild, D., … &amp; Dean, J. (2021).
+Carbon Emissions and Large Neural Network Training. arXiv preprint <a class="reference external" href="https://arxiv.org/pdf/2104.10350.pdf">arXiv:2104.10350</a></p>
+</dd>
+</dl>
+</div>
+</div>
+
+
+              </div>
+              
+              
+              <div class='prev-next-bottom'>
+                
+    <a class='left-prev' id="prev-link" href="server_power.html" title="previous page">Selecting hardware</a>
+    <a class='right-next' id="next-link" href="../reference/index.html" title="next page">API Reference</a>
+
+              </div>
+              
+          </main>
+          
+
+      </div>
+    </div>
+  
+  <script src="../_static/js/index.1c5a1a01449ed65a7b51.js"></script>
+
+  <footer class="footer mt-5 mt-md-0">
+  <div class="container">
+    
+    <div class="footer-item">
+      <p class="copyright">
+    &copy; Copyright 2020, Capgemini Invent - Martin Chauvin, Francois Lemeille, Jordan Toh.<br/>
+</p>
+    </div>
+    
+    <div class="footer-item">
+      <p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.0.2.<br/>
+</p>
+    </div>
+    
+  </div>
+</footer>
+  </body>
+</html>

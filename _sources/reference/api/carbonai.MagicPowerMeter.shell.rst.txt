@@ -1,0 +1,6 @@
+carbonai.MagicPowerMeter.shell
+==============================
+
+.. currentmodule:: carbonai
+
+.. autoattribute:: MagicPowerMeter.shell

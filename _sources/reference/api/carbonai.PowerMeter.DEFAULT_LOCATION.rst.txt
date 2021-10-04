@@ -1,0 +1,6 @@
+carbonai.PowerMeter.DEFAULT\_LOCATION
+=====================================
+
+.. currentmodule:: carbonai
+
+.. autoattribute:: PowerMeter.DEFAULT_LOCATION

@@ -1,0 +1,6 @@
+carbonai.PowerMeter.\_\_call\_\_
+================================
+
+.. currentmodule:: carbonai
+
+.. automethod:: PowerMeter.__call__

@@ -1,0 +1,6 @@
+carbonai.PowerMeter.LAPTOP\_PUE
+===============================
+
+.. currentmodule:: carbonai
+
+.. autoattribute:: PowerMeter.LAPTOP_PUE

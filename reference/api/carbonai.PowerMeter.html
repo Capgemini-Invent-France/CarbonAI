@@ -1,0 +1,383 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>carbonai.PowerMeter &#8212; CarbonAI  documentation</title>
+    
+  <link href="../../_static/css/theme.css" rel="stylesheet" />
+  <link href="../../_static/css/index.c5995385ac14fb8791e8eb36b4908be2.css" rel="stylesheet" />
+
+    
+  <link rel="stylesheet"
+    href="../../_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+
+    
+      
+
+    
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/basic.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/stylesheet.css" />
+    
+  <link rel="preload" as="script" href="../../_static/js/index.1c5a1a01449ed65a7b51.js">
+
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <link rel="shortcut icon" href="../../_static/favicon.png"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="carbonai.PowerMeter.__call__" href="carbonai.PowerMeter.__call__.html" />
+    <link rel="prev" title="PowerMeter" href="../power_meter.html" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="docsearch:language" content="en" />
+    
+  </head>
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="80">
+    
+    <div class="container-fluid" id="banner"></div>
+
+    
+    <nav class="navbar navbar-light navbar-expand-lg bg-light fixed-top bd-navbar" id="navbar-main"><div class="container-xl">
+
+  <div id="navbar-start">
+    
+    
+
+<a class="navbar-brand" href="../../index.html">
+  <img src="../../_static/logo.png" class="logo" alt="logo">
+</a>
+
+
+    
+  </div>
+
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-collapsible" aria-controls="navbar-collapsible" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+
+  
+  <div id="navbar-collapsible" class="col-lg-9 collapse navbar-collapse">
+    <div id="navbar-center" class="mr-auto">
+      
+      <div class="navbar-center-item">
+        <ul id="navbar-main-elements" class="navbar-nav">
+    <li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../getting_started/index.html">
+  Getting Started
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../about/index.html">
+  Context
+ </a>
+</li>
+
+<li class="toctree-l1 current active nav-item">
+ <a class="reference internal nav-link" href="../index.html">
+  API Reference
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../contact.html">
+  Contact
+ </a>
+</li>
+
+    
+</ul>
+      </div>
+      
+    </div>
+
+    <div id="navbar-end">
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+      </ul>
+      </div>
+      
+    </div>
+  </div>
+</div>
+    </nav>
+    
+
+    <div class="container-xl">
+      <div class="row">
+          
+            
+            <!-- Only show if we have sidebars configured, else just a small margin  -->
+            <div class="col-12 col-md-3 bd-sidebar"><form class="bd-search d-flex align-items-center" action="../../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
+</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
+  <div class="bd-toc-item active">
+    
+    <ul class="current nav bd-sidenav">
+ <li class="toctree-l1 current active has-children">
+  <a class="reference internal" href="../power_meter.html">
+   PowerMeter
+  </a>
+  <input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/>
+  <label for="toctree-checkbox-1">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul class="current">
+   <li class="toctree-l2 current active has-children">
+    <a class="current reference internal" href="#">
+     carbonai.PowerMeter
+    </a>
+    <input checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/>
+    <label for="toctree-checkbox-2">
+     <i class="fas fa-chevron-down">
+     </i>
+    </label>
+    <ul>
+     <li class="toctree-l3">
+      <a class="reference internal" href="carbonai.PowerMeter.__call__.html">
+       carbonai.PowerMeter.__call__
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="carbonai.PowerMeter.from_config.html">
+       carbonai.PowerMeter.from_config
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="carbonai.PowerMeter.measure_power.html">
+       carbonai.PowerMeter.measure_power
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="carbonai.PowerMeter.start_measure.html">
+       carbonai.PowerMeter.start_measure
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="carbonai.PowerMeter.stop_measure.html">
+       carbonai.PowerMeter.stop_measure
+      </a>
+     </li>
+    </ul>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="carbonai.PowerMeter.from_config.html">
+     carbonai.PowerMeter.from_config
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="carbonai.PowerMeter.measure_power.html">
+     carbonai.PowerMeter.measure_power
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="carbonai.PowerMeter.__call__.html">
+     carbonai.PowerMeter.__call__
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="carbonai.PowerMeter.start_measure.html">
+     carbonai.PowerMeter.start_measure
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="carbonai.PowerMeter.stop_measure.html">
+     carbonai.PowerMeter.stop_measure
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../magic_power_meter.html">
+   MagicPowerMeter
+  </a>
+ </li>
+</ul>
+
+    
+  </div>
+</nav>
+            </div>
+            
+          
+
+          
+          <div class="d-none d-xl-block col-xl-2 bd-toc">
+            
+              
+              <div class="toc-item">
+                
+
+<nav id="bd-toc-nav">
+    
+</nav>
+              </div>
+              
+              <div class="toc-item">
+                
+              </div>
+              
+            
+          </div>
+          
+
+          
+          
+            
+          
+          <main class="col-12 col-md-9 col-xl-7 py-md-5 pl-md-5 pr-md-4 bd-content" role="main">
+              
+              <div>
+                
+  <div class="section" id="carbonai-powermeter">
+<h1>carbonai.PowerMeter<a class="headerlink" href="#carbonai-powermeter" title="Permalink to this headline">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="carbonai.PowerMeter">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">carbonai.</span></span><span class="sig-name descname"><span class="pre">PowerMeter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">project_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">program_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">client_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">user_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cpu_power_log_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">get_country</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">location</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_online</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filepath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'csv'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">api_endpoint</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#carbonai.PowerMeter" title="Permalink to this definition">¶</a></dt>
+<dd><p>PowerMeter is a general tool to monitor and log the power consumption of
+any given function.</p>
+<p>Depending on the platform and hardware used, it allows to measure the
+power usage of the CPU,the DRAM and the GPU. The measure is, then,
+converted to CO2 emissions depending on the country set and the PUE
+of the machine (background on the PUE <a class="reference external" href="https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2#Officially_assigned_code_elements">here</a>). You can chose to log the
+results locally or send it to an endpoint.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl>
+<dt><strong>project_name</strong><span class="classifier">str, default current_directory_name</span></dt><dd><p>Name of the project you are working on.</p>
+</dd>
+<dt><strong>program_name</strong><span class="classifier">str, optional</span></dt><dd><p>Name of the program you are working on.</p>
+</dd>
+<dt><strong>client_name</strong><span class="classifier">str, optional</span></dt><dd><p>Name of the client you are working for.</p>
+</dd>
+<dt><strong>user_name</strong><span class="classifier">str, default computer_user_name</span></dt><dd><p>The name of the user using the tool (for logging purpose).</p>
+</dd>
+<dt><strong>cpu_power_log_path</strong><span class="classifier">str, optional</span></dt><dd><p>The path to the tool “PowerLog” or “powercap” or “IntelPowerGadget”.</p>
+</dd>
+<dt><strong>get_country</strong><span class="classifier">bool, default True</span></dt><dd><p>Whether to retrieve user country location or not (uses the user IP).</p>
+</dd>
+<dt><strong>location</strong><span class="classifier">str, optional</span></dt><dd><p>Country ISO Code available <a class="reference external" href="https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2#Officially_assigned_code_elements">here</a></p>
+<p>Must be set if get_country is False.</p>
+</dd>
+<dt><strong>is_online</strong><span class="classifier">boolean, default True</span></dt><dd><p>Whether the machine is connected to the internet or not.</p>
+</dd>
+<dt><strong>filepath</strong><span class="classifier">str, default .</span></dt><dd><p>Path of the file where all the carbon logs will be written.</p>
+</dd>
+<dt><strong>output_format</strong><span class="classifier">{‘csv’, ‘excel’}, default ‘csv’</span></dt><dd><p>Format of the carbon logs file produced.</p>
+</dd>
+<dt><strong>api_endpoint</strong><span class="classifier">str, optional</span></dt><dd><p>Endpoint of the API to upload the collected data to</p>
+<p>Note: we provide an endpoint to collect data and contribute, with the
+community, towards greener algorithms.
+Here is the url :
+<a class="reference external" href="https://ngji0jx9dc.execute-api.eu-west-3.amazonaws.com/post_new_item">https://ngji0jx9dc.execute-api.eu-west-3.amazonaws.com/post_new_item</a></p>
+</dd>
+</dl>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="carbonai.PowerMeter.from_config.html#carbonai.PowerMeter.from_config" title="carbonai.PowerMeter.from_config"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PowerMeter.from_config</span></code></a></dt><dd><p>Create a power meter from a config file.</p>
+</dd>
+</dl>
+</div>
+<p class="rubric">Notes</p>
+<p>This package may log private data (username, country, project_name).
+If you do not provide any api_endpoint, we will never have access
+to this data.</p>
+<p>On the other hand, if you chose to share your data with us
+(by using our endpoint:
+<a class="reference external" href="https://ngji0jx9dc.execute-api.eu-west-3.amazonaws.com/post_new_item">https://ngji0jx9dc.execute-api.eu-west-3.amazonaws.com/post_new_item</a>
+), we commit to anonymize any data shared.</p>
+<p class="rubric">Examples</p>
+<p>Create a PowerMeter for the project <cite>MNIST Classifier</cite> while
+not being online.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">power_meter</span> <span class="o">=</span> <span class="n">PowerMeter</span><span class="p">(</span><span class="n">project_name</span><span class="o">=</span><span class="s2">&quot;MNIST classifier&quot;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">is_online</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">location</span><span class="o">=</span><span class="s2">&quot;FR&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Create a PowerMeter for the project <cite>Test</cite> and send the collected data to
+our endpoint.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">power_meter</span> <span class="o">=</span> <span class="n">PowerMeter</span><span class="p">(</span><span class="n">project_name</span><span class="o">=</span><span class="s2">&quot;Test&quot;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">api_endpoint</span><span class="o">=</span><span class="s2">&quot;https://ngji0jx9dc.execute-</span>
+<span class="go">api.eu-west-3.amazonaws.com/post_new_item&quot;)</span>
+</pre></div>
+</div>
+<p class="rubric">Methods</p>
+<table class="longtable table autosummary">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="carbonai.PowerMeter.__call__.html#carbonai.PowerMeter.__call__" title="carbonai.PowerMeter.__call__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__call__</span></code></a>(package, algorithm[, step, …])</p></td>
+<td><p>Measure the power usage using a with statement.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="carbonai.PowerMeter.from_config.html#carbonai.PowerMeter.from_config" title="carbonai.PowerMeter.from_config"><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_config</span></code></a>(path)</p></td>
+<td><p>Create a PowerMeter from a json config file.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="carbonai.PowerMeter.measure_power.html#carbonai.PowerMeter.measure_power" title="carbonai.PowerMeter.measure_power"><code class="xref py py-obj docutils literal notranslate"><span class="pre">measure_power</span></code></a>(package, algorithm[, step, …])</p></td>
+<td><p>A decorator to measure the power consumption of a given function</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="carbonai.PowerMeter.start_measure.html#carbonai.PowerMeter.start_measure" title="carbonai.PowerMeter.start_measure"><code class="xref py py-obj docutils literal notranslate"><span class="pre">start_measure</span></code></a>(package, algorithm[, step, …])</p></td>
+<td><p>Starts mesuring the power consumption of a given sample of code</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="carbonai.PowerMeter.stop_measure.html#carbonai.PowerMeter.stop_measure" title="carbonai.PowerMeter.stop_measure"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stop_measure</span></code></a>()</p></td>
+<td><p>Stops the measure started with <a class="reference internal" href="carbonai.PowerMeter.start_measure.html#carbonai.PowerMeter.start_measure" title="carbonai.PowerMeter.start_measure"><code class="xref py py-func docutils literal notranslate"><span class="pre">PowerMeter.start_measure()</span></code></a></p></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+              </div>
+              
+              
+              <div class='prev-next-bottom'>
+                
+    <a class='left-prev' id="prev-link" href="../power_meter.html" title="previous page">PowerMeter</a>
+    <a class='right-next' id="next-link" href="carbonai.PowerMeter.__call__.html" title="next page">carbonai.PowerMeter.__call__</a>
+
+              </div>
+              
+          </main>
+          
+
+      </div>
+    </div>
+  
+  <script src="../../_static/js/index.1c5a1a01449ed65a7b51.js"></script>
+
+  <footer class="footer mt-5 mt-md-0">
+  <div class="container">
+    
+    <div class="footer-item">
+      <p class="copyright">
+    &copy; Copyright 2020, Capgemini Invent - Martin Chauvin, Francois Lemeille, Jordan Toh.<br/>
+</p>
+    </div>
+    
+    <div class="footer-item">
+      <p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.0.2.<br/>
+</p>
+    </div>
+    
+  </div>
+</footer>
+  </body>
+</html>

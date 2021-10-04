@@ -1,0 +1,6 @@
+carbonai.MagicPowerMeter.parent
+===============================
+
+.. currentmodule:: carbonai
+
+.. autoattribute:: MagicPowerMeter.parent

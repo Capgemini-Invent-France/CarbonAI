@@ -1,0 +1,6 @@
+carbonai.PowerMeter.from\_config
+================================
+
+.. currentmodule:: carbonai
+
+.. automethod:: PowerMeter.from_config

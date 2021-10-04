@@ -1,0 +1,6 @@
+carbonai.MagicPowerMeter.config
+===============================
+
+.. currentmodule:: carbonai
+
+.. autoattribute:: MagicPowerMeter.config

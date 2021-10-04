@@ -1,0 +1,6 @@
+carbonai.PowerMeter.stop\_measure
+=================================
+
+.. currentmodule:: carbonai
+
+.. automethod:: PowerMeter.stop_measure

@@ -1,0 +1,6 @@
+carbonai.PowerMeter.SERVER\_PUE
+===============================
+
+.. currentmodule:: carbonai
+
+.. autoattribute:: PowerMeter.SERVER_PUE

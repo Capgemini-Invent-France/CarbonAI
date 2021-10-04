@@ -1,0 +1,6 @@
+carbonai.MagicPowerMeter.registered
+===================================
+
+.. currentmodule:: carbonai
+
+.. autoattribute:: MagicPowerMeter.registered

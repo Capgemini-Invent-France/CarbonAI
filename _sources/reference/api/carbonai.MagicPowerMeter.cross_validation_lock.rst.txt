@@ -1,0 +1,6 @@
+carbonai.MagicPowerMeter.cross\_validation\_lock
+================================================
+
+.. currentmodule:: carbonai
+
+.. autoproperty:: MagicPowerMeter.cross_validation_lock

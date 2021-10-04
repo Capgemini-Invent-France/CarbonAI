@@ -1,0 +1,6 @@
+carbonai.MagicPowerMeter.options\_table
+=======================================
+
+.. currentmodule:: carbonai
+
+.. autoattribute:: MagicPowerMeter.options_table

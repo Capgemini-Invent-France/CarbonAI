@@ -1,0 +1,6 @@
+carbonai.PowerMeter.measure\_power
+==================================
+
+.. currentmodule:: carbonai
+
+.. automethod:: PowerMeter.measure_power

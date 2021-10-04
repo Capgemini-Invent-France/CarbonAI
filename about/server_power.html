@@ -1,0 +1,287 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Selecting hardware &#8212; CarbonAI  documentation</title>
+    
+  <link href="../_static/css/theme.css" rel="stylesheet" />
+  <link href="../_static/css/index.c5995385ac14fb8791e8eb36b4908be2.css" rel="stylesheet" />
+
+    
+  <link rel="stylesheet"
+    href="../_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+
+    
+      
+
+    
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/basic.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/stylesheet.css" />
+    
+  <link rel="preload" as="script" href="../_static/js/index.1c5a1a01449ed65a7b51.js">
+
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="shortcut icon" href="../_static/favicon.png"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="The accuracy/efficiency trade-off" href="accuracy_efficiency.html" />
+    <link rel="prev" title="AI’s carbon footprint" href="carbon_footprint.html" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="docsearch:language" content="en" />
+    
+  </head>
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="80">
+    
+    <div class="container-fluid" id="banner"></div>
+
+    
+    <nav class="navbar navbar-light navbar-expand-lg bg-light fixed-top bd-navbar" id="navbar-main"><div class="container-xl">
+
+  <div id="navbar-start">
+    
+    
+
+<a class="navbar-brand" href="../index.html">
+  <img src="../_static/logo.png" class="logo" alt="logo">
+</a>
+
+
+    
+  </div>
+
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-collapsible" aria-controls="navbar-collapsible" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+
+  
+  <div id="navbar-collapsible" class="col-lg-9 collapse navbar-collapse">
+    <div id="navbar-center" class="mr-auto">
+      
+      <div class="navbar-center-item">
+        <ul id="navbar-main-elements" class="navbar-nav">
+    <li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../getting_started/index.html">
+  Getting Started
+ </a>
+</li>
+
+<li class="toctree-l1 current active nav-item">
+ <a class="reference internal nav-link" href="index.html">
+  Context
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../reference/index.html">
+  API Reference
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../contact.html">
+  Contact
+ </a>
+</li>
+
+    
+</ul>
+      </div>
+      
+    </div>
+
+    <div id="navbar-end">
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+      </ul>
+      </div>
+      
+    </div>
+  </div>
+</div>
+    </nav>
+    
+
+    <div class="container-xl">
+      <div class="row">
+          
+            
+            <!-- Only show if we have sidebars configured, else just a small margin  -->
+            <div class="col-12 col-md-3 bd-sidebar"><form class="bd-search d-flex align-items-center" action="../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
+</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
+  <div class="bd-toc-item active">
+    
+    <ul class="current nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="carbon_scale.html">
+   Some ideas of scale
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="carbon_footprint.html">
+   AI’s carbon footprint
+  </a>
+ </li>
+ <li class="toctree-l1 current active">
+  <a class="current reference internal" href="#">
+   Selecting hardware
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="accuracy_efficiency.html">
+   The accuracy/efficiency trade-off
+  </a>
+ </li>
+</ul>
+
+    
+  </div>
+</nav>
+            </div>
+            
+          
+
+          
+          <div class="d-none d-xl-block col-xl-2 bd-toc">
+            
+              
+              <div class="toc-item">
+                
+<div class="tocsection onthispage pt-5 pb-3">
+    <i class="fas fa-list"></i> On this page
+</div>
+
+<nav id="bd-toc-nav">
+    <ul class="visible nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#server-location">
+   Server location
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#power-usage-effectiveness">
+   Power Usage Effectiveness
+  </a>
+ </li>
+</ul>
+
+</nav>
+              </div>
+              
+              <div class="toc-item">
+                
+              </div>
+              
+            
+          </div>
+          
+
+          
+          
+            
+          
+          <main class="col-12 col-md-9 col-xl-7 py-md-5 pl-md-5 pr-md-4 bd-content" role="main">
+              
+              <div>
+                
+  <div class="section" id="selecting-hardware">
+<span id="server-power"></span><h1>Selecting hardware<a class="headerlink" href="#selecting-hardware" title="Permalink to this headline">¶</a></h1>
+<p>Every server or computer use electricity as its primary source of power.
+Electricity can be produced in a sustainable way leveraging the power of the sun or of wind.
+It can also be produced by burning coal of gases which, in the burning process, emits a lot of
+green house gases (CO2, CH4, …). Those GHGs are responsible for the climate change, we are and will be
+facing.</p>
+<p>On this page, we provide the reader with some hardware levers to reduce its carbon footprint.</p>
+<div class="section" id="server-location">
+<h2>Server location<a class="headerlink" href="#server-location" title="Permalink to this headline">¶</a></h2>
+<p>Every country uses different means to produce its energy. Some are cleaner than others.
+We found that energy mix can vary a lot between countries, for instance for every kWh produced in the USA,
+there is 0.5kg of CO2 emitted where as in Iceland, it’s nearly 0 !
+Bellow is a comparison of energy mixes between a set of country <a class="footnote-reference brackets" href="#id3" id="id1">1</a> .</p>
+<a class="reference internal image-reference" href="../_images/energy_mix.png"><img alt="../_images/energy_mix.png" class="align-center" src="../_images/energy_mix.png" style="width: 583.0px; height: 432.5px;" /></a>
+<p>As you can see, one way to grately reduce your carbon footprint is to select a region with a low carbon intensive energy mix.</p>
+<p>GCP provides a way to select the best region according to your criterias :
+<a class="reference external" href="https://gcp-region-picker.web.app/">GCP region picker</a>.</p>
+</div>
+<div class="section" id="power-usage-effectiveness">
+<h2>Power Usage Effectiveness<a class="headerlink" href="#power-usage-effectiveness" title="Permalink to this headline">¶</a></h2>
+<p>Computers and servers use energy to make computations but they also require energy to be cooled.</p>
+<p>The Power Usage Effectiveness (PUE) is the ratio of energy used by the computing equipment in contrast
+to cooling and other overhead that supports the equipment.
+It can be defined as follows</p>
+<div class="math notranslate nohighlight">
+\[PUE = \frac{Total Energy Used}{Total Computing Energy Used}\]</div>
+<p>As you can guess, the closer to 1 the ratio, the more effective is the equipment
+which also means it is less carbon intensive.</p>
+<p>The PUE can vary a lot with infrastructures.</p>
+<ul class="simple">
+<li><p>After some tests on my MacBook Pro, it seems to have a PUE around 1.2</p></li>
+<li><p>The average <strong>PUE</strong> for a <strong>datacenter</strong> was <strong>1.58</strong> in 2020 <a class="footnote-reference brackets" href="#id4" id="id2">2</a></p></li>
+<li><p>Some datacenters achieve to get a PUE as low as 1, see <a class="reference external" href="https://www.ovh.com/ca/fr/apropos/technologies/datacenters.xml">OVH</a></p></li>
+</ul>
+<p>GCP publishes the PUEs of its datacenters every trimester :
+<a class="reference external" href="https://www.google.com/about/datacenters/efficiency/">gcp efficiency</a>.</p>
+<hr class="docutils" />
+<dl class="footnote brackets">
+<dt class="label" id="id3"><span class="brackets"><a class="fn-backref" href="#id1">1</a></span></dt>
+<dd><p>Data from ADEME’s <cite>Base Carbone</cite></p>
+</dd>
+<dt class="label" id="id4"><span class="brackets"><a class="fn-backref" href="#id2">2</a></span></dt>
+<dd><p>Uptime Institute survey <a class="reference external" href="https://journal.uptimeinstitute.com/data-center-pues-flat-since-2013/">Data center PUEs</a></p>
+</dd>
+</dl>
+</div>
+</div>
+
+
+              </div>
+              
+              
+              <div class='prev-next-bottom'>
+                
+    <a class='left-prev' id="prev-link" href="carbon_footprint.html" title="previous page">AI’s carbon footprint</a>
+    <a class='right-next' id="next-link" href="accuracy_efficiency.html" title="next page">The accuracy/efficiency trade-off</a>
+
+              </div>
+              
+          </main>
+          
+
+      </div>
+    </div>
+  
+  <script src="../_static/js/index.1c5a1a01449ed65a7b51.js"></script>
+
+  <footer class="footer mt-5 mt-md-0">
+  <div class="container">
+    
+    <div class="footer-item">
+      <p class="copyright">
+    &copy; Copyright 2020, Capgemini Invent - Martin Chauvin, Francois Lemeille, Jordan Toh.<br/>
+</p>
+    </div>
+    
+    <div class="footer-item">
+      <p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.0.2.<br/>
+</p>
+    </div>
+    
+  </div>
+</footer>
+  </body>
+</html>

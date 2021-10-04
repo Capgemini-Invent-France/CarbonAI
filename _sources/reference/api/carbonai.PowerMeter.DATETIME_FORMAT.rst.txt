@@ -1,0 +1,6 @@
+carbonai.PowerMeter.DATETIME\_FORMAT
+====================================
+
+.. currentmodule:: carbonai
+
+.. autoattribute:: PowerMeter.DATETIME_FORMAT

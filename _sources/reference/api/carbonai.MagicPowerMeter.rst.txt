@@ -1,0 +1,37 @@
+﻿carbonai.MagicPowerMeter
+========================
+
+.. currentmodule:: carbonai
+
+.. autoclass:: MagicPowerMeter
+
+
+
+
+..
+   HACK -- the point here is that we don't want this to appear in the output, but the autosummary should still generate the pages.
+   .. autosummary::
+      :toctree:
+      
+      MagicPowerMeter.measure_power
+
+
+
+
+
+
+
+..
+   HACK -- the point here is that we don't want this to appear in the output, but the autosummary should still generate the pages.
+   .. autosummary::
+      :toctree:
+      
+      MagicPowerMeter.config
+      MagicPowerMeter.cross_validation_lock
+      MagicPowerMeter.magics
+      MagicPowerMeter.options_table
+      MagicPowerMeter.parent
+      MagicPowerMeter.registered
+      MagicPowerMeter.shell
+
+

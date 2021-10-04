@@ -1,0 +1,38 @@
+﻿carbonai.PowerMeter
+===================
+
+.. currentmodule:: carbonai
+
+.. autoclass:: PowerMeter
+
+   
+
+
+..
+   HACK -- the point here is that we don't want this to appear in the output, but the autosummary should still generate the pages.
+   .. autosummary::
+      :toctree:
+      
+      PowerMeter.__call__
+      PowerMeter.from_config
+      PowerMeter.measure_power
+      PowerMeter.start_measure
+      PowerMeter.stop_measure
+
+
+
+
+   
+
+
+..
+   HACK -- the point here is that we don't want this to appear in the output, but the autosummary should still generate the pages.
+   .. autosummary::
+      :toctree:
+      
+      PowerMeter.DATETIME_FORMAT
+      PowerMeter.DEFAULT_LOCATION
+      PowerMeter.LAPTOP_PUE
+      PowerMeter.SERVER_PUE
+
+
