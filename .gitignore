@@ -143,3 +143,4 @@ cython_debug/
 .DS_STORE
 .vscode/
 .pypirc
+.gitlab-ci.yml
