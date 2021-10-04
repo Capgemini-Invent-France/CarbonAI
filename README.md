@@ -4,7 +4,7 @@ This project aims at creating a python package that allows you to monitor the po
 
 ## Documentation
 
-The complete documentation is available [here](TBD).
+The complete documentation is available [here](https://capgemini-invent-france.github.io/CarbonAI/).
 
 ## Getting started
 ### Install
