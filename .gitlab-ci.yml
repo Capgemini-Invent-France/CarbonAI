@@ -47,7 +47,8 @@ deploy-public:
 deploy-pages:
   stage: deploy
   script:
-    - poetry run sphinx-build -b html docs/source public
+    - poetry run python docs/make.py html
+    - mv docs/build/html/ public/
   artifacts:
     paths:
       - public
