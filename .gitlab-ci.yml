@@ -44,7 +44,7 @@ deploy-public:
   when: manual
   needs: ["pytest-tests"]
 
-deploy-pages:
+pages:
   stage: deploy
   script:
     - poetry run python docs/make.py html
