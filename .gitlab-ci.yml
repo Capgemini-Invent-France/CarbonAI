@@ -48,6 +48,7 @@ deploy-pages:
   stage: deploy
   script:
     - poetry run python docs/make.py html
+    - mkdir public
     - cp -r docs/build/html/* public
   artifacts:
     paths:
