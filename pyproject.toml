@@ -1,9 +1,18 @@
 [tool.poetry]
 name = "CarbonAI"
-version = "0.2"
+version = "0.2.1"
 description = "Monitor the power consumption of a function"
 authors = ["Capgemini Invent - Martin Chauvin, Francois Lemeille, Jordan Toh"]
 license = "MIT"
+readme = "README.md"
+homepage = ""
+repository = "https://github.com/Capgemini-Invent-France/CarbonAI"
+documentation = "https://capgemini-invent-france.github.io/CarbonAI/"
+keywords = [
+    "CarbonAI",
+    "energy usage",
+    "carbon footprint"
+]
 
 [tool.poetry.dependencies]
 python = ">=3.7.1,<4"
