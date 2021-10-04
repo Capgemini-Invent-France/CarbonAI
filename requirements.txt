@@ -1,9 +1,0 @@
-numpy==1.18.1
-pandas==0.25.3
-requests==2.22.0
-ipython
-psutil
-fuzzywuzzy
-sphinx 
-sphinx-rtd-theme
-IPython

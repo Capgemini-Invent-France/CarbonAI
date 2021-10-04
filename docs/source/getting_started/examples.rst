@@ -1,5 +1,6 @@
 .. _examples:
 
+========
 Examples
 ========
 
@@ -9,7 +10,7 @@ Please provide a description of the running function, the dataset, the model, or
 
 In most cases, you only have to declare a ``PowerMeter`` once per file/project.
 
-Easy information filling 
+Easy information filling
 -------------------------
 
 To avoid filling information regarding the project at each instanciation,
@@ -26,7 +27,7 @@ it is possible to use a configuration file to do it only once:
         "is_online": false,
         "user_name": "customUsername",
         "filepath": "",
-        "api_endpoint": "...", 
+        "api_endpoint": "...",
         "location":"FR"
     }
 
@@ -36,7 +37,7 @@ The JSON-formatted file is then handled by the method **PowerMeter.from_config**
 
 .. code-block:: python
 
-    from CarbonAImpact import PowerMeter
+    from carbonai import PowerMeter
     PROJECT_PATH = ".../path-to-the-config.json"
     power_meter = PowerMeter.from_config(PROJECT_PATH)
 
@@ -48,7 +49,7 @@ To monitor the power consumption of a function, follow this example:
 
 .. code-block:: python
 
-    from CarbonAImpact import PowerMeter
+    from carbonai import PowerMeter
     power_meter = PowerMeter(project_name="MNIST classifier", is_online=False, location="FR")
 
     @power_meter.measure_power(
@@ -68,8 +69,8 @@ To monitor the power consumption of a jupyter notebook cell, follow this example
 
 .. code-block:: python
 
-    %load_ext CarbonAImpact.MagicPowerMeter
-    from CarbonAImpact import PowerMeter
+    %load_ext carbonai.MagicPowerMeter
+    from carbonai import PowerMeter
     power_meter = PowerMeter(project_name="MNIST classifier", is_online=False, location="FR")
 
 .. code-block:: python
@@ -83,7 +84,7 @@ This is the prefered inline method as it will stop the process even if you get a
 
 .. code-block:: python
 
-    from CarbonAImpact import PowerMeter
+    from carbonai import PowerMeter
     power_meter = PowerMeter(project_name="MNIST classifier", is_online=False, location="FR")
 
     with power_meter(
@@ -104,7 +105,7 @@ This method won't stop the monitoring process unless told to do so, and therefor
 
 .. code-block:: python
 
-    from CarbonAImpact import PowerMeter
+    from carbonai import PowerMeter
     power_meter = PowerMeter(project_name="MNIST classifier", is_online=False, location="FR")
 
     power_meter.start_measure(

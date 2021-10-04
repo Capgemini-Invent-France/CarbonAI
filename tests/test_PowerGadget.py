@@ -1,16 +1,24 @@
 """
 tests for the Python class PowerGadget
 """
-import pytest
 from pathlib import Path
 
-from CarbonAImpact.PowerGadget import PowerGadget
-from CarbonAImpact.utils import (TOTAL_CPU_TIME, TOTAL_ENERGY_ALL, TOTAL_ENERGY_CPU, TOTAL_ENERGY_MEMORY)
+import pytest
+
+# from carbonai import PowerGadget
+from carbonai.power_gadget import PowerGadget
+from carbonai.utils import (
+    TOTAL_CPU_TIME,
+    TOTAL_ENERGY_ALL,
+    TOTAL_ENERGY_CPU,
+    TOTAL_ENERGY_MEMORY,
+)
 
 
 @pytest.fixture
 def data():
-    return Path.cwd() / 'tests/data/test_intel_power_log.csv'
+    return Path.cwd() / "tests/data/test_intel_power_log.csv"
+
 
 def test_parse_log(data):
     """

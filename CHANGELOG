@@ -2,28 +2,38 @@
 All notable changes to this project will be documented in this file.
  
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
-and this project adheres to [Semantic Versioning](http://semver.org/).
-
-## [Unreleased] - 2021-03-30
+## [Unreleased]
 
 ### Added
-- [Process consumption](https://gitlab.com/the_insighters/projects/carbonaimpact/-/issues/23)
+- **More usage examples**: MINOR add a usage example of the package on the training of a transformer model
+## [0.2] - 2021-09-30
+### Added
+- **Process consumption**:
   MAJOR Records current's process power usage instead of whole machine usage
-- [Output description](https://gitlab.com/the_insighters/projects/carbonaimpact/-/issues/17)
-  MINOR Add doc to describe the csv file outputed
- 
+- **Output description**:
+  MINOR Add doc to describe the csv file output
+- **API reference**:
+  MINOR Add more in-depth doc-strings
+- **Context page**:
+  MINOR Add a context page to the doc
+- **Code quality**: 
+  MINOR check code quality in pre-commit + fix major code quality issues
+
 ### Changed
-- [Linux requirements](https://gitlab.com/the_insighters/projects/carbonaimpact/-/issues/16) 
+- **Linux requirements**:
   Update doc
-- [Cloud compatibility](https://gitlab.com/the_insighters/projects/carbonaimpact/-/issues/22) 
+- **Cloud compatibility**:
   The package will now throw a warning if no CPU power measurement tool is available
- 
+- **Doc Design**: 
+  Update the doc design based on the pydata model
+- **Branding**: 
+  Renamed and changed the logo of the package
 ### Fixed
-- [Windows installation](https://gitlab.com/the_insighters/projects/carbonaimpact/-/issues/20) 
+- **Windows installation**:
   Support Intel Power Gadget 3.6 for Windows
-- [Output path](https://gitlab.com/the_insighters/projects/carbonaimpact/-/issues/24) 
+- **Output path**:
   The output path can either be a string or a pathlib.Path
-- [Linux requirements](https://gitlab.com/the_insighters/projects/carbonaimpact/-/issues/21) 
+- **Linux requirements**:
   Argument checking
-- [Online/offline usage](https://gitlab.com/the_insighters/projects/carbonaimpact/-/issues/15) 
+- **Online/offline usage**:
   Argument checking

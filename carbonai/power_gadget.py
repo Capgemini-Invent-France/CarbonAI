@@ -5,7 +5,6 @@ Python wrapper of Intel(R) Power Gadget, a software-based power estimation tool
 enabled for 2nd Generation Intel(R) Core(TM) processors or later.
 The software data can be logged from the command line (without running the GUI
 app) using PowerLog.
-cf. https://software.intel.com/content/www/us/en/develop/articles/intel-power-gadget.html
 """
 __all__ = [
     "PowerGadgetMac",
@@ -15,33 +14,32 @@ __all__ = [
     "NoPowerGadget",
 ]
 
-import os
-from pathlib import Path
-import logging
-import subprocess
-import re
-import glob
-import struct
-import datetime
-import threading
 import abc
-import psutil
+import datetime
+import glob
+import logging
+import os
+import re
+import struct
+import subprocess
+import threading
 import time
+from pathlib import Path
 
-import pandas as pd
+import pandas as pd  # type: ignore
+import psutil  # type: ignore
 
 from .utils import (
+    HOME_DIR,
+    MAC_INTELPOWERLOG_FILENAME,
+    PACKAGE_PATH,
     TOTAL_CPU_TIME,
     TOTAL_ENERGY_ALL,
     TOTAL_ENERGY_CPU,
     TOTAL_ENERGY_MEMORY,
     TOTAL_ENERGY_PROCESS_CPU,
     TOTAL_ENERGY_PROCESS_MEMORY,
-    PACKAGE_PATH,
-    MAC_INTELPOWERLOG_FILENAME,
-    HOME_DIR,
     WIN_INTELPOWERLOG_FILENAME,
-    POWERLOG_PATH_LINUX,
 )
 
 LOGGER = logging.getLogger(__name__)
@@ -59,7 +57,9 @@ POWERLOG_TOOL_WIN = "IntelPowerGadget.exe"
 
 CPU_IDS_DIR = "/sys/devices/system/cpu/cpu*/topology/physical_package_id"
 READ_MSR_PATH = "/dev/cpu/{}/msr"
-READ_RAPL_PATH = "/sys/class/powercap/intel-rapl/intel-rapl:{}/"  # rapl_socket_id
+READ_RAPL_PATH = (
+    "/sys/class/powercap/intel-rapl/intel-rapl:{}/"  # rapl_socket_id
+)
 RAPL_DEVICENAME_FILE = "name"
 RAPL_ENERGY_FILE = "energy_uj"
 RAPL_DRAM_PATH = "intel-rapl:{}:{}/"  # rapl_socket_id, rapl_device_id
@@ -67,7 +67,8 @@ RAPL_DRAM_PATH = "intel-rapl:{}:{}/"  # rapl_socket_id, rapl_device_id
 
 class PowerGadget(abc.ABC):
     """
-    Abstract wrapper to an Intel Power Gadget object instanciated by a command line interface
+    Abstract wrapper to an Intel Power Gadget object instanciated \
+        by a command line interface
     """
 
     @staticmethod
@@ -86,9 +87,10 @@ class PowerGadget(abc.ABC):
             "Cumulative IA Energy (mWh)" or "Cumulative GPU Energy (mWh)"
         """
         content = powerlog_file.read_text()
-        if not "Total Elapsed Time" in content:
+        if "Total Elapsed Time" not in content:
             LOGGER.debug(
-                "The log file does not seem to be written yet, we'll wait 2 secs."
+                "The log file does not seem to be written yet, \
+                we'll wait 2 secs."
             )
             time.sleep(2)
             content = powerlog_file.read_text()
@@ -99,18 +101,21 @@ class PowerGadget(abc.ABC):
             TOTAL_ENERGY_MEMORY: 0,
         }
         results[TOTAL_CPU_TIME] = float(
-            re.search(r"(?<=Total Elapsed Time \(sec\) = )(\d|\.)*", content).group(0)
+            re.search(
+                r"(?<=Total Elapsed Time \(sec\) = )(\d|\.)*", content
+            ).group(0)
         )
         results[TOTAL_ENERGY_ALL] = float(
             re.search(
-                r"((?<=Cumulative Package Energy_0 \(mWh\) = )|(?<=Cumulative Processor Energy_0 \(mWh\) = ))(\d|\.)*",
+                r"((?<=Cumulative Package Energy_0 \(mWh\) = )|"
+                r"(?<=Cumulative Processor Energy_0 \(mWh\) = ))(\d|\.)*",
                 content,
             ).group(0)
         )
         results[TOTAL_ENERGY_CPU] = float(
-            re.search(r"(?<=Cumulative IA Energy_0 \(mWh\) = )(\d|\.)*", content).group(
-                0
-            )
+            re.search(
+                r"(?<=Cumulative IA Energy_0 \(mWh\) = )(\d|\.)*", content
+            ).group(0)
         )
         results[TOTAL_ENERGY_MEMORY] = float(
             re.search(
@@ -119,34 +124,49 @@ class PowerGadget(abc.ABC):
         )
         if process_usage:
             # to account for the actual algorithm energy consumption we need to
-            # combine the overall mesure of the machine power usage with the actual algorithm CPU and memory usage
+            # combine the overall mesure of the machine power usage with
+            # the actual algorithm CPU and memory usage
             process_usage = pd.DataFrame(
                 process_usage,
                 columns=["time", "process_cpu_usage", "process_memory_usage"],
             )
             powers = pd.read_csv(powerlog_file)
-            powers = powers.dropna(subset=["Cumulative Processor Energy_0(mWh)"])
+            powers = powers.dropna(
+                subset=["Cumulative Processor Energy_0(mWh)"]
+            )
             powers["System Time"] = pd.to_datetime(
                 powers["System Time"], format="%H:%M:%S:%f"
             )
-            powers_sec = powers.groupby(pd.Grouper(key="System Time", freq="S"))[
+            powers_sec = powers.groupby(
+                pd.Grouper(key="System Time", freq="S")
+            )[
                 [
                     "Cumulative Processor Energy_0(mWh)",
                     "Cumulative IA Energy_0(mWh)",
                     "Cumulative DRAM Energy_0(mWh)",
                 ]
-            ].apply(lambda x: x.iloc[-1] - x.iloc[0])
+            ].apply(
+                lambda x: x.iloc[-1] - x.iloc[0]
+            )
             process_usage["time"] = process_usage["time"].dt.floor("S").dt.time
             process_usage.set_index("time", inplace=True)
             powers_sec.index = powers_sec.index.time
             power_process = pd.merge(
-                powers_sec, process_usage, how="left", left_index=True, right_index=True
+                powers_sec,
+                process_usage,
+                how="left",
+                left_index=True,
+                right_index=True,
             )
-            # a measure is performed each second but it actually takes a little more than 1s
-            # so when merging on the timestamp there may be some empty values that we fill with the previous one
+            # a measure is performed each second but
+            # it actually takes a little more than 1s
+            # so when merging on the timestamp there may be some empty values
+            #  that we fill with the previous one
             power_process[
                 ["process_cpu_usage", "process_memory_usage"]
-            ] = power_process[["process_cpu_usage", "process_memory_usage"]].fillna(
+            ] = power_process[
+                ["process_cpu_usage", "process_memory_usage"]
+            ].fillna(
                 method="ffill", limit=1
             )
             results[TOTAL_ENERGY_PROCESS_CPU] = (
@@ -167,20 +187,18 @@ class PowerGadget(abc.ABC):
         """
         Retrieve the log file where is written the PowerLog logs
         """
-        pass
 
     def start(self):
         """
         Starts the recording processus with Intel Power Gadget
         """
-        pass
 
     def stop_thread(self):
         self.thread.do_run = False
         self.thread.join()
 
     def get_computer_usage(self, process, interval=1):
-        """Compute the ratio of cpu and memory used by the current process 
+        """Compute the ratio of cpu and memory used by the current process
 
         Parameters
         ----------
@@ -197,7 +215,9 @@ class PowerGadget(abc.ABC):
         with process.oneshot():
             process_cpu_usage = process.cpu_percent(interval=interval)
             cpu_usage = psutil.cpu_percent()
-            process_cpu_usage = process_cpu_usage / (cpu_usage * psutil.cpu_count())
+            process_cpu_usage = process_cpu_usage / (
+                cpu_usage * psutil.cpu_count()
+            )
             memory_global = psutil.virtual_memory()
             memory_usage = process.memory_full_info().rss / (
                 memory_global.total - memory_global.available
@@ -208,12 +228,12 @@ class PowerGadget(abc.ABC):
         """
         Stops the recording processus with Intel Power Gadget
         """
-        pass
 
 
 class NoPowerGadget(PowerGadget):
     """
-    Dummy class used when no power gadget (intel power gadget, rapl, msr) is available. It will return empty consumption
+    Dummy class used when no power gadget (intel power gadget, rapl, msr)
+    is available. It will return empty consumption
     """
 
     def __init__(self):
@@ -247,9 +267,13 @@ class PowerGadgetMac(PowerGadget):
 
         if not self.powerlog_path.exists():
             raise ModuleNotFoundError(
-                "We didn't find the Intel Power Gadget tool. \nMake sure it is installed (download available here : https://software.intel.com/sites/default/files/managed/91/6b/Intel%20Power%20Gadget.dmg).\nIf it is installed, we looked for it here:"
-                + str(self.powerlog_path)
-                + ", try passing the path to the powerLog tool to the powerMeter."
+                "We didn't find the Intel Power Gadget tool.\n"
+                "Make sure it is installed (download available here : "
+                "https://software.intel.com/sites/default/files/managed/91/6b/"
+                "Intel%20Power%20Gadget.dmg).\n"
+                "If it is installed, we looked for it here: "
+                f"{powerlog_path}, try passing the path to "
+                "the powerLog tool to the powerMeter."
             )
         self.powerlog_file = self.__get_powerlog_file()
         # self.thread = None
@@ -283,13 +307,16 @@ class PowerGadgetMac(PowerGadget):
                 self.powerlog_file,
             ],
             stdout=open(os.devnull, "wb"),
+            check=True,
         )
         consumption = self.parse_log(self.powerlog_file)
         return consumption
 
     def __append_energy_usage(self, process, interval=1):
         energy_usage = self.__get_power_consumption(duration=interval)
-        _, cpu_usage, memory_usage = self.get_computer_usage(process, interval=0)
+        _, cpu_usage, memory_usage = self.get_computer_usage(
+            process, interval=0
+        )
         energy_usage[TOTAL_ENERGY_PROCESS_CPU] = (
             energy_usage[TOTAL_ENERGY_CPU] * cpu_usage
         )
@@ -319,7 +346,9 @@ class PowerGadgetMac(PowerGadget):
         if self.thread and self.thread.is_alive():
             self.stop_thread()
         self.power_draws = []
-        self.thread = threading.Thread(target=self.get_power_consumption, args=())
+        self.thread = threading.Thread(
+            target=self.get_power_consumption, args=()
+        )
         self.thread.start()
 
     def stop(self):
@@ -346,16 +375,24 @@ class PowerGadgetWin(PowerGadget):
                     break
         if not self.powerlog_path.exists():
             raise ModuleNotFoundError(
-                "We didn't find the Intel Power Gadget tool. \nMake sure it is installed (download available here : https://software.intel.com/file/823776/download).\nIf it is installed, we looked for it here:"
-                + str(self.powerlog_path)
-                + ", try passing the path to the powerLog tool to the powerMeter."
+                "We didn't find the Intel Power Gadget tool.\n"
+                "Make sure it is installed (download available here :"
+                "https://software.intel.com/sites/default/files/managed/91/6b/"
+                "Intel%20Power%20Gadget.dmg).\n"
+                "If it is installed, we looked for it here:"
+                f"{self.powerlog_path}, try passing the path to the "
+                "powerLog tool to the powerMeter."
             )
         self.thread = None
         self.process_usage = []
 
     def __get_powerlog_file(self):
-        file_names = glob.glob(str(HOME_DIR / "Documents" / WIN_INTELPOWERLOG_FILENAME))
-        file_names.sort(key=lambda f: list(map(int, re.split(r"-|_|\.|/", f)[-7:-1])))
+        file_names = glob.glob(
+            str(HOME_DIR / "Documents" / WIN_INTELPOWERLOG_FILENAME)
+        )
+        file_names.sort(
+            key=lambda f: list(map(int, re.split(r"-|_|\.|/", f)[-7:-1]))
+        )
         return Path(file_names[-1])
 
     def get_process_usage(self, interval=1):
@@ -374,7 +411,9 @@ class PowerGadgetWin(PowerGadget):
     def start(self):
         LOGGER.info("starting CPU power monitoring ...")
         if self.thread and self.thread.is_alive():
-            LOGGER.debug("another thread is alive, we are going to close it first")
+            LOGGER.debug(
+                "another thread is alive, we are going to close it first"
+            )
             self.stop_thread()
         _ = subprocess.Popen(
             '"' + str(self.powerlog_path) + '" /min',
@@ -386,19 +425,26 @@ class PowerGadgetWin(PowerGadget):
         time.sleep(1)
         self.thread = threading.Thread(target=self.get_process_usage, args=())
         self.thread.start()
-        _ = subprocess.run('"' + str(self.powerlog_path) + '" -start', shell=True)
+        _ = subprocess.run(
+            '"' + str(self.powerlog_path) + '" -start', shell=True, check=True
+        )
 
     def stop(self):
         LOGGER.info("stoping CPU power monitoring ...")
-        _ = subprocess.run('"' + str(self.powerlog_path) + '" -stop', shell=True)
+        _ = subprocess.run(
+            '"' + str(self.powerlog_path) + '" -stop', shell=True, check=True
+        )
         _ = subprocess.run(
             'taskkill /IM "' + POWERLOG_TOOL_WIN + '"',
             stdout=open(os.devnull, "wb"),
             shell=True,
+            check=True,
         )
         self.stop_thread()
         powerlog_file = self.__get_powerlog_file()
-        self.record = self.parse_log(powerlog_file, process_usage=self.process_usage)
+        self.record = self.parse_log(
+            powerlog_file, process_usage=self.process_usage
+        )
         os.remove(powerlog_file)
 
 
@@ -505,7 +551,9 @@ class PowerGadgetLinuxRAPL(PowerGadgetLinux):
                 for cpu_id, dram_id in self.dram_ids
             ]
         )
-        _, cpu_usage, memory_usage = self.get_computer_usage(process, interval=interval)
+        _, cpu_usage, memory_usage = self.get_computer_usage(
+            process, interval=interval
+        )
         energy_usage["cpu_usage"] = cpu_usage
         energy_usage["memory_usage"] = memory_usage
         self.power_draws.append(energy_usage)
@@ -531,14 +579,18 @@ class PowerGadgetLinuxRAPL(PowerGadgetLinux):
         self.record = {}
         if self.thread and self.thread.is_alive():
             self.stop_thread()
-        self.thread = threading.Thread(target=self.get_power_consumption, args=())
+        self.thread = threading.Thread(
+            target=self.get_power_consumption, args=()
+        )
         self.thread.start()
 
     def stop(self):
         LOGGER.info("stoping CPU power monitoring ...")
         usages = self.collect_power_usage()
         end_time = time.time()
-        self.record[TOTAL_ENERGY_CPU] = usages[TOTAL_ENERGY_CPU].sum() / 3600 / 1000
+        self.record[TOTAL_ENERGY_CPU] = (
+            usages[TOTAL_ENERGY_CPU].sum() / 3600 / 1000
+        )
         self.record[TOTAL_ENERGY_PROCESS_CPU] = (
             usages[TOTAL_ENERGY_PROCESS_CPU].sum() / 3600 / 1000
         )
@@ -559,19 +611,32 @@ class PowerGadgetLinuxMSR(PowerGadgetLinux):
 
     MSR_RAPL_POWER_UNIT = 0x606
     MSR_PKG_RAPL_POWER_LIMIT = 0x610
-    MSR_PKG_ENERGY_STATUS = 0x611  #  reports measured actual energy usage
+    # MSR_PKG_ENERGY_STATUS reports measured actual energy usage
+    MSR_PKG_ENERGY_STATUS = 0x611
     MSR_DRAM_ENERGY_STATUS = 0x619
     MSR_PKG_PERF_STATUS = 0x613
     MSR_PKG_POWER_INFO = 0x614
     MSR_PP0_ENERGY_STATUS = 0x639
 
     @staticmethod
-    def __read_msr(fd, msr):
+    def __read_msr(msr_file, msr_position):
         """
-        TODO: add docstring
+        Read MSR file at a specific position
+
+        Parameters
+        ----------
+        msr_file : _io.TextIOWrapper
+            An opened MSR file
+        msr_position : int
+            Position at which read the MSR file
+
+        Returns
+        -------
+        int
+            The value of the given MSR
         """
-        os.lseek(fd, msr, os.SEEK_SET)
-        return struct.unpack("Q", os.read(fd, 8))[0]
+        os.lseek(msr_file, msr_position, os.SEEK_SET)
+        return struct.unpack("Q", os.read(msr_file, 8))[0]
 
     def __init__(self):
         super().__init__()
@@ -583,56 +648,65 @@ class PowerGadgetLinuxMSR(PowerGadgetLinux):
 
     def __get_used_units(self, cpu):
         """
-        TODO: add docstring
+        Get the unit used by the MSR to encode the energy usage
         """
-        fd = os.open(READ_MSR_PATH.format(cpu), os.O_RDONLY)
+        msr_file = os.open(READ_MSR_PATH.format(cpu), os.O_RDONLY)
         # Calculate the units used
-        result = self.__read_msr(fd, self.MSR_RAPL_POWER_UNIT)
+        result = self.__read_msr(msr_file, self.MSR_RAPL_POWER_UNIT)
         power_units = 0.5 ** (result & 0xF)
         cpu_energy_units = 0.5 ** ((result >> 8) & 0x1F)
         dram_energy_units = cpu_energy_units
         time_units = 0.5 ** ((result >> 16) & 0xF)
-        os.close(fd)
+        os.close(msr_file)
         return power_units, cpu_energy_units, dram_energy_units, time_units
 
     def __get_cpu_energy(self, cpu, unit):
         """
         Returns the CPU Energy figure
         """
-        fd = os.open(READ_MSR_PATH.format(cpu), os.O_RDONLY)
-        result = self.__read_msr(fd, self.MSR_PKG_ENERGY_STATUS)
-        os.close(fd)
+        msr_file = os.open(READ_MSR_PATH.format(cpu), os.O_RDONLY)
+        result = self.__read_msr(msr_file, self.MSR_PKG_ENERGY_STATUS)
+        os.close(msr_file)
         return result * unit / 3.6
 
     def __get_dram_energy(self, cpu, unit):
         """
         Returns the dram energy figure
         """
-        fd = os.open(READ_MSR_PATH.format(cpu), os.O_RDONLY)
-        result = self.__read_msr(fd, self.MSR_DRAM_ENERGY_STATUS)
-        os.close(fd)
+        msr_file = os.open(READ_MSR_PATH.format(cpu), os.O_RDONLY)
+        result = self.__read_msr(msr_file, self.MSR_DRAM_ENERGY_STATUS)
+        os.close(msr_file)
         return result * unit / 3.6
 
-    def __get_computer_consumption(self, prev_cpu_energies, prev_dram_energies):
+    def __get_computer_consumption(
+        self, prev_cpu_energies, prev_dram_energies
+    ):
         """
-        TODO: add docs
-        Retrieve all the available power consumptions with PowerLog using the
-        following cli: PowerLog [-resolution ] -duration  [-verbose] [-file ]
+        Get the power consumption since the last measure
 
-        Parameters:
-        -----------
-        prev_cpu_energies, prev_dram_energies (list):
+        Parameters
+        ----------
+        prev_cpu_energies : List
+            List of the previous measure on the CPUs
+            (One element of the list for each CPU)
+        prev_dram_energies : [type]
+            List of the previous measure on the DRAMs
+            (One element of the list for each CPU)
 
-        Returns:
-        --------
-        cpu_power, dram_power (int)
-        prev_cpu_energies, prev_dram_energies (list)
+        Returns
+        -------
+        [type]
+            [description]
         """
         cpu_power = 0
         dram_power = 0
         for i, cpu in enumerate(self.cpu_ids):
-            _, cpu_energy_units, dram_energy_units, _ = self.__get_used_units(cpu)
-            current_dram_energy = self.__get_dram_energy(cpu, dram_energy_units)
+            _, cpu_energy_units, dram_energy_units, _ = self.__get_used_units(
+                cpu
+            )
+            current_dram_energy = self.__get_dram_energy(
+                cpu, dram_energy_units
+            )
             current_cpu_energy = self.__get_cpu_energy(cpu, cpu_energy_units)
             if prev_cpu_energies[i] > cpu_energy_units:
                 cpu_energy_units *= 2
@@ -659,10 +733,16 @@ class PowerGadgetLinuxMSR(PowerGadgetLinux):
         prev_dram_energies = []
         prev_cpu_energies = []
         for cpu in self.cpu_ids:
-            _, cpu_energy_units, dram_energy_units, _ = self.__get_used_units(cpu)
-            prev_dram_energies.append(self.__get_dram_energy(cpu, dram_energy_units))
-            prev_cpu_energies.append(self.__get_cpu_energy(cpu, cpu_energy_units))
-        t0 = time.time()
+            _, cpu_energy_units, dram_energy_units, _ = self.__get_used_units(
+                cpu
+            )
+            prev_dram_energies.append(
+                self.__get_dram_energy(cpu, dram_energy_units)
+            )
+            prev_cpu_energies.append(
+                self.__get_cpu_energy(cpu, cpu_energy_units)
+            )
+        start_time = time.time()
         while getattr(self.thread, "do_run", True):
             # time.sleep(interval)
             _, cpu_usage, memory_usage = self.get_computer_usage(
@@ -673,21 +753,27 @@ class PowerGadgetLinuxMSR(PowerGadgetLinux):
                 dram_power,
                 prev_cpu_energies,
                 prev_dram_energies,
-            ) = self.__get_computer_consumption(prev_cpu_energies, prev_dram_energies)
+            ) = self.__get_computer_consumption(
+                prev_cpu_energies, prev_dram_energies
+            )
             self.power_draws[TOTAL_ENERGY_CPU] += cpu_power
             self.power_draws[TOTAL_ENERGY_MEMORY] += dram_power
             self.power_draws[TOTAL_ENERGY_PROCESS_CPU] += cpu_power * cpu_usage
-            self.power_draws[TOTAL_ENERGY_PROCESS_MEMORY] += dram_power * memory_usage
-            t1 = time.time()
-            self.power_draws[TOTAL_CPU_TIME] += t1 - t0
-            t0 = t1
+            self.power_draws[TOTAL_ENERGY_PROCESS_MEMORY] += (
+                dram_power * memory_usage
+            )
+            end_time = time.time()
+            self.power_draws[TOTAL_CPU_TIME] += end_time - start_time
+            start_time = end_time
 
     def start(self):
         LOGGER.info("starting CPU power monitoring ...")
         if self.thread and self.thread.is_alive():
             self.stop()
         self.power_draws = {}
-        self.thread = threading.Thread(target=self.get_computer_consumption, args=())
+        self.thread = threading.Thread(
+            target=self.get_computer_consumption, args=()
+        )
         self.thread.start()
 
     def stop(self):

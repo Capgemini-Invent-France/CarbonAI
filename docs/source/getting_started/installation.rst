@@ -1,5 +1,6 @@
 .. _installation:
 
+============
 Installation
 ============
 This package is compatible with most platforms with varying installation processes
@@ -38,4 +39,4 @@ All platforms
 -------------
 Once you've installed (if needed) the intel power gadget.
 Install the package using pip :
-``pip install git+https://gitlab.com/the_insighters/projects/carbonaimpact.git``
+``pip install carbonai``

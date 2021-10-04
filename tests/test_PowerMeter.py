@@ -1,14 +1,17 @@
 """
 tests for the Python class PowerMeter
 """
-import pytest
 from pathlib import Path
 
-from CarbonAImpact.PowerMeter import PowerMeter
+import pytest
+
+from carbonai.power_meter import PowerMeter
+
 
 @pytest.fixture
 def data():
-    return Path.cwd() / 'tests/data/config.json'
+    return Path.cwd() / "tests/data/config.json"
+
 
 def test_from_config(data):
     """
