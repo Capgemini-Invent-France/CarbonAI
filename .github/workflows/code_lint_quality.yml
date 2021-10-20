@@ -1,0 +1,10 @@
+name: "Lint and evaluate quality of the code push on main branch"
+
+on:
+  push:         
+    branches:
+      - main
+
+jobs:
+  lint_evaluate:
+    runs-on: ubuntu-latest
