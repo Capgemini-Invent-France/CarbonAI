@@ -18,7 +18,7 @@ jobs:
         use-mypy: true
         use-isort: true
         use-pylint: true
-        extra-pylint-options: "--fail-under=8"
+        extra-pylint-options: "--fail-under=8 --disable=E0401"
         # extra-pylint-options: ""
         extra-pycodestyle-options: ""
         extra-flake8-options: ""
