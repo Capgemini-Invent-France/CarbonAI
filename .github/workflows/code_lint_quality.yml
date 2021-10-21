@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-
+      - fl_new_github_action
 jobs:
   lint:
     runs-on: ubuntu-latest
