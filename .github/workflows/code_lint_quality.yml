@@ -1,25 +1,27 @@
-name: "Lint and evaluate quality of the code push on main branch"
+name: Lint and evaluate quality of the code push on main branch
 
 on:
-  push:         
+  push:
     branches:
       - main
 
 jobs:
-  steps: 
-    - name: Python Code Quality and Lint
-      uses: ricardochaves/python-lint@v1.3.0
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - uses: ricardochaves/python-lint@test
       with:
         python-root-list: "python_alelo tests"
-        use-pylint: true
-        use-pycodestyle: true
-        use-flake8: true
-        use-black: true
-        use-mypy: true
-        use-isort: true
+        use-pylint: false
+        use-pycodestyle: false
+        use-flake8: false
+        use-black: false
+        use-mypy: false
+        use-isort: false
         extra-pylint-options: ""
         extra-pycodestyle-options: ""
-        extra-flake8-options: "--fail-under=9"
+        extra-flake8-options: ""
         extra-black-options: ""
         extra-mypy-options: ""
         extra-isort-options: ""
