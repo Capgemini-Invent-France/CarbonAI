@@ -1,9 +1,7 @@
 name: Code quality and linting
 on:
   push:
-    branches:
-      - main
-      - fl_new_github_action
+  pull_request:
 jobs:
   lint:
     runs-on: ubuntu-latest
