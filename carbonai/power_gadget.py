@@ -393,6 +393,12 @@ class PowerGadgetWin(PowerGadget):
         file_names.sort(
             key=lambda f: list(map(int, re.split(r"-|_|\.|/", f)[-7:-1]))
         )
+        if len(file_names) < 1:
+            LOGGER.warning(
+                "Didn't find any powerlog to process. "
+                "We checked in the folder %s.",
+                str(HOME_DIR / "Documents"),
+            )
         return Path(file_names[-1])
 
     def get_process_usage(self, interval=1):
@@ -416,7 +422,7 @@ class PowerGadgetWin(PowerGadget):
             )
             self.stop_thread()
         _ = subprocess.Popen(
-            '"' + str(self.powerlog_path) + '" /min',
+            'start /MIN "" "' + str(self.powerlog_path) + '"',
             stdin=None,
             stdout=None,
             stderr=None,
