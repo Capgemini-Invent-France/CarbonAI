@@ -258,7 +258,7 @@ class PowerGadgetMac(PowerGadget):
     Mac OS X custom PowerGadget wrapper.
     """
 
-    def __init__(self, powerlog_path=""):
+    def __init__(self, powerlog_path="", powerlog_save_path=""):
         super().__init__()
         if powerlog_path:
             self.powerlog_path = Path(powerlog_path)
@@ -275,12 +275,12 @@ class PowerGadgetMac(PowerGadget):
                 f"{powerlog_path}, try passing the path to "
                 "the powerLog tool to the powerMeter."
             )
-        self.powerlog_file = self.__get_powerlog_file()
+        if powerlog_save_path:
+            self.powerlog_save_path = Path(powerlog_save_path)
+        else:
+            self.powerlog_save_path = PACKAGE_PATH / MAC_INTELPOWERLOG_FILENAME
         # self.thread = None
         self.power_draws = []
-
-    def __get_powerlog_file(self):
-        return PACKAGE_PATH / MAC_INTELPOWERLOG_FILENAME
 
     def __get_power_consumption(self, duration=1, resolution=500):
         """
@@ -304,12 +304,12 @@ class PowerGadgetMac(PowerGadget):
                 "-duration",
                 str(duration),
                 "-file",
-                self.powerlog_file,
+                self.powerlog_save_path,
             ],
             stdout=open(os.devnull, "wb"),
             check=True,
         )
-        consumption = self.parse_log(self.powerlog_file)
+        consumption = self.parse_log(self.powerlog_save_path)
         return consumption
 
     def __append_energy_usage(self, process, interval=1):
@@ -363,7 +363,7 @@ class PowerGadgetWin(PowerGadget):
     Windows custom PowerGadget wrapper.
     """
 
-    def __init__(self, powerlog_path=""):
+    def __init__(self, powerlog_path="", powerlog_save_path=""):
         super().__init__()
         if powerlog_path:
             self.powerlog_path = Path(powerlog_path)
@@ -383,16 +383,31 @@ class PowerGadgetWin(PowerGadget):
                 f"{self.powerlog_path}, try passing the path to the "
                 "powerLog tool to the powerMeter."
             )
+
+        if powerlog_save_path:
+            self.powerlog_save_path = Path(powerlog_save_path)
+        else:
+            self.powerlog_save_path = Path(HOME_DIR) / "Documents"
+        if not self.powerlog_save_path.exists():
+            raise FileNotFoundError(
+                "We didn't find the save path you provided."
+            )
         self.thread = None
         self.process_usage = []
 
     def __get_powerlog_file(self):
         file_names = glob.glob(
-            str(HOME_DIR / "Documents" / WIN_INTELPOWERLOG_FILENAME)
+            str(self.powerlog_save_path / WIN_INTELPOWERLOG_FILENAME)
         )
         file_names.sort(
             key=lambda f: list(map(int, re.split(r"-|_|\.|/", f)[-7:-1]))
         )
+        if len(file_names) < 1:
+            LOGGER.warning(
+                "Didn't find any powerlog to process. "
+                "We checked in the folder %s.",
+                str(self.powerlog_save_path),
+            )
         return Path(file_names[-1])
 
     def get_process_usage(self, interval=1):
@@ -416,7 +431,7 @@ class PowerGadgetWin(PowerGadget):
             )
             self.stop_thread()
         _ = subprocess.Popen(
-            '"' + str(self.powerlog_path) + '" /min',
+            'start /MIN "" "' + str(self.powerlog_path) + '"',
             stdin=None,
             stdout=None,
             stderr=None,
