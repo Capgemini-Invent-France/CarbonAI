@@ -1,6 +1,6 @@
 # CarbonAI
 
-This project aims at creating a python package that allows you to monitor the power consumption of any python function.
+This project aims to create a python package that allows you to monitor the power consumption of any python function.
 
 ## Documentation
 
