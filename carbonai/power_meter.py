@@ -73,8 +73,8 @@ class PowerMeter:
         Name of the project you are working on.
     program_name : str, optional
         Name of the program you are working on.
-    client_name : str, optional
-        Name of the client you are working for.
+    company_name : str, optional
+        Name of the company you are working for.
     user_name : str, default computer_user_name
         The name of the user using the tool (for logging purpose).
     cpu_power_log_path : str, optional
@@ -145,7 +145,7 @@ class PowerMeter:
         self,
         project_name="",
         program_name="",
-        client_name="",
+        company_name="",
         user_name="",
         cpu_power_log_path="",
         powerlog_save_path="",
@@ -179,7 +179,7 @@ class PowerMeter:
 
         self.project = self.__set_project_name(project_name)
         self.program_name = self.__set_project_entity(program_name)
-        self.client_name = self.__set_project_entity(client_name)
+        self.company_name = self.__set_project_entity(company_name)
 
         self.is_online = is_online
         if api_endpoint:
@@ -282,7 +282,7 @@ class PowerMeter:
             {
                 "project_name": "Project X",
                 "program_name": "Program X",
-                "client_name": "Client X",
+                "company_name": "Company X",
                 "get_country": true,
                 "is_online": false,
                 "user_name": "customUsername",
@@ -836,7 +836,7 @@ class PowerMeter:
             "ISO": self.location,
             "Project name": self.project,
             "Program name": self.program_name,
-            "Client name": self.client_name,
+            "Company name": self.company_name,
             "Total Elapsed CPU Time (sec)": cpu_recorded_power[TOTAL_CPU_TIME],
             "Total Elapsed GPU Time (sec)": gpu_recorded_power[TOTAL_GPU_TIME],
             "Cumulative Package Energy (mWh)": cpu_recorded_power[

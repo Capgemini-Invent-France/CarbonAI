@@ -31,8 +31,8 @@ You should get a new line (in the csv file) for every usage of the package.
       - Name of the project for which the package was used
     * - Program name 
       - Name of the program for which the package was used
-    * - Client name 
-      - Name of the client for which the package was used
+    * - Company name 
+      - Name of the company for which the package was used
     * - Total Elapsed CPU Time (sec) 
       - Total time of CPU usage (in seconds)
     * - Total Elapsed GPU Time (sec) 

@@ -21,7 +21,7 @@ it is possible to use a configuration file to do it only once:
     {
         "project_name": "Project X",
         "program_name": "Program X",
-        "client_name": "Client X",
+        "company_name": "Company X",
         "cpu_power_log_path": "",
         "get_country": true,
         "is_online": false,

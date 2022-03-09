@@ -1,7 +1,7 @@
 {
     "project_name": "example",
     "program_name": "CarbonAI",
-    "client_name": "IDE",
+    "company_name": "IDE",
     "get_country": true,
     "user_name": "TBD"
 }
