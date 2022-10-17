@@ -79,6 +79,9 @@ class PowerMeter:
         The name of the user using the tool (for logging purpose).
     cpu_power_log_path : str, optional
         The path to the tool "PowerLog" or "powercap" or "IntelPowerGadget".
+    powerlog_save_path: str, optional
+        Path to the folder where we should find the logs provided by
+        IntelPowerGadget.
     get_country : bool, default True
         Whether to retrieve user country location or not (uses the user IP).
     location : str, optional
@@ -145,6 +148,7 @@ class PowerMeter:
         client_name="",
         user_name="",
         cpu_power_log_path="",
+        powerlog_save_path="",
         get_country=True,
         location="",
         is_online=True,
@@ -162,7 +166,8 @@ class PowerMeter:
             "": NoPowerGadget,
         }
         self.power_gadget = powergadget_platform[self.platform](
-            powerlog_path=cpu_power_log_path
+            powerlog_path=cpu_power_log_path,
+            powerlog_save_path=powerlog_save_path,
         )
 
         self.pue = self.__set_pue()
@@ -299,7 +304,9 @@ class PowerMeter:
             return self.LAPTOP_PUE  # pue for my laptop
         return self.SERVER_PUE  # pue for a server
 
-    def __set_powergadget_linux(self, powerlog_path=None):
+    def __set_powergadget_linux(
+        self, powerlog_path=None, powerlog_save_path=None
+    ):
         if POWERLOG_PATH_LINUX.exists():
             power_gadget = PowerGadgetLinuxRAPL()
         # The user needs to be root to use MSR interface
