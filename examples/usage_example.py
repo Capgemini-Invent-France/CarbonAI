@@ -31,7 +31,7 @@ plt.show()
 # power_meter = PowerMeter(
 #   project_name="example",
 #   program_name="CarbonAI",
-#   client_name="IDE",
+#   company_name="IDE",
 #   is_online=False,
 #   location="FR"
 # )
